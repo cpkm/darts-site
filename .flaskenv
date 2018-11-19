@@ -1,0 +1,2 @@
+FLASK_APP=dartssite.py
+FLASK_ENV=development
