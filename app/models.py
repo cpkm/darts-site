@@ -16,11 +16,11 @@ class Player(db.Model):
 
     games = db.relationship('Game', 
         secondary=player_game, 
-        backref=db.backref('player', lazy='dynamic'), lazy='dynamic')
+        backref=db.backref('players', lazy='dynamic'), lazy='dynamic')
 
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return '<Player {}>'.format(self.name)
 
 
 class Game(db.Model):
@@ -28,4 +28,4 @@ class Game(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=date.today())
 
     def __repr__(self):
-        return '<Post {}>'.format(self.body)
+        return '<Game {}>'.format(self.id)
