@@ -64,6 +64,9 @@ class Match(db.Model):
     opponent = db.Column(db.String(64), index=True)
     home_game = db.Column(db.Boolean, index=True, default=True)
     games = db.relationship('Game', backref='match', lazy='dynamic')
+    team_score = db.Column(db.Integer, index=True)
+    opponent_score = db.Column(db.Integer, index=True)
+    win = db.Column(db.Boolean, index=True, default=True)
 
     def add_game(self, game):
         if not self.is_game(game):
