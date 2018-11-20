@@ -1,9 +1,7 @@
 """player_game association
-
 Revision ID: 09b974ced5e2
 Revises: 6425cdc4c19a
 Create Date: 2018-11-19 14:04:57.984778
-
 """
 from alembic import op
 import sqlalchemy as sa

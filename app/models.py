@@ -60,13 +60,16 @@ class Game(db.Model):
 
 class Match(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    opponent_id = db.Column(db.Integer, db. ForeignKey('team.id'))
     date = db.Column(db.Date, index=True, default=date.today())
-    opponent = db.Column(db.String(64), index=True)
+    location = db.Column(db.String(64))
     home_game = db.Column(db.Boolean, index=True, default=True)
     games = db.relationship('Game', backref='match', lazy='dynamic')
     team_score = db.Column(db.Integer, index=True)
     opponent_score = db.Column(db.Integer, index=True)
     win = db.Column(db.Boolean, index=True, default=True)
+    match_summary = db.Column(db.String(512))
+    food = db.Column(db.String(128))
 
     def add_game(self, game):
         if not self.is_game(game):
@@ -87,3 +90,25 @@ class Match(db.Model):
 
     def __repr__(self):
         return '<Match {}>'.format(self.date)
+
+
+class Team(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), index=True)
+    home_location = db.Column(db.String(64), index=True)
+    address = db.Column(db.String(128), index=True)
+    matches = db.relationship('Match')
+
+
+class PlayerStatistics(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    matches_played = db.Column(db.Integer, primary_key=True)
+    matches_won = db.Column(db.Integer, primary_key=True)
+    matches_lost = db.Column(db.Integer, primary_key=True)
+    games_played = db.Column(db.Integer, primary_key=True)
+    games_won = db.Column(db.Integer, primary_key=True)
+    total_stars = db.Column(db.Integer, primary_key=True)
+    total_high_scores = db.Column(db.Integer, primary_key=True)
+    total_low_scores = db.Column(db.Integer, primary_key=True)
+
+
