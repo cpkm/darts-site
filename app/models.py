@@ -6,25 +6,16 @@ from datetime import date as date
 from app import db
 
 
-# naming_convention = {
-#     "ix": 'ix_%(column_0_label)s',
-#     "uq": "uq_%(table_name)s_%(column_0_name)s",
-#     "ck": "ck_%(table_name)s_%(column_0_name)s",
-#     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-#     "pk": "pk_%(table_name)s",
-# }
-# db = SQLAlchemy(metadata=MetaData(naming_convention=naming_convention))
-
 class PlayerGame(db.Model):
-        player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
-        game_id = db.Column(db.Integer, db.ForeignKey('game.id'), primary_key=True)
-        stars = db.Column(db.Integer, index=True)
+    player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'), primary_key=True)
+    stars = db.Column(db.Integer, index=True)
 
-        player = db.relationship('Player', backref=db.backref('games_association', lazy='dynamic'))
-        game = db.relationship('Game', backref=db.backref('players_association', lazy='dynamic'))
+    player = db.relationship('Player', backref=db.backref('games_association', lazy='dynamic'))
+    game = db.relationship('Game', backref=db.backref('players_association', lazy='dynamic'))
 
-        def __repr__(self):
-            return '<Player {}, Game {}>'.format(self.player_id,self.game_id)
+    def __repr__(self):
+        return '<Player {}, Game {}>'.format(self.player_id,self.game_id)
 
 
 class Player(db.Model):
@@ -48,6 +39,7 @@ class Player(db.Model):
 class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
+    match = db.relationship('Match', back_populates='games')
     game_num = db.Column(db.Integer, index=True)
     game_type = db.Column(db.String(64), index=True)
     win = db.Column(db.Boolean, index=True, default=True)
@@ -61,10 +53,11 @@ class Game(db.Model):
 class Match(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     opponent_id = db.Column(db.Integer, db. ForeignKey('team.id'))
+    opponent = db.relationship('Team', back_populates='matches')
     date = db.Column(db.Date, index=True, default=date.today())
     location = db.Column(db.String(64))
     home_game = db.Column(db.Boolean, index=True, default=True)
-    games = db.relationship('Game', backref='match', lazy='dynamic')
+    games = db.relationship('Game', back_populates='match', lazy='dynamic')
     team_score = db.Column(db.Integer, index=True)
     opponent_score = db.Column(db.Integer, index=True)
     win = db.Column(db.Boolean, index=True, default=True)
@@ -97,7 +90,7 @@ class Team(db.Model):
     name = db.Column(db.String(64), index=True)
     home_location = db.Column(db.String(64), index=True)
     address = db.Column(db.String(128), index=True)
-    matches = db.relationship('Match')
+    matches = db.relationship('Match', back_populates='opponent', lazy='dynamic')
 
 
 class PlayerStatistics(db.Model):
