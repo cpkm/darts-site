@@ -32,7 +32,7 @@ class Player(db.Model):
         return self.games_association.filter_by(game_id=game_id).first().stars
 
     def __repr__(self):
-        return '<Player {}>'.format(self.name)
+        return '<Player {}>'.format(self.nickname) if self.nickname else '<Player_id {}>'.format(self.id)
 
 
 class Game(db.Model):

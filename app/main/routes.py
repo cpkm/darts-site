@@ -21,23 +21,24 @@ def index():
     return render_template('index.html', title=None, 
         schedule=schedule.items, next_url=next_url, prev_url=prev_url)
 
-
-@bp.route('/player',  methods=['GET', 'POST'])
-def player():
-    form = EditPlayerForm()
+@bp.route('/player_edit',  methods=['GET', 'POST'], defaults={'nickname': None})
+@bp.route('/player_edit/<nickname>',  methods=['GET', 'POST'])
+def player_edit(nickname):
+    player = Player.query.filter_by(nickname=nickname).first()
+    form = EditPlayerForm(obj=player)
     all_players = Player.query.all()
     if form.validate_on_submit():
-        player = Player(
+        newplayer = Player(
             first_name=form.first_name.data,
             last_name=form.last_name.data,
             nickname=form.nickname.data)
-        db.session.add(player)
+        db.session.add(newplayer)
         db.session.commit()
         flash('Player {} {} added!'.format(
-            player.first_name, player.last_name))
-        return redirect(url_for('main.player'))
+            newplayer.first_name, newplayer.last_name))
+        return redirect(url_for('main.player_edit'))
     return render_template('edit_player.html', title='Add player', 
-        form=form, player=None, all_players=all_players)
+        form=form, all_players=all_players)
 
 @bp.route('/match')
 @login_required
