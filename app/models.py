@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from sqlalchemy.ext.associationproxy import association_proxy
 from datetime import date as date
+from hashlib import md5
 from app import db
 
 
@@ -87,10 +88,15 @@ class Match(db.Model):
 
 class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), index=True)
+    name = db.Column(db.String(64), index=True, unique=True)
     home_location = db.Column(db.String(64), index=True)
     address = db.Column(db.String(128), index=True)
     matches = db.relationship('Match', back_populates='opponent', lazy='dynamic')
+
+    def avatar(self, size):
+        digest = md5(self.name.lower().encode('utf-8')).hexdigest()
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+            digest, size)
 
 
 class PlayerStatistics(db.Model):

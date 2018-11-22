@@ -2,14 +2,59 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-  <h1>Hi, {{ current_user.username }}!</h1>
-  {% if form %}
-  {{ wtf.quick_form(form) }}
+  <h1>Welcome to ICC4!</h1>
   <br>
-  {% endif %}
-  {% for post in posts %}
-    {% include '_post.html' %}
+  <h2 class="my-4">Schedule</h2>
+  {% for match in schedule %}
+    {% include '_match.html' %}
   {% endfor %}
+  <br>
+  <div class="container">
+
+    <h2 class="my-4">Leaderboards</h2>
+
+    <div class="row">
+      <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+          <h4 class="card-header">Stars</h4>
+          <div class="card-body">
+            <p class="card-text">Ryan</p>
+            <p class="card-text">Ryan</p>
+            <p class="card-text">Ryan</p>
+          </div>
+          <div class="card-footer">
+            <a href="#" class="btn btn-primary">Full leaderboard</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+          <h4 class="card-header">High scores</h4>
+          <div class="card-body">
+            <p class="card-text">Ryan</p>
+            <p class="card-text">Ryan</p>
+            <p class="card-text">Ryan</p>
+          </div>
+          <div class="card-footer">
+            <a href="#" class="btn btn-primary">Full leaderboard</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+          <h4 class="card-header">Low scores</h4>
+          <div class="card-body">
+            <p class="card-text">Joey</p>
+            <p class="card-text">Nick</p>
+            <p class="card-text">Not Ryan</p>
+          </div>
+          <div class="card-footer">
+            <a href="#" class="btn btn-primary">Full leaderboard</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <nav aria-label="...">
     <ul class="pager">
       <li class="previous{% if not prev_url %} disabled{% endif %}">
