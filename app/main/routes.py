@@ -4,7 +4,7 @@ from werkzeug.urls import url_parse
 from datetime import datetime
 from app import db
 from app.main import bp
-#from app.main.forms import EditProfileForm, PostForm, SearchForm
+from app.main.forms import EditPlayerForm
 from app.models import Player, Game, Match, Team
 
 
@@ -21,10 +21,23 @@ def index():
     return render_template('index.html', title=None, 
         schedule=schedule.items, next_url=next_url, prev_url=prev_url)
 
-@bp.route('/player')
-@login_required
+
+@bp.route('/player',  methods=['GET', 'POST'])
 def player():
-    return 0
+    form = EditPlayerForm()
+    all_players = Player.query.all()
+    if form.validate_on_submit():
+        player = Player(
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            nickname=form.nickname.data)
+        db.session.add(player)
+        db.session.commit()
+        flash('Player {} {} added!'.format(
+            player.first_name, player.last_name))
+        return redirect(url_for('main.player'))
+    return render_template('edit_player.html', title='Add player', 
+        form=form, player=None, all_players=all_players)
 
 @bp.route('/match')
 @login_required
