@@ -51,7 +51,7 @@
         <a class="nav-link" href="{{ url_for('main.player_edit') }}">Player editor</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.team') }}">Team editor</a>
+        <a class="nav-link" href="{{ url_for('main.team_edit') }}">Team editor</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="">Logout</a>
@@ -63,57 +63,19 @@
 </div>
 {% endblock %}
 
-<!--
-
-  <nav class="navbar navbar-default">
-    <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="{{ url_for('main.index') }}">ICC4</a>
-      </div>
-      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <ul class="nav navbar-nav">
-          <li><a href="{{ url_for('main.index') }}">Home</a></li>
-          <li><a href="">Explore</a></li>
-        </ul>
-        {% if g.search_form %}
-          <form class="navbar-form navbar-left" method="get"
-              action="{{ url_for('main.search') }}">
-            <div class="form-group">
-              {{ g.search_form.q(size=20, class='form-control', placeholder=g.search_form.q.label.text) }}
-            </div>
-          </form>
-        {% endif %}
-        <ul class="nav navbar-nav navbar-right">
-            {% if False %}
-            <li><a href="">Login</a></li>
-            {% else %}
-            <li><a href="{{ url_for('main.match') }}">Match editor</a></li>
-            <li><a href="{{ url_for('main.player') }}">Player editor</a></li>
-            <li><a href="{{ url_for('main.team') }}">Team editor</a></li>
-            <li><a href="">Logout</a></li>
-            {% endif %}
-          </ul>
-        </div>
-    </div>
-  </nav>
-
--->
-
 {% block content %}
-  <div class="container">
-    {% with messages = get_flashed_messages() %}
+<div class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      {% for message in messages %}
-      <div class="alert alert-info" role="alert">{{ message }}</div>
+      {% for category, message in messages %}
+        {% if category not in ['primary','secondary','light','dark','danger','warning','info','success'] %}
+        {% set category = 'info' %}
+        {% endif %}
+        <div class="alert alert-{{ category }} alert-dismissible" role="alert">{{ message }}</div>  
       {% endfor %}
+    {% else %}<div class="my-5"></div>
     {% endif %}
-    {% endwith %}
+  {% endwith %}
     
     {# application content needs to be provided in the app_content block #}
     {% block app_content %}{% endblock %}
