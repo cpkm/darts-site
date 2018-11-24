@@ -107,7 +107,11 @@ def team_edit(name):
 @bp.route('/match_edit/<id>',  methods=['GET', 'POST'])
 def match_edit(id):
     match = Match.query.filter_by(id=id).first()
-    form = EditMatchForm()
+    if match is not None:
+        form = EditMatchForm(date=match.date, home_away=match.home_away,
+                opponent=match.opponent.name)
+    else:
+        form = EditMatchForm()
     all_matches = Match.query.order_by(Match.date).all()
     all_teams = Team.query.order_by(Team.name).all()
 
@@ -118,6 +122,15 @@ def match_edit(id):
         db.session.commit()
         flash('Match {} {} {} added!'.format(newmatch.date, form.opponent.data, form.home_away.data))
         return redirect(url_for('main.match_edit'))
+
+    if form.submit_edit.data and form.validate() and match is not None:
+        match.date = form.date.data
+        match.opponent = Team.query.filter_by(name=form.opponent.data).first()
+        match.home_away = form.home_away.data
+        db.session.add(match)
+        db.session.commit()
+        flash('Match {} {} {} modified!'.format(form.date.data, form.opponent.data, form.home_away.data))
+        return redirect(url_for('main.match_edit', id=match.id))
 
     if  form.submit_delete.data and match is not None:
         db.session.delete(match)

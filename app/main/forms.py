@@ -55,8 +55,19 @@ class EditMatchForm(FlaskForm):
     submit_edit = SubmitField('Edit Match')
     submit_delete = SubmitField('Delete Match')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.original_date = self.date
+        self.original_opponent = self.opponent
+        self.original_home_away = self.home_away
+
     def validate_opponent(self, opponent):
         opp_id = Team.query.filter_by(name=opponent.data).first().id
+
+        #if self.date==self.original_date and self.original_opponent==opponent and self.original_home_away==self.home_away:
+        #    flash('Match details unchanged.', 'warning')
+        #    raise ValidationError('Match details did not change.')
+
         if Match.query.filter_by(date=self.date.data, home_away=self.home_away.data, opponent_id=opp_id).first() is not None:
             flash('Match must be unique! Match not added', 'danger')
             raise ValidationError('Match details are not unique.')
