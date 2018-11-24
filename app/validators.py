@@ -5,6 +5,50 @@ from sqlalchemy import Column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from wtforms import ValidationError
 
+from wtforms.validators import Required, Optional
+
+
+class RequiredIf(object):
+    """Validator which makes a field required if another field is set and has a truthy value.
+    """
+    field_flags = ('requiredif',)
+
+    def __init__(self, message=None, *args, **kwargs):
+        super(RequiredIf).__init__()
+        self.message = message
+        self.conditions = kwargs
+
+    # field is requiring that name field in the form is data value in the form
+    def __call__(self, form, field):
+        for name, data in self.conditions.items():
+            other_field = form[name]
+            if other_field is None:
+                raise Exception('no field named "%s" in form' % name)
+            if other_field.data == data and not field.data:
+                Required()(form, field)
+            Optional()(form, field)
+
+
+class OptionalIf(object):
+    """Validator which makes a field optional if another field is set and has a truthy value.
+    """
+    field_flags = ('requiredif',)
+
+    def __init__(self, message=None, *args, **kwargs):
+        super(OptionalIf).__init__()
+        self.message = message
+        self.conditions = kwargs
+
+    # field is requiring that name field in the form is data value in the form
+    def __call__(self, form, field):
+        for name, data in self.conditions.items():
+            other_field = form[name]
+            if other_field is None:
+                raise Exception('no field named "%s" in form' % name)
+            if other_field.data == data and not field.data:
+                Optional()(form, field)
+            Required()(form, field)
+
 
 class Unique(object):
     """Checks field values unicity against specified table fields.

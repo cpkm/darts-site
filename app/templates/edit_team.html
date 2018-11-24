@@ -5,7 +5,7 @@
   <h1>Team Edit</h1>
   <br>
   <div class="row">
-    <div class="col-md-5 mt-4"><h2>Add/Edit team</h2>
+    <div class="col-sm-5 mt-4"><h2>Add/Edit team</h2>
       <h4 class="text-center text-muted">{% if team %}{{ team.name }}{% else %}&nbsp;{% endif %}</h4>
       <form class="form form-horizontal" method="post" role="form">
         {{ form.hidden_tag() }}
@@ -19,8 +19,8 @@
         {{ wtf.form_field(form.submit_delete, button_map={'submit_delete': 'danger my-1 w-40'}) }}
       </form>
     </div>
-    <div class="col-md-2"></div>
-    <div class="col-md-5 mt-2 mx-auto">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-5 mt-2 mx-auto">
       <div class="card h-100">
         <h2 class="card-header">All teams</h2>
         <div class="card-body">

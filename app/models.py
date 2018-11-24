@@ -55,7 +55,7 @@ class Match(db.Model):
     opponent = db.relationship('Team', back_populates='matches')
     date = db.Column(db.Date, index=True, default=date.today())
     location = db.Column(db.String(64))
-    home_game = db.Column(db.Boolean, index=True, default=True)
+    home_away = db.Column(db.String(32), index=True)
     games = db.relationship('Game', back_populates='match', lazy='dynamic')
     team_score = db.Column(db.Integer, index=True)
     opponent_score = db.Column(db.Integer, index=True)

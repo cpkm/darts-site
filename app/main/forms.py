@@ -1,9 +1,10 @@
-from flask import request
+from flask import request, flash
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField, BooleanField
+from wtforms import StringField, SubmitField, TextAreaField, BooleanField, RadioField, FieldList, FormField, DateField
 from wtforms.validators import ValidationError, DataRequired, Length, Email
 from app.models import Player, Game, Match, Team, PlayerGame
 from app.validators import Unique
+from datetime import datetime
 
 class EditPlayerForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
@@ -21,6 +22,7 @@ class EditPlayerForm(FlaskForm):
         if nickname.data is '':
            nickname.data = '{} {}'.format(self.first_name.data, self.last_name.data)
         new_player_test = Player.query.filter_by(nickname=nickname.data).first()
+        print(self.original_nickname,nickname.data,self.original_nickname.data is not nickname.data)
         if new_player_test is not None and self.original_nickname.data is not nickname.data:
             raise ValidationError('Player nickname must be unique.')
 
@@ -44,4 +46,23 @@ class EditTeamForm(FlaskForm):
             raise ValidationError('Team name must be unique.')
 
 
-#class EditMatchForm(FlaskForm):
+class EditMatchForm(FlaskForm):
+    date = DateField('Date', format='%Y-%m-%d', validators=[DataRequired()])
+    opponent = StringField('Opponent', validators=[DataRequired()])
+    home_away = RadioField('Location', choices=[('home','Home'),('away','Away')], validators=[DataRequired()])
+
+    submit_new = SubmitField('Submit')
+    submit_edit = SubmitField('Edit Match')
+    submit_delete = SubmitField('Delete Match')
+
+    def validate_opponent(self, opponent):
+        opp_id = Team.query.filter_by(name=opponent.data).first().id
+        if Match.query.filter_by(date=self.date.data, home_away=self.home_away.data, opponent_id=opp_id).first() is not None:
+            flash('Match must be unique! Match not added', 'danger')
+            raise ValidationError('Match details are not unique.')
+
+class DoublesGameForm(FlaskForm):
+    p1 = StringField('Player 1', validators=[DataRequired()])
+    p2 = StringField('Player 2', validators=[DataRequired()])
+
+    submit = SubmitField('Submit')

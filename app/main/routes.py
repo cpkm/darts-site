@@ -4,7 +4,7 @@ from werkzeug.urls import url_parse
 from datetime import datetime
 from app import db
 from app.main import bp
-from app.main.forms import EditPlayerForm, EditTeamForm
+from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm
 from app.models import Player, Game, Match, Team
 from wtforms.validators import ValidationError
 
@@ -22,6 +22,7 @@ def index():
     return render_template('index.html', title=None, 
         schedule=schedule.items, next_url=next_url, prev_url=prev_url)
 
+
 @bp.route('/player_edit',  methods=['GET', 'POST'], defaults={'nickname': None})
 @bp.route('/player_edit/<nickname>',  methods=['GET', 'POST'])
 def player_edit(nickname):
@@ -34,11 +35,14 @@ def player_edit(nickname):
             first_name=form.first_name.data,
             last_name=form.last_name.data,
             nickname=form.nickname.data)
-        db.session.add(newplayer)
-        db.session.commit()
-        flash('Player {} ({} {}) added!'.format(
-            newplayer.nickname, newplayer.first_name, newplayer.last_name))
-        return redirect(url_for('main.player_edit'))
+        if Player.query.filter_by(nickname=newplayer.nickname).first() is None:
+            db.session.add(newplayer)
+            db.session.commit()
+            flash('Player {} ({} {}) added!'.format(
+                newplayer.nickname, newplayer.first_name, newplayer.last_name))
+            return redirect(url_for('main.player_edit'))
+        flash('Player {} ({} {}) already exists!'.format(
+            newplayer.nickname, newplayer.first_name, newplayer.last_name), 'warning')
 
     if form.submit_edit.data and form.validate() and player is not None:
         player.first_name = form.first_name.data
@@ -73,10 +77,12 @@ def team_edit(name):
             name=form.name.data,
             home_location=form.home_location.data,
             address=form.address.data)
-        db.session.add(newteam)
-        db.session.commit()
-        flash('Team {} added!'.format(newteam.name))
-        return redirect(url_for('main.team_edit'))
+        if Team.query.filter_by(name=newteam.name).first() is None:
+            db.session.add(newteam)
+            db.session.commit()
+            flash('Team {} added!'.format(newteam.name))
+            return redirect(url_for('main.team_edit'))
+        flash('Team {} already exists!'.format(newteam.name), 'warning')
 
     if form.submit_edit.data and form.validate() and team is not None:
         team.name = form.name.data
@@ -97,12 +103,37 @@ def team_edit(name):
         form=form, team=team, all_teams=all_teams)
 
 
-@bp.route('/match')
-@login_required
-def match():
-    return 0
+@bp.route('/match_edit',  methods=['GET', 'POST'], defaults={'id': None})
+@bp.route('/match_edit/<id>',  methods=['GET', 'POST'])
+def match_edit(id):
+    match = Match.query.filter_by(id=id).first()
+    form = EditMatchForm()
+    all_matches = Match.query.order_by(Match.date).all()
+    all_teams = Team.query.order_by(Team.name).all()
+
+    if form.submit_new.data and form.validate():
+        newmatch = Match(date=form.date.data, 
+            opponent=Team.query.filter_by(name=form.opponent.data).first(), home_away=form.home_away.data)
+        db.session.add(newmatch)
+        db.session.commit()
+        flash('Match {} {} {} added!'.format(newmatch.date, form.opponent.data, form.home_away.data))
+        return redirect(url_for('main.match_edit'))
+
+    if  form.submit_delete.data and match is not None:
+        db.session.delete(match)
+        db.session.commit()
+        flash('Match {} {} {} deleted!'.format(form.date.data, form.opponent.data, form.home_away.data), 'danger')
+        return redirect(url_for('main.match_edit'))
+
+    return render_template('edit_match.html', title='Match Editor', 
+        form=form, match=match, all_teams=all_teams, all_matches=all_matches)
 
 @bp.route('/search')
 @login_required
 def search():
+    return 0
+
+@bp.route('/match')
+@login_required
+def match():
     return 0

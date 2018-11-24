@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+  <h1>Match Edit</h1>
+  <br>
+  <div class="row">
+    <div class="col-md-5 mt-4"><h2>Add/Edit match</h2>
+      <form class="form" method="post" role="form">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens="only") }}
+
+        <div class="form-group">
+          <label for="opponent">Opponent</label>
+          <select type="text" class="form-control" id="opponent" name="opponent" required value="" aria-describedby="opponent">
+          {% for team in all_teams %}
+          <option value="{{ team.name }}">{{ team.name }}</option>
+          {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="date">Date</label>
+            <input class="form-control" type="date" name="date" value="2018-09-17" id="date">
+        </div>
+        <fieldset class="form-group">
+          <div class="form-check form-check-inline">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="home_away" id="home_check" value="home" checked>
+              Home
+            </label>
+          </div>
+          <div class="form-check form-check-inline">
+          <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="home_away" id="away_check" value="away">
+              Away
+            </label>
+          </div>
+        </fieldset>
+
+        {{ wtf.form_field(form.submit_new, button_map={'submit_new': 'primary my-1 btn-block'}) }}
+        <br>
+        {% if match %}
+        <h4 class="text-center text-muted">{{ match.date }} {{ match.opponent.name }} {{ match.home_away }}</h4>
+        {{ wtf.form_field(form.submit_delete, button_map={'submit_delete': 'danger my-1 btn-block'}) }}
+        {% endif %}
+
+
+      </form>
+    </div>
+    <div class="col-md-2"></div>
+    <div class="col-md-5 mt-2 mx-auto">
+      <div class="card h-100">
+        <h2 class="card-header">Current season</h2>
+        <div class="card-body">
+          <ul class="list-unstyled">
+          {% for m in all_matches %}
+          <li><a href="{{ url_for('main.match_edit', id=m.id) }}">{{ m.date }} {{ m.opponent.name }} {{ m.home_away }} </a></li>
+          {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
