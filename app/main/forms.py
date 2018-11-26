@@ -49,7 +49,7 @@ class EditTeamForm(FlaskForm):
 class EditMatchForm(FlaskForm):
     date = DateField('Date', format='%Y-%m-%d', validators=[DataRequired()])
     opponent = SelectField('Opponent', choices=[], validators=[DataRequired()])
-    home_away = RadioField('Location', choices=[('home','Home'),('away','Away')], validators=[DataRequired()])
+    home_away = RadioField('Location', choices=[('home','Home'),('away','Away')], default='home', validators=[DataRequired()])
 
     submit_new = SubmitField('Submit')
     submit_edit = SubmitField('Edit Match')
@@ -87,9 +87,39 @@ class EditMatchForm(FlaskForm):
             flash('Match must be unique! Match not added', 'danger')
             raise ValidationError('Match details are not unique.')
 
+
 class DoublesGameForm(FlaskForm):
     p1 = SelectField('', choices=[], default='Dummy', validators=[DataRequired()])
     p2 = SelectField('', choices=[], default='Dummy', validators=[DataRequired()])
-    win = BooleanField('Win')
     p1_stars = SelectField('', choices=[('0','0'),('1','1'),('2','2')], default='0')
     p2_stars = SelectField('', choices=[('0','0'),('1','1'),('2','2')], default='0')
+    win = BooleanField('Win')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        roster = Player.query.all()
+        player_choices = [(p.nickname,p.nickname) for p in roster]
+        self.p1.choices=player_choices
+        self.p2.choices=player_choices
+
+
+class SinglesGameForm(FlaskForm):
+    p1 = SelectField('', choices=[], default='Dummy', validators=[DataRequired()])
+    p1_stars = SelectField('', choices=[('0','0'),('1','1'),('2','2')], default='0')
+    win = BooleanField('Win')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        roster = Player.query.all()
+        player_choices = [(p.nickname,p.nickname) for p in roster]
+        self.p1.choices=player_choices
+
+
+class EnterScoresForm(FlaskForm):
+    d701 = FieldList(FormField(DoublesGameForm), min_entries=4)
+    d501 = FieldList(FormField(DoublesGameForm), min_entries=4)
+    s501 = FieldList(FormField(SinglesGameForm), min_entries=8)
+
+    submit = SubmitField('Submit Scores')
+
+

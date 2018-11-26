@@ -3,69 +3,119 @@
 
 {% block app_content %}
 <div class="container">
-	<h1>Enter game score</h1>
-	<br>
-		<div class="col-md-6">
-			<form class="form" method="post" role="form">
-				{{ form.hidden_tag() }}
-				{{ wtf.form_errors(form, hiddens="only") }}
+  <h1>Enter game score</h1>
+  <br>
+  {% set c=3 %}
+  <div class="col-12 mt-2 mx-auto">
+    <div class="card h-100">
+      <h2 class="card-header">Current season</h2>
+      <div class="card-body">
+        <ul class="row list-unstyled">
+        {% for m in all_matches %}
+        <li class="col-xs-3">
+          <a href="{{ url_for('main.enter_score', id=m.id) }}">{{ m.date }} {{ m.opponent.name }} {{ m.home_away }} </a>
+        </li>
+        {% endfor %}
+        </ul>
+        <hr>
+        <a href="{{ url_for('main.match_edit') }}">Add new match</a>
+      </div>
+    </div>
+  </div>
 
-				<div class="form-row">
-					<div class="form-group col-xs-3 mb-0">
-						<input type="text" readonly class="form-control-plaintext" id="game_type" value="701 doubles">
-					</div>
-					<div class="form-group col-xs-3 mb-0">
-						<div class="checkbox">
-							<label class="form-check-label">
-						  <input class="form-check-input" for="win" type="checkbox" value="" id="win" name="win">
-						  {{ form.win.label.text }}</label>
-						</div>
-					</div>
-				</div>
+  {% if match %}
 
-				<div class="form-row">
-					<div class="form-group col-xs-10 mb-1">
-						<select class="form-control form-control-sm" name="p1" id="p1" placeholder="Dummy">
-							{% for choice in form.p1.choices %}
-							{% if choice[0] == form.p1.default %}
-							<option selected value="{{ choice[0] }}">{{ choice[1] }}</option>
-							{% else %}
-							<option value="{{ choice[0] }}">{{ choice[1] }}</option>
-							{% endif %}
-							{% endfor %}
-						</select>
-					</div>
-					<div class="form-group col-xs-2 mb-1">
-						<select class="form-control form-control-sm" name="p1_star" id="p1_star">
-						{% for choice in form.p1_stars.choices %}
-						<option value="{{ choice[0] }}">{{ choice[1] }}</option>
-						{% endfor %}
-						</select>
-					</div>
-				</div>
+  <div class="col-12 mt-2 mx-auto">
+    <div class="card h-100">
+      <h2 class="card-header">Match scores</h2>
+      <div class="card-body">
+      <form class="form" method="post" role="form">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens="only") }}
 
-				<div class="form-row">
-					<div class="form-group col-xs-10 mb-1">
-						<select class="form-control form-control-sm" name="p2" id="p2" placeholder="Dummy">
-							{% for choice in form.p2.choices %}
-							{% if choice[0] == form.p2.default %}
-							<option selected value="{{ choice[0] }}">{{ choice[1] }}</option>
-							{% else %}
-							<option value="{{ choice[0] }}">{{ choice[1] }}</option>
-							{% endif %}
-							{% endfor %}
-						</select>
-					</div>
-					<div class="form-group col-xs-2 mb-1">
-						<select class="form-control form-control-sm" name="p2_star" id="p2_star">
-						{% for choice in form.p2_stars.choices %}
-						<option value="{{ choice[0] }}">{{ choice[1] }}</option>
-						{% endfor %}
-						</select>
-					</div>
-				</div>
+        <h4>701 doubles</h4>
+        {% for game in form.d701 %}
+        <div class="col-md-{{ c }}">
+          <div class="form-row my-0">
+            <div class="form-group col-xs my-0">
+            {{ wtf.form_field(game.win) }}
+            </div>
+          </div>
+          <div class="form-row my-0">
+            <div class="form-group col-xs-9 my-1">
+              {{ game.p1(class="form-control form-control-sm") }}
+            </div>
+            <div class="form-group col-xs-3 my-1">
+              {{ game.p1_stars(class="form-control form-control-sm") }}
+            </div>
+          </div>
+          <div class="form-row my-0">
+            <div class="form-group col-xs-9 my-1">
+              {{ game.p2(class="form-control form-control-sm") }}
+            </div>
+            <div class="form-group col-xs-3 my-1">
+              {{ game.p2_stars(class="form-control form-control-sm") }}
+            </div>
+          </div>
+          <hr>
+        </div>
+        {% endfor %}
 
-			</form>
-		</div>
-	</div>
+        <h4>501 doubles</h4>
+        {% for game in form.d501 %}
+        <div class="col-md-{{ c }}">
+          <div class="form-row my-0">
+            <div class="form-group col-xs my-0">
+            {{ wtf.form_field(game.win) }}
+            </div>
+          </div>
+          <div class="form-row my-0">
+            <div class="form-group col-xs-9 my-1">
+              {{ game.p1(class="form-control form-control-sm") }}
+            </div>
+            <div class="form-group col-xs-3 my-1">
+              {{ game.p1_stars(class="form-control form-control-sm") }}
+            </div>
+          </div>
+          <div class="form-row my-0">
+            <div class="form-group col-xs-9 my-1">
+              {{ game.p2(class="form-control form-control-sm") }}
+            </div>
+            <div class="form-group col-xs-3 my-1">
+              {{ game.p2_stars(class="form-control form-control-sm") }}
+            </div>
+          </div>
+          <hr>
+        </div>
+        {% endfor %}
+
+        <h4>501 singles</h4>
+        {% for game in form.s501 %}
+        <div class="col-md-{{ c }}">
+          <div class="form-row my-0">
+            <div class="form-group col-xs my-0">
+            {{ wtf.form_field(game.win) }}
+            </div>
+          </div>
+          <div class="form-row my-0">
+            <div class="form-group col-xs-9 my-1">
+              {{ game.p1(class="form-control form-control-sm") }}
+            </div>
+            <div class="form-group col-xs-3 my-1">
+              {{ game.p1_stars(class="form-control form-control-sm") }}
+            </div>
+          </div>
+          <hr>
+        </div>
+        {% endfor %}
+
+        {{ wtf.form_field(form.submit, button_map={'submit': 'primary my-1 btn-block'}) }}
+
+      </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
 {% endblock %}
