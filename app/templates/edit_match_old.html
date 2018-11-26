@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<div class="container">
+  <h1>Match Edit</h1>
+  <br>
+  <div class="row">
+    <div class="col-md-5 mt-4"><h2>Add/Edit match</h2>
+      <form class="form" method="post" role="form">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_errors(form, hiddens="only") }}
+
+        <div class="form-group required">
+          <label for="opponent">{{ form.opponent.label.text }}</label>
+          <select type="text" class="form-control" id="opponent" name="opponent" required value="{{ form.opponent.data }}" aria-describedby="opponent">
+          {% for team in all_teams %}
+          {%if match %}
+          {% if team.name == match.opponent.name %}
+          <option selected value="{{ team.name }}">{{ team.name }}</option>
+          {% else %}
+          <option value="{{ team.name }}">{{ team.name }}</option>
+          {% endif %}
+          {% else %}
+          <option value="{{ team.name }}">{{ team.name }}</option>
+          {% endif %}
+          {% endfor %}
+          </select>
+        </div>
+        <div class="form-group required">
+          <label for="date">{{ form.date.label.text }}</label>
+            <input class="form-control" type="date" name="date" value="{{ form.date.data }}" id="date">
+        </div>
+        <fieldset class="form-group">
+          {% for choice in form.home_away.choices %}
+          <div class="form-check form-check-inline">
+            {% if match %}
+            {% if choice[0] == match.home_away %}
+            <input type="radio" class="form-check-input" name="home_away" id={{ form.home_away.id }} value="{{ choice[0] }}" checked>
+            {% else %}
+            <input type="radio" class="form-check-input" name="home_away" id={{ form.home_away.id }} value="{{ choice[0] }}">
+            {% endif %}
+            {% else %}
+            <input type="radio" class="form-check-input" name="home_away" id={{ form.home_away.id }} value="{{ choice[0] }}">
+            {% endif %}
+            <label for="home_away" class="form-check-label">{{ choice[1] }}</label>
+          </div>
+          {% endfor %}
+        </fieldset>
+        {% if match %}
+        <h4 class="text-center text-muted">{{ match.date }} {{ match.opponent.name }} {{ match.home_away }}</h4>
+        {{ wtf.form_field(form.submit_edit, button_map={'submit_edit': 'info my-1 btn-block'}) }}
+        {{ wtf.form_field(form.submit_delete, button_map={'submit_delete': 'danger my-1 btn-block'}) }}
+        {% else %}
+        {{ wtf.form_field(form.submit_new, button_map={'submit_new': 'primary my-1 btn-block'}) }}
+        {% endif %}
+      </form>
+    </div>
+    <div class="col-md-2"></div>
+    <div class="col-md-5 mt-2 mx-auto">
+      <div class="card h-100">
+        <h2 class="card-header">Current season</h2>
+        <div class="card-body">
+          <ul class="list-unstyled">
+          {% for m in all_matches %}
+          <li><a href="{{ url_for('main.match_edit', id=m.id) }}">{{ m.date }} {{ m.opponent.name }} {{ m.home_away }} </a></li>
+          {% endfor %}
+          </ul>
+          <hr>
+          <a href="{{ url_for('main.match_edit') }}">Add new match</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

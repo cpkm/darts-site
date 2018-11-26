@@ -1,6 +1,6 @@
 from flask import request, flash
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField, BooleanField, RadioField, FieldList, FormField, DateField
+from wtforms import StringField, SubmitField, TextAreaField, BooleanField, RadioField, FieldList, FormField, DateField, SelectField
 from wtforms.validators import ValidationError, DataRequired, Length, Email
 from app.models import Player, Game, Match, Team, PlayerGame
 from app.validators import Unique
@@ -48,32 +48,48 @@ class EditTeamForm(FlaskForm):
 
 class EditMatchForm(FlaskForm):
     date = DateField('Date', format='%Y-%m-%d', validators=[DataRequired()])
-    opponent = StringField('Opponent', validators=[DataRequired()])
+    opponent = SelectField('Opponent', choices=[], validators=[DataRequired()])
     home_away = RadioField('Location', choices=[('home','Home'),('away','Away')], validators=[DataRequired()])
 
     submit_new = SubmitField('Submit')
     submit_edit = SubmitField('Edit Match')
     submit_delete = SubmitField('Delete Match')
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, match=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.original_date = self.date
-        self.original_opponent = self.opponent
-        self.original_home_away = self.home_away
+        print(match, match is not None)
+        if match is not None:
+            self.original_date = match.date
+            self.original_opponent = match.opponent.name
+            self.original_home_away = match.home_away
+        else:
+            self.original_date = None
+            self.original_opponent = None
+            self.original_home_away = None
+
+    def load_match(self, match):
+        self.date.data = match.date
+        self.opponent.data = match.opponent.name
+        self.home_away.data = match.home_away
+
 
     def validate_opponent(self, opponent):
         opp_id = Team.query.filter_by(name=opponent.data).first().id
 
-        #if self.date==self.original_date and self.original_opponent==opponent and self.original_home_away==self.home_away:
-        #    flash('Match details unchanged.', 'warning')
-        #    raise ValidationError('Match details did not change.')
+        print(self.date.data,self.home_away.data,opponent.data)
+        print(self.original_date,self.original_home_away,self.original_opponent)
+
+        if self.original_date==self.date.data and self.original_opponent==opponent.data and self.original_home_away==self.home_away.data:
+            flash('Match details unchanged.', 'warning')
+            raise ValidationError('Match details did not change.')
 
         if Match.query.filter_by(date=self.date.data, home_away=self.home_away.data, opponent_id=opp_id).first() is not None:
             flash('Match must be unique! Match not added', 'danger')
             raise ValidationError('Match details are not unique.')
 
 class DoublesGameForm(FlaskForm):
-    p1 = StringField('Player 1', validators=[DataRequired()])
-    p2 = StringField('Player 2', validators=[DataRequired()])
-
-    submit = SubmitField('Submit')
+    p1 = SelectField('', choices=[], default='Dummy', validators=[DataRequired()])
+    p2 = SelectField('', choices=[], default='Dummy', validators=[DataRequired()])
+    win = BooleanField('Win')
+    p1_stars = SelectField('', choices=[('0','0'),('1','1'),('2','2')], default='0')
+    p2_stars = SelectField('', choices=[('0','0'),('1','1'),('2','2')], default='0')

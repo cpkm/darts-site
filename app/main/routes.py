@@ -4,7 +4,7 @@ from werkzeug.urls import url_parse
 from datetime import datetime
 from app import db
 from app.main import bp
-from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm
+from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, DoublesGameForm
 from app.models import Player, Game, Match, Team
 from wtforms.validators import ValidationError
 
@@ -107,6 +107,64 @@ def team_edit(name):
 @bp.route('/match_edit/<id>',  methods=['GET', 'POST'])
 def match_edit(id):
     match = Match.query.filter_by(id=id).first()
+    form = EditMatchForm(match=match)
+    all_teams = Team.query.order_by(Team.name).all()
+    team_choices = [('', '-Select Opponent-')]+[(t.name,t.name) for t in all_teams]
+    form.opponent.choices=team_choices
+    all_matches = Match.query.order_by(Match.date).all()
+
+    if form.submit_new.data and form.validate():
+        newmatch = Match(date=form.date.data, 
+            opponent=Team.query.filter_by(name=form.opponent.data).first(), home_away=form.home_away.data)
+        db.session.add(newmatch)
+        db.session.commit()
+        flash('Match {} {} {} added!'.format(newmatch.date, form.opponent.data, form.home_away.data))
+        return redirect(url_for('main.match_edit'))
+
+    if form.submit_edit.data and form.validate() and match is not None:
+        match.date = form.date.data
+        match.opponent = Team.query.filter_by(name=form.opponent.data).first()
+        match.home_away = form.home_away.data
+        db.session.add(match)
+        db.session.commit()
+        flash('Match {} {} {} modified!'.format(form.date.data, form.opponent.data, form.home_away.data))
+        return redirect(url_for('main.match_edit', id=match.id))
+    elif request.method=='GET' and match is not None:
+        form.load_match(match)
+
+    if  form.submit_delete.data and match is not None:
+        db.session.delete(match)
+        db.session.commit()
+        flash('Match {} {} {} deleted!'.format(form.date.data, form.opponent.data, form.home_away.data), 'danger')
+        return redirect(url_for('main.match_edit'))
+
+    return render_template('edit_match.html', title='Match Editor', 
+        form=form, match=match, all_matches=all_matches)
+
+@bp.route('/search')
+@login_required
+def search():
+    return 0
+
+@bp.route('/enter_score')
+def enter_score():
+    form = DoublesGameForm()
+    roster = Player.query.all()
+    player_choices = [(p.nickname,p.nickname) for p in roster]
+
+    form.p1.choices=player_choices
+    form.p2.choices=player_choices
+    return render_template('enter_score.html', title='Enter Scores', form=form)
+
+
+
+
+
+'''
+@bp.route('/match_edit',  methods=['GET', 'POST'], defaults={'id': None})
+@bp.route('/match_edit/<id>',  methods=['GET', 'POST'])
+def match_edit(id):
+    match = Match.query.filter_by(id=id).first()
     if match is not None:
         form = EditMatchForm(date=match.date, home_away=match.home_away,
                 opponent=match.opponent.name)
@@ -140,13 +198,4 @@ def match_edit(id):
 
     return render_template('edit_match.html', title='Match Editor', 
         form=form, match=match, all_teams=all_teams, all_matches=all_matches)
-
-@bp.route('/search')
-@login_required
-def search():
-    return 0
-
-@bp.route('/match')
-@login_required
-def match():
-    return 0
+        '''
