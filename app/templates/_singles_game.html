@@ -1,0 +1,17 @@
+{{ game.hidden_tag() }}
+<div class="col-lg-{{ c }}">
+  <div class="form-row my-0">
+    <div class="form-group col-xs my-0">
+    {{ wtf.form_field(game.win) }}
+    </div>
+  </div>
+  <div class="form-row my-0">
+    <div class="form-group col-xs-9 my-1">
+      {{ game.p1(class="form-control form-control-sm") }}
+    </div>
+    <div class="form-group col-xs-3 my-1">
+      {{ game.p1_stars(class="form-control form-control-sm") }}
+    </div>
+  </div>
+  <hr>
+</div>

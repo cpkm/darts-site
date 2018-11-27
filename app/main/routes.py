@@ -5,7 +5,7 @@ from datetime import datetime
 from app import db
 from app.main import bp
 from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm
-from app.models import Player, Game, Match, Team
+from app.models import Player, Game, Match, Team, PlayerGame
 from wtforms.validators import ValidationError
 
 
@@ -116,6 +116,7 @@ def match_edit(id):
     if form.submit_new.data and form.validate():
         newmatch = Match(date=form.date.data, 
             opponent=Team.query.filter_by(name=form.opponent.data).first(), home_away=form.home_away.data)
+        newmatch.set_location()
         db.session.add(newmatch)
         db.session.commit()
         flash('Match {} {} {} added!'.format(newmatch.date, form.opponent.data, form.home_away.data))
@@ -125,18 +126,22 @@ def match_edit(id):
         match.date = form.date.data
         match.opponent = Team.query.filter_by(name=form.opponent.data).first()
         match.home_away = form.home_away.data
+        match.match_type = form.match_type.data
+        match.set_location()
         db.session.add(match)
         db.session.commit()
         flash('Match {} {} {} modified!'.format(form.date.data, form.opponent.data, form.home_away.data))
         return redirect(url_for('main.match_edit', id=match.id))
-    elif request.method=='GET' and match is not None:
-        form.load_match(match)
 
     if  form.submit_delete.data and match is not None:
+        match.delete_all_games()
         db.session.delete(match)
         db.session.commit()
-        flash('Match {} {} {} deleted!'.format(form.date.data, form.opponent.data, form.home_away.data), 'danger')
+        flash('Match {} {} {} and all associated games deleted!'.format(form.date.data, form.opponent.data, form.home_away.data), 'danger')
         return redirect(url_for('main.match_edit'))
+
+    if request.method=='GET' and match is not None:
+        form.load_match(match)
 
     return render_template('edit_match.html', title='Match Editor', 
         form=form, match=match, all_matches=all_matches)
@@ -150,7 +155,52 @@ def search():
 @bp.route('/enter_score/<id>',  methods=['GET', 'POST'])
 def enter_score(id):
     match = Match.query.filter_by(id=id).first()
-    form = EnterScoresForm()
+    form = EnterScoresForm(obj=match)
     all_matches = Match.query.order_by(Match.date).all()
+
+    if form.submit_details.data and form.validate() and match is not None:
+        match.win = form.win.data
+        match.team_score = form.team_score.data
+        match.opponent_score = form.opponent_score.data
+        match.food = form.food.data
+        match.match_summary = form.match_summary.data
+        db.session.add(match)
+        db.session.commit()
+        flash('Match {} {} {} details edited!'.format(match.date, match.opponent.name, match.home_away))
+        return redirect(url_for('main.enter_score', id=match.id))
+
+    if form.submit_scores.data and form.validate() and match is not None:
+        match.delete_all_games()
+        for i,f in enumerate(form.d701):
+            game = Game(match=match, win=f.win.data, game_num=i, game_type='doubles 701')
+            p1 = Player.query.filter_by(nickname=f.p1.data).first()
+            p2 = Player.query.filter_by(nickname=f.p2.data).first()
+            pg1 = PlayerGame(player=p1, game=game, stars=int(f.p1_stars.data))
+            pg2 = PlayerGame(player=p2, game=game, stars=int(f.p2_stars.data))
+            db.session.add_all([game,pg1,pg2])
+            db.session.commit()
+
+        for i,f in enumerate(form.d501):
+            game = Game(match=match, win=f.win.data, game_num=i, game_type='doubles 501')
+            p1 = Player.query.filter_by(nickname=f.p1.data).first()
+            p2 = Player.query.filter_by(nickname=f.p2.data).first()
+            pg1 = PlayerGame(player=p1, game=game, stars=int(f.p1_stars.data))
+            pg2 = PlayerGame(player=p2, game=game, stars=int(f.p2_stars.data))
+            db.session.add_all([game,pg1,pg2])
+            db.session.commit()
+
+        for i,f in enumerate(form.s501):
+            game = Game(match=match, win=f.win.data, game_num=i, game_type='singles 501')
+            p1 = Player.query.filter_by(nickname=f.p1.data).first()
+            pg1 = PlayerGame(player=p1, game=game, stars=int(f.p1_stars.data))
+            db.session.add_all([game,pg1])
+            db.session.commit()
+
+        flash('Match {} {} {} scores entered successfully!'.format(match.date, match.opponent.name, match.home_away), 'success')
+        return redirect(url_for('main.enter_score', id=match.id))
+
+    if request.method=='GET' and match is not None:
+        form.load_games(match)
+
     return render_template('enter_score.html', title='Enter Scores', 
         form=form, match=match, all_matches=all_matches)

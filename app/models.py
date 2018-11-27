@@ -56,6 +56,7 @@ class Match(db.Model):
     date = db.Column(db.Date, index=True, default=date.today())
     location = db.Column(db.String(64))
     home_away = db.Column(db.String(32), index=True)
+    match_type = db.Column(db.String(32), index=True)
     games = db.relationship('Game', back_populates='match', lazy='dynamic')
     team_score = db.Column(db.Integer, index=True)
     opponent_score = db.Column(db.Integer, index=True)
@@ -79,6 +80,25 @@ class Match(db.Model):
         if game:
             return self.games.filter_by(id=game.id).count() > 0
         return self.games.filter_by(id=game_id).count() > 0
+
+    def delete_all_games(self):
+        player_game = PlayerGame.query.join(Game).filter_by(match=self).all()
+        for pg in player_game:
+            db.session.delete(pg)
+        db.session.commit()
+
+        games = Game.query.filter_by(match=self).all()
+        for g in games:
+            db.session.delete(g)
+        db.session.commit()
+
+
+    def set_location(self):
+        if self.opponent is not None:
+            if self.home_away == 'away':
+                self.location = self.opponent.home_location
+            else:
+                self.location = 'Italian Canadian Club'
 
     def __repr__(self):
         return '<Match {}>'.format(self.date)

@@ -14,12 +14,30 @@
         {{ wtf.form_field(form.opponent) }}
         {{ wtf.form_field(form.date, type="date") }}
 
+        <div class="form-row">
+          <div class="col-xs-4 px-4">
+        {{ wtf.form_field(form.home_away) }}
+       </div>
+        <div class="col-xs-4">
+       </div>
+      <div class="col-xs-4 px-4">
+        {{ wtf.form_field(form.match_type) }}
+       </div>
+
+      </div>
+<!--
         {% for field in form.home_away %}
         <div class="form-check form-check-inline">
         {{ field(class="form-check-input") }}
         {{ field.label(class="form-check-label font-weight-normal") }}
         </div>
         {% endfor %}
+        {% for field in form.match_type %}
+        <div class="form-check form-check-inline">
+        {{ field(class="form-check-input") }}
+        {{ field.label(class="form-check-label font-weight-normal") }}
+        </div>
+        {% endfor %}-->
         <hr>
         {% if match %}
         <h4 class="text-center text-muted">{{ match.date }} {{ match.opponent.name }} {{ match.home_away }}</h4>
