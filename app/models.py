@@ -117,8 +117,12 @@ class Team(db.Model):
             digest, size)
 
 
-class PlayerStatistics(db.Model):
+class PlayerSeasonStatistics(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    player_id = db.Column(db.Integer, db. ForeignKey('player.id'))
+    player = db.relationship('Player')
+    season_id = db.Column(db.Integer, db. ForeignKey('season.id'))
+    season = db.relationship('Season')
     matches_played = db.Column(db.Integer, primary_key=True)
     matches_won = db.Column(db.Integer, primary_key=True)
     matches_lost = db.Column(db.Integer, primary_key=True)
@@ -127,5 +131,27 @@ class PlayerStatistics(db.Model):
     total_stars = db.Column(db.Integer, primary_key=True)
     total_high_scores = db.Column(db.Integer, primary_key=True)
     total_low_scores = db.Column(db.Integer, primary_key=True)
+
+class TeamSeasonStatistics(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    team_id = db.Column(db.Integer, db. ForeignKey('team.id'))
+    team = db.relationship('Team')
+    season_id = db.Column(db.Integer, db. ForeignKey('season.id'))
+    season = db.relationship('Season')
+    matches_played = db.Column(db.Integer, primary_key=True)
+    matches_won = db.Column(db.Integer, primary_key=True)
+    matches_lost = db.Column(db.Integer, primary_key=True)
+    games_played = db.Column(db.Integer, primary_key=True)
+    games_won = db.Column(db.Integer, primary_key=True)
+    total_stars = db.Column(db.Integer, primary_key=True)
+    total_high_scores = db.Column(db.Integer, primary_key=True)
+    total_low_scores = db.Column(db.Integer, primary_key=True)
+
+
+class Season(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    season_name = db.Column(db.String(64), index=True, unique=True)
+    start_date = db.Column(db.Date, index=True)
+    end_date = db.Column(db.Date, index=True)
 
 
