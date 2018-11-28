@@ -5,7 +5,7 @@ from datetime import datetime
 from app import db
 from app.main import bp
 from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm
-from app.models import Player, Game, Match, Team, PlayerGame
+from app.models import Player, Game, Match, Team, PlayerGame, PlayerSeasonStats
 from wtforms.validators import ValidationError
 
 
@@ -55,9 +55,11 @@ def player_edit(nickname):
         return redirect(url_for('main.player_edit', nickname=player.nickname))
 
     if  form.submit_delete.data and player is not None:
-        db.session.delete(player)
+        stats=PlayerSeasonStats.query.filter_by(player=player).all()
+        for m in [player]+stats:
+            db.session.delete(m)
         db.session.commit()
-        flash('Player {} ({} {}) deleted!'.format(
+        flash('Player {} ({} {}) and all associated stats deleted!'.format(
             player.nickname, player.first_name, player.last_name), 'danger')
         return redirect(url_for('main.player_edit'))
 
@@ -171,7 +173,10 @@ def enter_score(id):
 
     if form.submit_scores.data and form.validate() and match is not None:
         match.delete_all_games()
-        for i,f in enumerate(form.d701):
+
+        count = 1
+        for j,f in enumerate(form.d701):
+            i = count + j
             game = Game(match=match, win=f.win.data, game_num=i, game_type='doubles 701')
             p1 = Player.query.filter_by(nickname=f.p1.data).first()
             p2 = Player.query.filter_by(nickname=f.p2.data).first()
@@ -180,7 +185,9 @@ def enter_score(id):
             db.session.add_all([game,pg1,pg2])
             db.session.commit()
 
-        for i,f in enumerate(form.d501):
+        count = count + len(form.d701)
+        for j,f in enumerate(form.d501):
+            i = count + j
             game = Game(match=match, win=f.win.data, game_num=i, game_type='doubles 501')
             p1 = Player.query.filter_by(nickname=f.p1.data).first()
             p2 = Player.query.filter_by(nickname=f.p2.data).first()
@@ -189,12 +196,17 @@ def enter_score(id):
             db.session.add_all([game,pg1,pg2])
             db.session.commit()
 
-        for i,f in enumerate(form.s501):
+        count = count + len(form.d501)
+        for j,f in enumerate(form.s501):
+            i = count + j
             game = Game(match=match, win=f.win.data, game_num=i, game_type='singles 501')
             p1 = Player.query.filter_by(nickname=f.p1.data).first()
             pg1 = PlayerGame(player=p1, game=game, stars=int(f.p1_stars.data))
             db.session.add_all([game,pg1])
             db.session.commit()
+
+        for p in match.get_roster():
+            p.update_player_stats()
 
         flash('Match {} {} {} scores entered successfully!'.format(match.date, match.opponent.name, match.home_away), 'success')
         return redirect(url_for('main.enter_score', id=match.id))

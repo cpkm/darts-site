@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm
 from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, RadioField, 
     FieldList, FormField, DateField, SelectField, IntegerField)
 from wtforms.validators import ValidationError, DataRequired, Length, Email
-from app.models import Player, Game, Match, Team, PlayerGame
+from app.models import Player, Game, Match, Team, PlayerGame, Season, season_from_date
 from app.validators import Unique
 from datetime import datetime
 
