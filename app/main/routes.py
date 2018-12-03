@@ -1,26 +1,29 @@
 from flask import render_template, flash, redirect, url_for, request, current_app, g
 from flask_login import current_user, login_required
 from werkzeug.urls import url_parse
-from datetime import datetime
+from datetime import datetime, date
 from app import db
 from app.main import bp
-from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm
-from app.models import Player, Game, Match, Team, PlayerGame, PlayerSeasonStats
+from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm
+from app.models import Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season, season_from_date
 from wtforms.validators import ValidationError
 
 
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
 def index():
+    all_players = Player.query.all()
     page = request.args.get('page', 1, type=int)
-    schedule = Match.query.paginate(
+    last_match = Match.query.filter(Match.date<date.today()).order_by(Match.date.desc()).first()
+    schedule = Match.query.filter(Match.date>=date.today()).order_by(Match.date).paginate(
         page, current_app.config['MATCH_PER_PAGE'], False)
     next_url = url_for('main.index', page=schedule.next_num) \
         if schedule.has_next else None
     prev_url = url_for('main.index', page=schedule.prev_num) \
         if schedule.has_prev else None
     return render_template('index.html', title=None, 
-        schedule=schedule.items, next_url=next_url, prev_url=prev_url)
+        schedule=schedule.items, next_url=next_url, prev_url=prev_url, 
+        all_players=all_players, last_match=last_match)
 
 
 @bp.route('/player_edit',  methods=['GET', 'POST'], defaults={'nickname': None})
@@ -159,6 +162,7 @@ def enter_score(id):
     match = Match.query.filter_by(id=id).first()
     form = EnterScoresForm(obj=match)
     all_matches = Match.query.order_by(Match.date).all()
+    hl_form = HLScoreForm()
 
     if form.submit_details.data and form.validate() and match is not None:
         match.win = form.win.data
@@ -168,6 +172,8 @@ def enter_score(id):
         match.match_summary = form.match_summary.data
         db.session.add(match)
         db.session.commit()
+        for p in match.get_roster():
+            p.update_player_stats()
         flash('Match {} {} {} details edited!'.format(match.date, match.opponent.name, match.home_away))
         return redirect(url_for('main.enter_score', id=match.id))
 
@@ -207,12 +213,47 @@ def enter_score(id):
 
         for p in match.get_roster():
             p.update_player_stats()
+            p.update_activity()
 
         flash('Match {} {} {} scores entered successfully!'.format(match.date, match.opponent.name, match.home_away), 'success')
         return redirect(url_for('main.enter_score', id=match.id))
 
     if request.method=='GET' and match is not None:
         form.load_games(match)
+        hl_form.load_scores(match)
+
+    if hl_form.add_btn.data:
+        new_row = hl_form.hl_scores.append_entry()
+        new_row.player.choices = [(p.nickname,p.nickname) for p in Player.query.all()]
+
+        return render_template('enter_score.html', title='Enter Scores', 
+        form=form, hl_form=hl_form, match=match, all_matches=all_matches)
+
+    if hl_form.rem_btn.data:
+        hl_form.hl_scores.pop_entry()
+        return render_template('enter_score.html', title='Enter Scores', 
+        form=form, hl_form=hl_form, match=match, all_matches=all_matches)
+
+    if hl_form.submit_scores.data and match is not None:
+        match.delete_all_books()
+        hl_form.save_scores(match)
+        flash('Match {} {} {} high/low scores entered successfully!'.format(match.date, match.opponent.name, match.home_away), 'success')
+        return redirect(url_for('main.enter_score', id=match.id))
 
     return render_template('enter_score.html', title='Enter Scores', 
-        form=form, match=match, all_matches=all_matches)
+        form=form, hl_form=hl_form, match=match, all_matches=all_matches)
+
+
+@bp.route('/player/<nickname>',  methods=['GET', 'POST'])
+def player(nickname):
+    player = Player.query.filter_by(nickname=nickname).first_or_404()
+    seasons = PlayerSeasonStats.query.filter_by(player_id=player.id).join(Season).order_by(Season.start_date).all()
+    page = request.args.get('page', 1, type=int)
+    matches = Match.query.join(Game).join(PlayerGame).filter_by(player_id=player.id).order_by(Match.date.desc()).distinct().paginate(
+        page, current_app.config['MATCH_PER_PAGE'], False)
+    next_url = url_for('main.player', nickname=player.nickname, page=matches.next_num) \
+        if matches.has_next else None
+    prev_url = url_for('main.player', username=player.nickname, page=matches.prev_num) \
+        if matches.has_prev else None
+    return render_template('player.html', next_url=next_url, prev_url=prev_url,
+            player=player, matches=matches.items, seasons=seasons)

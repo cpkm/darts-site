@@ -4,10 +4,47 @@
 {% block app_content %}
   <h1>Welcome to ICC4!</h1>
   <br>
-  <h2 class="my-4">Schedule</h2>
-  {% for match in schedule %}
-    {% include '_match.html' %}
-  {% endfor %}
+  <div class="row">
+    <div class="col-md-6">
+    <h2 class="my-4">Schedule</h2>
+    <h4>Last match</h4>
+    {% with match = last_match %}
+      {% include '_match.html' %}
+    {% endwith %}
+    <h4>Upcoming matches</h4>
+    {% for match in schedule %}
+      {% include '_match.html' %}
+    {% endfor %}
+    
+      <nav aria-label="...">
+      <ul class="pager">
+        <li class="previous{% if not prev_url %} disabled{% endif %}">
+          <a href="{{ prev_url or '#' }}">
+            <span aria-hidden="true">&larr;</span>Nearer
+          </a>
+        </li>
+        <li class="next{% if not next_url %} disabled{% endif %}">
+          <a href="{{ next_url or '#' }}">
+            Further<span aria-hidden="true">&rarr;</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    </div>
+    <div class="col-md-6">
+      <div class="card h-100">
+          <h2 class="card-header">Roster</h2>
+          <div class="card-body">
+            <ul class="list-unstyled">
+            {% for p in all_players %}
+            <li><a href="{{ url_for('main.player', nickname=p.nickname) }}">{{ p.nickname }}</a></li>
+            {% endfor %}
+            </ul>
+            <hr>
+            <a href="{{ url_for('main.player_edit') }}">Add new player</a>
+          </div>
+        </div>
+  </div>
   <br>
   <div class="container">
 
@@ -55,18 +92,5 @@
       </div>
     </div>
   </div>
-  <nav aria-label="...">
-    <ul class="pager">
-      <li class="previous{% if not prev_url %} disabled{% endif %}">
-        <a href="{{ prev_url or '#' }}">
-          <span aria-hidden="true">&larr;</span> Newer posts
-        </a>
-      </li>
-      <li class="next{% if not next_url %} disabled{% endif %}">
-        <a href="{{ next_url or '#' }}">
-          Older posts <span aria-hidden="true">&rarr;</span>
-        </a>
-      </li>
-    </ul>
-  </nav>
+  
 {% endblock %}

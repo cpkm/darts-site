@@ -1,17 +1,21 @@
 <table class="table table-hover">
   <tr>
     <td width="70px">
-      <a href="{{ url_for('main.match_edit', match_id=match.id) }}">
+      <a href="{{ url_for('main.match_edit', id=match.id) }}">
         <img src="{{ match.opponent.avatar(70) }}">
       </a>
     </td>
     <td>
-      <a href="{{ url_for('main.match_edit', match_id=match.id) }}">
+      <a href="{{ url_for('main.match_edit', id=match.id) }}">
         {{ match.opponent.name }}
       </a> 
-      {{ match.date }}
+       - {{ match.date }}
       <br>
-      {{ match.opponent.home_location }}
+      {% if match.home_away == 'away' %}
+      at {{ match.opponent.home_location }}
+      {% else %}
+      at Italian Canadian Club
+      {% endif %}
     </td>
   </tr>
 </table>

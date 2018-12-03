@@ -1,7 +1,9 @@
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import MetaData, alias
+from sqlalchemy import MetaData, alias, func, join
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method, Comparator
+from sqlalchemy.sql import select
 from datetime import date, timedelta
 from hashlib import md5
 from app import db
@@ -25,12 +27,29 @@ class Player(db.Model):
     first_name = db.Column(db.String(64), index=True)
     last_name = db.Column(db.String(64), index=True)
     games = association_proxy('games_association', 'game')
-    last_active = db.Column(db.Date, index=True, default=date.today())
+    last_match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
+    last_match = db.relationship('Match', foreign_keys=[last_match_id])
+    first_match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
+    first_match = db.relationship('Match', foreign_keys=[first_match_id])
+
+    high_scores = db.relationship('HighScore', back_populates='player', lazy='dynamic')
+    low_scores = db.relationship('LowScore', back_populates='player', lazy='dynamic')
+
+    def avatar(self, size):
+        digest = md5(self.nickname.lower().encode('utf-8')).hexdigest()
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+            digest, size)
 
     def game_stars(self, game=None, game_id=None):
         if game:
             return self.games_association.filter_by(game=game).first().stars
         return self.games_association.filter_by(game_id=game_id).first().stars
+
+    def update_activity(self):
+        self.last_match = Match.query.join(Game).join(PlayerGame).filter_by(player_id=self.id).order_by(Match.date.desc()).first()
+        self.first_match = Match.query.join(Game).join(PlayerGame).filter_by(player_id=self.id).order_by(Match.date).first()
+        db.session.commit()
+        return
 
     def update_player_stats(self, season_label='current'):
         if season_label=='current':
@@ -51,15 +70,18 @@ class Player(db.Model):
         player_games = PlayerGame.query.filter_by(player=self).join(Game).join(Match).\
                             filter(Match.date>=season.start_date,Match.date<=season.end_date)
 
-        stats.matches_played = len(Match.query.filter(Match.date>=season.start_date,Match.date<=season.end_date).\
-                                    join(Game).join(PlayerGame).filter_by(player_id=self.id).all())
-        stats.matches_won = len(Match.query.filter_by(win=True).join(Game).join(PlayerGame).filter_by(player_id=self.id).all())
-        season.matches_lost = len(Match.query.filter_by(win=False).join(Game).join(PlayerGame).filter_by(player_id=self.id).all())
+        stats.matches_played = Match.query.filter(Match.date>=season.start_date,Match.date<=season.end_date).\
+                                    join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
+        stats.matches_won = Match.query.filter_by(win=True).filter(Match.date>=season.start_date,Match.date<=season.end_date).\
+                            join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
+        stats.matches_lost = Match.query.filter_by(win=False).filter(Match.date>=season.start_date,Match.date<=season.end_date).\
+                            join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
 
-        ga = alias(Game)
         stats.games_played = player_games.count()
-        stats.games_won = player_games.join(ga).filter_by(win=True).count()
-        stats.games_lost = player_games.join(ga).filter_by(win=False).count()
+        stats.games_won = Game.query.filter_by(win=True).join(PlayerGame).filter_by(player_id=self.id).\
+                            join(Match).filter(Match.date>=season.start_date,Match.date<=season.end_date).count()
+        stats.games_lost = Game.query.filter_by(win=False).join(PlayerGame).filter_by(player_id=self.id).\
+                            join(Match).filter(Match.date>=season.start_date,Match.date<=season.end_date).count()
 
         stats.total_stars = sum([pg.stars for pg in player_games.all()])
 
@@ -103,6 +125,13 @@ class Match(db.Model):
     match_summary = db.Column(db.String(512))
     food = db.Column(db.String(128))
 
+    high_scores = db.relationship('HighScore', back_populates='match', lazy='dynamic')
+    low_scores = db.relationship('LowScore', back_populates='match', lazy='dynamic')
+
+    @hybrid_property
+    def season(self):
+        return season_from_date(self.date)
+
     def add_game(self, game):
         if not self.is_game(game):
             game.match=self
@@ -126,9 +155,19 @@ class Match(db.Model):
             db.session.delete(pg)
         db.session.commit()
 
-        games = Game.query.filter_by(match=self).all()
+        games = self.games.all()
         for g in games:
             db.session.delete(g)
+        db.session.commit()
+
+    def delete_all_books(self):
+        high_scores = self.high_scores.all()
+        for hs in high_scores:
+            db.session.delete(hs)
+        db.session.commit()
+        low_scores = self.low_scores.all()
+        for ls in low_scores:
+            db.session.delete(ls)
         db.session.commit()
 
     def set_location(self):
@@ -177,14 +216,66 @@ class PlayerSeasonStats(db.Model):
     total_high_scores = db.Column(db.Integer)
     total_low_scores = db.Column(db.Integer)
 
+    '''
+    filters = [filter1,filter2,...]
+    query....filter(*filters).count()
+    '''
+
+    @hybrid_property
+    def gp(self):
+        return PlayerGame.query.filter_by(player_id=self.player_id).join(Game).join(Match).\
+                filter_by(season=self.season).distinct().count()
+    
+    @gp.expression
+    def gp(cls):
+        j = join(PlayerGame,Game).join(Match)
+        return select([func.count(PlayerGame.player_id)]).where(PlayerGame.player_id==cls.player_id).\
+        select_from(j).where(Match.season.id==cls.season_id).label('gp')
+
+    @hybrid_property
+    def gw(self):
+        return PlayerGame.query.filter_by(player_id=self.player_id).join(Game).filter_by(win=True).join(Match).\
+                filter_by(season=self.season).distinct().count()
+    
+    @gw.expression
+    def gw(cls):
+        j = join(PlayerGame,Game).join(Match)
+        return select([func.count(PlayerGame.player_id)]).where(PlayerGame.player_id==cls.player_id).\
+        select_from(j).where(Game.win==True & Match.season.id==cls.season_id).label('gw')
+
+    @hybrid_property
+    def gl(self):
+        return PlayerGame.query.filter_by(player_id=self.player_id).join(Game).filter_by(win=False).join(Match).\
+                filter_by(season=self.season).distinct().count()
+    
+    @gl.expression
+    def gl(cls):
+        j = join(PlayerGame,Game).join(Match)
+        return select([func.count(PlayerGame.player_id)]).where(PlayerGame.player_id==cls.player_id).\
+        select_from(j).where(Game.win==False & Match.season.id==cls.season_id).label('gw')
+
+
+
     def __repr__(self):
         return '<{} {}>'.format(self.player.nickname,self.season.season_name)
+
+'''
+class QueryComparator(Comparator):
+    def operate(self, op, other):
+        print(self.__clause_element__())
+        print(other)
+        return op(self.__clause_element__(), other)
+
+                pg = alias(PlayerGame)
+        sq=db.session.query(pg).filter_by(player_id=self.player_id).join(Game).join(Match).\
+                filter_by(season=self.season).distinct().count()
+'''
 
 
 
 class TeamSeasonStats(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    season_id = db.Column(db.Integer, db. ForeignKey('season.id'))
+    season_id = db.Column(db.Integer, db.ForeignKey('season.id'))
     season = db.relationship('Season')
     matches_played = db.Column(db.Integer)
     matches_won = db.Column(db.Integer)
@@ -196,7 +287,7 @@ class TeamSeasonStats(db.Model):
     total_low_scores = db.Column(db.Integer)
 
     def update_team_stats(self):
-        return
+        return 
 
 
 class Season(db.Model):
@@ -209,6 +300,29 @@ class Season(db.Model):
         return '<Season {}>'.format(self.season_name)
 
 
+class HighScore(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    score = db.Column(db.Integer)
+    player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
+    match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
+    player = db.relationship('Player', back_populates='high_scores')
+    match = db.relationship('Match', back_populates='high_scores')
+
+
+class LowScore(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    score = db.Column(db.Integer)
+    player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
+    match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
+    player = db.relationship('Player', back_populates='low_scores')
+    match = db.relationship('Match', back_populates='low_scores')
+
+
 def season_from_date(date):
     season = Season.query.filter(Season.start_date <= date).filter(Season.end_date >= date).first()
     return season
+
+def update_all_player_stats():
+    players = Player.query.all()
+    for p in players:
+        p.update_player_stats()

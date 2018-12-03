@@ -1,0 +1,23 @@
+{{ score.hidden_tag() }}
+<div class="col-sm-12">
+  <div class="form-row">
+    <div class="form-group col-sm-2 my-1">
+      {{ score.player(class="form-control form-control-sm my-1") }}
+    </div>
+    <div class="form-group col-sm-4 mx-auto my-1">
+      <div class="row">
+      {% for hs in score.high_scores %}
+      {{ hs(class="form-control form-control-sm col-2 my-1 border-info") }}
+      {% endfor %}
+      </div>
+    </div>
+    <div class="form-group col-sm-4 mx-auto my-1">
+      <div class="row">
+      {% for ls in score.low_scores %}
+      {{ ls(class="form-control form-control-sm col-2 my-1 border-danger") }}
+      {% endfor %}
+      </div>
+    </div>
+  </div>
+  <hr>
+</div>

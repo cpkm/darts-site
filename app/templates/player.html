@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<div class="container">
+  <table class="table table-hover">
+    <tr>
+      <td width="256px"><img src="{{ player.avatar(256) }}"></td>
+      <td>
+        <h1>{{ player.nickname }}</h1>
+        <h3>{{ player.first_name }} {{ player.last_name }}</h3>
+        {% if player.first_match %}<p>Active since: <a href="{{ url_for('main.match_edit',id=player.first_match_id) }}">{{ player.first_match.date }}</a></p>{% endif %}
+        {% if player.last_match %}<p>Last match: <a href="{{ url_for('main.match_edit',id=player.last_match_id) }}">{{ player.last_match.date }} vs. {{ player.last_match.opponent.name }}</a></p>{% endif %}
+      </td>
+    </tr>
+
+  {% for match in matches %}
+    {% include '_match.html' %}
+  {% endfor %}
+  <nav aria-label="...">
+    <ul class="pager">
+      <li class="previous{% if not prev_url %} disabled{% endif %}">
+        <a href="{{ prev_url or '#' }}">
+          <span aria-hidden="true">&larr;</span> Newer matches
+        </a>
+      </li>
+      <li class="next{% if not next_url %} disabled{% endif %}">
+        <a href="{{ next_url or '#' }}">
+          Older matches <span aria-hidden="true">&rarr;</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  </table>
+</div>
+
+
+  <div class="col-12 mt-2 mx-auto">
+    <div class="card h-100">
+      <h2 class="card-header">Player Statisitics</h2>
+      <div class="card-body">
+        <table class="table text-center table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Season</th>
+              <th scope="col" data-toggle="tooltip" data-placement="top" title="Matches played">MP</th>
+              <th scope="col" data-toggle="tooltip" data-placement="top" title="Match wins">MW</th>
+              <th scope="col" data-toggle="tooltip" data-placement="top" title="Match losses">ML</th>
+              <th scope="col" data-toggle="tooltip" data-placement="top" title="Games played">GP</th>
+              <th scope="col" data-toggle="tooltip" data-placement="top" title="Game wins">GW</th>
+              <th scope="col" data-toggle="tooltip" data-placement="top" title="Game losses">GL</th>
+              <th scope="col" data-toggle="tooltip" data-placement="top" title="Total Stars">TS</th>
+              <th scope="col" data-toggle="tooltip" data-placement="top" title="Total High Scores">HS</th>
+              <th scope="col" data-toggle="tooltip" data-placement="top" title="Total Low Score">LS</th>
+          </thead>
+          <tbody>
+            {% for season in seasons %}
+            <tr>
+              <th scope="row">{{ season.season.season_name }}</th>
+              <td>{{ season.matches_played }}</td>
+              <td>{{ season.matches_won }}</td>
+              <td>{{ season.matches_lost }}</td>
+              <td>{{ season.games_played }}</td>
+              <td>{{ season.games_won }}</td>
+              <td>{{ season.games_lost }}</td>
+              <td>{{ season.total_stars }}</td>
+              <td>{{ season.total_high_scores }}</td>
+              <td>{{ season.total_low_scores }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+
+      </div>
+    </div>
+  </div>
+
+<!--
+    total_stars = db.Column(db.Integer)
+    total_high_scores = db.Column(db.Integer)
+    total_low_scores = db.Column(db.Integer)
+  -->
+
+
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+{% endblock %}

@@ -3,7 +3,8 @@ from flask_wtf import FlaskForm
 from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, RadioField, 
     FieldList, FormField, DateField, SelectField, IntegerField)
 from wtforms.validators import ValidationError, DataRequired, Length, Email
-from app.models import Player, Game, Match, Team, PlayerGame, Season, season_from_date
+from app import db
+from app.models import Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, season_from_date
 from app.validators import Unique
 from datetime import datetime
 
@@ -147,8 +148,6 @@ class EnterScoresForm(FlaskForm):
                     self.d701[i].p2.data = player_game[1].player.nickname
                     self.d701[i].p1_stars.data = str(player_game[0].stars)
                     self.d701[i].p2_stars.data = str(player_game[1].stars)
-
-                    print(player_game[0].stars,player_game[1].stars)
                 elif nop==1:
                     self.d701[i].p1.data = player_game[0].player.nickname
                     self.d701[i].p1_stars.data = player_game[0].stars
@@ -165,8 +164,6 @@ class EnterScoresForm(FlaskForm):
                     self.d501[i].p2.data = player_game[1].player.nickname
                     self.d501[i].p1_stars.data = str(player_game[0].stars)
                     self.d501[i].p2_stars.data = str(player_game[1].stars)
-
-                    print(player_game[0].stars,player_game[1].stars)
                 elif nop==1:
                     self.d501[i].p1.data = player_game[0].player.nickname
                     self.d501[i].p1_stars.data = str(player_game[0].stars)
@@ -181,11 +178,73 @@ class EnterScoresForm(FlaskForm):
                 if nop==1:
                     self.s501[i].p1.data = player_game[0].player.nickname
                     self.s501[i].p1_stars.data = str(player_game[0].stars)
-
-                    print(player_game[0].stars)
                 else:
                     pass
         return
+
+
+class HLPlayerScoreForm(FlaskForm):
+    player = SelectField('', choices=[], default='Dummy')
+    high_scores = FieldList(IntegerField('Score'), min_entries=12, max_entries=12)
+    low_scores = FieldList(IntegerField('Score'), min_entries=12, max_entries=12)
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        roster = Player.query.all()
+        player_choices = [(p.nickname,p.nickname) for p in roster]
+        self.player.choices = player_choices
+
+
+class HLScoreForm(FlaskForm):
+    hl_scores = FieldList(FormField(HLPlayerScoreForm), min_entries=4,max_entries=24)
+    add_btn = SubmitField('+')
+    rem_btn = SubmitField('-')
+
+    submit_scores = SubmitField('Submit scores')
+
+    def save_scores(self, match):
+        for row in self.hl_scores:
+            print(row.player.data)
+            if row.player.data != 'Dummy':
+                player = Player.query.filter_by(nickname=row.player.data).first()
+                for hs in row.high_scores:
+                    if hs.data is not None:
+                        entry = HighScore(player=player, score=hs.data, match_id=match.id)
+                        db.session.add(entry)
+                        db.session.commit()
+                for ls in row.low_scores:
+                    if ls.data is not None:
+                        entry = LowScore(player=player, score=ls.data, match_id=match.id)
+                        db.session.add(entry)
+                        db.session.commit()
+        return
+
+    def load_scores(self, match):
+        if match.high_scores.all() is None and match.low_scores.all():
+            return
+        hp = [s.player for s in match.high_scores.group_by(HighScore.player_id).all()]
+        lp = [s.player for s in match.low_scores.group_by(LowScore.player_id).all()]
+        all_p = hp + list(set(lp)-set(hp))
+
+        diff = len(all_p) - len(self.hl_scores)
+
+        if diff > 0:
+            for _ in range(diff):
+                self.hl_scores.append_entry()
+
+        for i,p in enumerate(all_p):
+            self.hl_scores[i].player.data = p.nickname
+            for j,s in enumerate(match.high_scores.filter_by(player=p).all()):
+                self.hl_scores[i].high_scores[j].data = s.score
+
+            for j,s in enumerate(match.low_scores.filter_by(player=p).all()):
+                self.hl_scores[i].low_scores[j].data = s.score
+        return
+
+            
+
+
 
 
 
