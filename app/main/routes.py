@@ -5,7 +5,8 @@ from datetime import datetime, date
 from app import db
 from app.main import bp
 from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm
-from app.models import Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season, season_from_date
+from app.models import (Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
+    season_from_date, update_all_team_stats)
 from wtforms.validators import ValidationError
 
 
@@ -212,9 +213,10 @@ def enter_score(id):
             db.session.commit()
 
         for p in match.get_roster():
-            p.update_player_stats()
+            p.update_player_stats(match.season.season_name)
             p.update_activity()
 
+        update_all_team_stats()
         flash('Match {} {} {} scores entered successfully!'.format(match.date, match.opponent.name, match.home_away), 'success')
         return redirect(url_for('main.enter_score', id=match.id))
 
@@ -237,6 +239,10 @@ def enter_score(id):
     if hl_form.submit_scores.data and match is not None:
         match.delete_all_books()
         hl_form.save_scores(match)
+        for p in match.get_roster():
+            p.update_player_stats(match.season.season_name)
+            p.update_activity()
+        update_all_team_stats()
         flash('Match {} {} {} high/low scores entered successfully!'.format(match.date, match.opponent.name, match.home_away), 'success')
         return redirect(url_for('main.enter_score', id=match.id))
 
@@ -257,3 +263,20 @@ def player(nickname):
         if matches.has_prev else None
     return render_template('player.html', next_url=next_url, prev_url=prev_url,
             player=player, matches=matches.items, seasons=seasons)
+
+
+@bp.route('/schedule',  methods=['GET', 'POST'], defaults={'season_name': '2018/2019'})
+@bp.route('/schedule/<season_name>',  methods=['GET', 'POST'])
+def schedule(season_name):
+    all_seasons = Season.query.all()
+    season = Season.query.filter_by(season_name=season_name).first()
+    matches = Match.query.filter_by(season=season).order_by(Match.date).all()
+    return render_template('schedule.html', season=season, matches=matches, all_seasons=all_seasons)
+
+
+
+
+
+
+
+

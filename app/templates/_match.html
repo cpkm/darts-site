@@ -9,13 +9,18 @@
       <a href="{{ url_for('main.match_edit', id=match.id) }}">
         {{ match.opponent.name }}
       </a> 
-       - {{ match.date }}
+       - {{ match.date.strftime('%d-%b %Y') }}
       <br>
       {% if match.home_away == 'away' %}
       at {{ match.opponent.home_location }}
       {% else %}
       at Italian Canadian Club
       {% endif %}
-    </td>
+      {% if match.win != None %}
+      <h5>{% if match.win == True %}W{% else %}L{% endif %}
+      <small>{{ match.team_score }} - {{ match.opponent_score }}</small>
+      </h5>
+      {% endif %}
+      </td>
   </tr>
 </table>

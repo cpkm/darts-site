@@ -51,13 +51,13 @@ class Player(db.Model):
         db.session.commit()
         return
 
-    def update_player_stats(self, season_label='current'):
-        if season_label=='current':
+    def update_player_stats(self, season_name='current'):
+        if season_name=='current':
             season = season_from_date(date.today())
-        elif season_label=='last':
+        elif season_name=='last':
             season = season_from_date(date.today()-timedelta(365))
         else:
-            season = Season.query.filter_by(season_name=season_label).first()
+            season = Season.query.filter_by(season_name=season_name).first()
 
         if season is None:
             raise NameError('No season found')
@@ -68,25 +68,21 @@ class Player(db.Model):
             stats = PlayerSeasonStats(season=season, player=self)
 
         player_games = PlayerGame.query.filter_by(player=self).join(Game).join(Match).\
-                            filter(Match.date>=season.start_date,Match.date<=season.end_date)
-
-        stats.matches_played = Match.query.filter(Match.date>=season.start_date,Match.date<=season.end_date).\
+                            filter(Match.season==season)
+        stats.matches_played = Match.query.filter(Match.season==season).\
                                     join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
-        stats.matches_won = Match.query.filter_by(win=True).filter(Match.date>=season.start_date,Match.date<=season.end_date).\
+        stats.matches_won = Match.query.filter_by(win=True).filter(Match.season==season).\
                             join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
-        stats.matches_lost = Match.query.filter_by(win=False).filter(Match.date>=season.start_date,Match.date<=season.end_date).\
+        stats.matches_lost = Match.query.filter_by(win=False).filter(Match.season==season).\
                             join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
-
         stats.games_played = player_games.count()
         stats.games_won = Game.query.filter_by(win=True).join(PlayerGame).filter_by(player_id=self.id).\
-                            join(Match).filter(Match.date>=season.start_date,Match.date<=season.end_date).count()
+                            join(Match).filter(Match.season==season).count()
         stats.games_lost = Game.query.filter_by(win=False).join(PlayerGame).filter_by(player_id=self.id).\
-                            join(Match).filter(Match.date>=season.start_date,Match.date<=season.end_date).count()
-
+                            join(Match).filter(Match.season==season).count()
         stats.total_stars = sum([pg.stars for pg in player_games.all()])
-
-        stats.total_high_scores = None
-        stats.total_low_scores = None
+        stats.total_high_scores = HighScore.query.filter_by(player=self).join(Match).filter(Match.season==season).count()
+        stats.total_low_scores = LowScore.query.filter_by(player=self).join(Match).filter(Match.season==season).count()
 
         db.session.add(stats)
         db.session.commit()
@@ -131,6 +127,10 @@ class Match(db.Model):
     @hybrid_property
     def season(self):
         return season_from_date(self.date)
+
+    @season.expression
+    def season(cls):
+        return season_from_date(cls.date)
 
     def add_game(self, game):
         if not self.is_game(game):
@@ -282,11 +282,24 @@ class TeamSeasonStats(db.Model):
     matches_lost = db.Column(db.Integer)
     games_played = db.Column(db.Integer)
     games_won = db.Column(db.Integer)
+    games_lost = db.Column(db.Integer)
     total_stars = db.Column(db.Integer)
     total_high_scores = db.Column(db.Integer)
     total_low_scores = db.Column(db.Integer)
 
     def update_team_stats(self):
+        self.matches_played = Match.query.filter_by(season=self.season).count()
+        self.matches_won = Match.query.filter_by(season=self.season, win=True).count()
+        self.matches_lost = Match.query.filter_by(season=self.season, win=False).count()
+        self.games_played = Game.query.join(Match).filter(Match.season==self.season).count()
+        self.games_won = Game.query.filter_by(win=True).join(Match).filter(Match.season==self.season).count()
+        self.games_lost = Game.query.filter_by(win=False).join(Match).filter(Match.season==self.season).count()
+        self.total_stars = sum([pg.stars for pg in PlayerGame.query.join(Game).join(Match).filter(Match.season==self.season).all()])
+        self.total_high_scores = HighScore.query.join(Match).filter(Match.season==self.season).count()
+        self.total_low_scores = LowScore.query.join(Match).filter(Match.season==self.season).count()
+
+        db.session.add(self)
+        db.session.commit()
         return 
 
 
@@ -326,3 +339,12 @@ def update_all_player_stats():
     players = Player.query.all()
     for p in players:
         p.update_player_stats()
+
+def update_all_team_stats():
+    seasons = Season.query.all()
+    for season in seasons:
+        stats = TeamSeasonStats.query.filter_by(season=season).first()
+        if stats is None:
+            stats = TeamSeasonStats(season=season)
+        stats.update_team_stats()
+
