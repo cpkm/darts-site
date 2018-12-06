@@ -2,18 +2,44 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-<div class="container">
-  <table class="table table-hover">
-    <tr>
-      <td>
-        <h1>{{ season.season_name }} season</h1>
-        <h6 class="text-muted">From {{ season.start_date.strftime('%d-%b %Y') }} to {{ season.end_date.strftime('%d-%b %Y') }}</h6>
-      </td>
-    </tr>
-  {% for match in matches %}
-    {% include '_match.html' %}
-  {% endfor %}
-  </table>
+<div class="row">
+
+  <div class="col-md-3">
+    <div class="card h-100 bg-light">
+      <div class="card-header">All seasons</div>
+      <div class="card-body">
+        <table class="table table-hover">
+        
+        {% for season in all_seasons %}
+          <tr>
+            <td>
+            <a href="{{ url_for('main.schedule', id=season.id) }}">{{ season.season_name }}</a>
+          </td>
+          </tr>
+        {% endfor %}
+        </table>
+        <hr>
+        <a href="{{ url_for('main.match_edit') }}">Add new season</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-9">
+    <div class="card h-100">
+      <div class="card-header">Current season</div>
+      <div class="card-body">
+        <h4 class="card-title">Season {{ season.season_name }}</h4>
+        <h6 class="card-subtitle mb-2 text-muted">From {{ season.start_date.strftime('%d-%b %Y') }} to {{ season.end_date.strftime('%d-%b %Y') }}</h6>
+        <table class="table table-hover">
+        {% for match in matches %}
+          {% include '_match.html' %}
+        {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+
+    
 </div>
 
 {% endblock %}

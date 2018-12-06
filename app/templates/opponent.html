@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+<div class="row">
+
+  <div class="col-md-3">
+    <div class="card h-100 bg-light">
+      <div class="card-header">All opponents</div>
+      <div class="card-body">
+        <ul class="list-unstyled">
+        {% for team in all_teams %}
+          <li>
+            <a href="{{ url_for('main.opponent', id=team.id) }}">{{ team.name }}</a>
+          </li>
+        {% endfor %}
+        </ul>
+        <hr>
+        <a href="{{ url_for('main.team_edit') }}">Add new team</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-9">
+    <div class="card h-100">
+      <div class="card-header">Opponent</div>
+      <div class="card-body">
+        {% if opponent %}
+        <h4 class="card-title">{{ opponent.name }}</h4>
+        <h6 class="card-subtitle mb-2 text-muted">Playing out of {{ opponent.home_location }}</h6>
+        
+          <table class="table table-hover">
+          {% for match in matches %}
+            {% include '_match.html' %}
+          {% endfor %}
+          </table>
+        {% else %}
+        <h4 class="card-title">Select an opponent from the left</h4>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+    
+</div>
+
+
+
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+{% endblock %}

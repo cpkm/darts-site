@@ -121,7 +121,8 @@ def match_edit(id):
 
     if form.submit_new.data and form.validate():
         newmatch = Match(date=form.date.data, 
-            opponent=Team.query.filter_by(name=form.opponent.data).first(), home_away=form.home_away.data)
+            opponent=Team.query.filter_by(name=form.opponent.data).first(), 
+            home_away=form.home_away.data, match_type=form.match_type.data)
         newmatch.set_location()
         db.session.add(newmatch)
         db.session.commit()
@@ -265,14 +266,24 @@ def player(nickname):
             player=player, matches=matches.items, seasons=seasons)
 
 
-@bp.route('/schedule',  methods=['GET', 'POST'], defaults={'season_name': '2018/2019'})
-@bp.route('/schedule/<season_name>',  methods=['GET', 'POST'])
-def schedule(season_name):
+@bp.route('/schedule',  methods=['GET', 'POST'], defaults={'id': None})
+@bp.route('/schedule/<id>',  methods=['GET', 'POST'])
+def schedule(id):
+    if id is None:
+        season = season_from_date(date.today())
+    else:
+        season = Season.query.filter_by(id=id).first_or_404()
     all_seasons = Season.query.all()
-    season = Season.query.filter_by(season_name=season_name).first()
     matches = Match.query.filter_by(season=season).order_by(Match.date).all()
     return render_template('schedule.html', season=season, matches=matches, all_seasons=all_seasons)
 
+@bp.route('/opponent',  methods=['GET', 'POST'], defaults={'id': None})
+@bp.route('/opponent/<id>',  methods=['GET', 'POST'])
+def opponent(id):
+    opponent = Team.query.filter_by(id=id).first()
+    matches = Match.query.filter_by(opponent=opponent).order_by(Match.date).all()
+    all_teams = Team.query.all()
+    return render_template('opponent.html', opponent=opponent, all_teams=all_teams, matches=matches)
 
 
 

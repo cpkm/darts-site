@@ -117,7 +117,7 @@ class Match(db.Model):
     games = db.relationship('Game', back_populates='match', lazy='dynamic')
     team_score = db.Column(db.Integer, index=True)
     opponent_score = db.Column(db.Integer, index=True)
-    win = db.Column(db.Boolean, index=True, default=True)
+    win = db.Column(db.Boolean, index=True, default=None)
     match_summary = db.Column(db.String(512))
     food = db.Column(db.String(128))
 

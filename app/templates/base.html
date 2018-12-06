@@ -29,8 +29,22 @@
       <li class="nav-item">
         <a class="nav-link" href="">Explore</a>
       </li>
+      <li class="nav-item dropdown">
+          <a class="btn nav-link dropdown-toggle" href="{{ url_for('main.schedule') }}" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Schedule
+          </a>
+          
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+            <a class="dropdown-item" href="{{ url_for('main.schedule') }}">Current</a>
+            {% if all_seasons %}
+            {% for s in all_seasons %}
+            <a class="dropdown-item" href="{{ url_for('main.schedule', id=s.id) }}">{{ s.season_name }}</a>
+            {% endfor %}
+            {% endif %}
+          </div>
+      </li>
       <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.schedule') }}">Schedule</a>
+        <a class="nav-link" href="{{ url_for('main.opponent') }}">Opponents</a>
       </li>
 
     </ul>

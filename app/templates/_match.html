@@ -6,7 +6,7 @@
       </a>
     </td>
     <td>
-      <a href="{{ url_for('main.match_edit', id=match.id) }}">
+      <a href="{{ url_for('main.opponent', id=match.opponent_id) }}">
         {{ match.opponent.name }}
       </a> 
        - {{ match.date.strftime('%d-%b %Y') }}
@@ -14,10 +14,10 @@
       {% if match.home_away == 'away' %}
       at {{ match.opponent.home_location }}
       {% else %}
-      at Italian Canadian Club
+      &emsp;at Italian Canadian Club
       {% endif %}
       {% if match.win != None %}
-      <h5>{% if match.win == True %}W{% else %}L{% endif %}
+      <h5>{% if match.win == True %}W{% else %}L{% endif %}&ensp;
       <small>{{ match.team_score }} - {{ match.opponent_score }}</small>
       </h5>
       {% endif %}
