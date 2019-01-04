@@ -118,9 +118,11 @@ class Match(db.Model):
     team_score = db.Column(db.Integer, index=True)
     opponent_score = db.Column(db.Integer, index=True)
     win = db.Column(db.Boolean, index=True, default=None)
+    overtime = db.Column(db.Boolean, index=True, default=False)
     match_summary = db.Column(db.String(512))
     food = db.Column(db.String(128))
 
+    match_stats = db.relationship('MatchStats', uselist=False, back_populates='match')
     high_scores = db.relationship('HighScore', back_populates='match', lazy='dynamic')
     low_scores = db.relationship('LowScore', back_populates='match', lazy='dynamic')
 
@@ -148,6 +150,30 @@ class Match(db.Model):
         if game:
             return self.games.filter_by(id=game.id).count() > 0
         return self.games.filter_by(id=game_id).count() > 0
+
+    def update_match_stats(self):
+        match_stats = MatchStats.query.filter_by(match_id=self.id).first()
+        if match_stats is None:
+            match_stats = MatchStats(match=self)
+
+        match_stats.wins_d7 = Game.query.filter((Game.win==True) & (Game.game_type=='doubles 701')).\
+            join(PlayerGame).join(Match).filter(Match.id==self.id).distinct().count()
+        match_stats.wins_d5 = Game.query.filter((Game.win==True) & (Game.game_type=='doubles 501')).\
+            join(PlayerGame).join(Match).filter(Match.id==self.id).distinct().count()
+        match_stats.wins_s5 =  Game.query.filter((Game.win==True) & (Game.game_type=='singles 501')).\
+            join(PlayerGame).join(Match).filter(Match.id==self.id).distinct().count()
+        match_stats.stars_s5 = sum([pg.stars for pg in PlayerGame.query.\
+            join(Game).filter(Game.game_type=='singles 501').\
+            join(Match).filter(Match.id==self.id).all()])
+        match_stats.stars_d5 = sum([pg.stars for pg in PlayerGame.query.\
+            join(Game).filter(Game.game_type=='doubles 501').\
+            join(Match).filter(Match.id==self.id).all()])
+        match_stats.stars_d7 = sum([pg.stars for pg in PlayerGame.query.\
+            join(Game).filter(Game.game_type=='doubles 701').\
+            join(Match).filter(Match.id==self.id).all()])
+        db.session.add(match_stats)
+        db.session.commit()
+        return
 
     def delete_all_games(self):
         player_game = PlayerGame.query.join(Game).filter_by(match=self).all()
@@ -259,20 +285,6 @@ class PlayerSeasonStats(db.Model):
     def __repr__(self):
         return '<{} {}>'.format(self.player.nickname,self.season.season_name)
 
-'''
-class QueryComparator(Comparator):
-    def operate(self, op, other):
-        print(self.__clause_element__())
-        print(other)
-        return op(self.__clause_element__(), other)
-
-                pg = alias(PlayerGame)
-        sq=db.session.query(pg).filter_by(player_id=self.player_id).join(Game).join(Match).\
-                filter_by(season=self.season).distinct().count()
-'''
-
-
-
 class TeamSeasonStats(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     season_id = db.Column(db.Integer, db.ForeignKey('season.id'))
@@ -312,7 +324,6 @@ class Season(db.Model):
     def __repr__(self):
         return '<Season {}>'.format(self.season_name)
 
-
 class HighScore(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     score = db.Column(db.Integer)
@@ -329,6 +340,19 @@ class LowScore(db.Model):
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
     player = db.relationship('Player', back_populates='low_scores')
     match = db.relationship('Match', back_populates='low_scores')
+
+
+class MatchStats(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
+    match = db.relationship('Match', back_populates='match_stats')
+
+    wins_s5 = db.Column(db.Integer)
+    wins_d5 = db.Column(db.Integer)
+    wins_d7 = db.Column(db.Integer)
+    stars_s5 = db.Column(db.Integer)
+    stars_d5 = db.Column(db.Integer)
+    stars_d7 = db.Column(db.Integer)
 
 
 def season_from_date(date):

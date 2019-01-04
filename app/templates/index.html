@@ -8,9 +8,11 @@
     <div class="col-md-6">
     <h2 class="my-4">Schedule</h2>
     <h4>Last match</h4>
+    {% if last_match %}
     {% with match = last_match %}
       {% include '_match.html' %}
     {% endwith %}
+    {% endif %}
     <h4>Upcoming matches</h4>
     {% for match in schedule %}
       {% include '_match.html' %}

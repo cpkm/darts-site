@@ -1,5 +1,5 @@
 from app import create_app, db
-from app.models import Player, Game, Match, PlayerGame, Team, Season, PlayerSeasonStats
+from app.models import Player, Game, Match, PlayerGame, Team, Season, PlayerSeasonStats, MatchStats
 
 app = create_app()
 

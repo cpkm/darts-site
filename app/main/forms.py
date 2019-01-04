@@ -118,6 +118,7 @@ class SinglesGameForm(FlaskForm):
 
 class EnterScoresForm(FlaskForm):
     win = BooleanField('Match won')
+    overtime = BooleanField('Overtime')
     team_score = IntegerField('Us', validators=[DataRequired()])
     opponent_score = IntegerField('Them', validators=[DataRequired()])
     food = StringField('Food')

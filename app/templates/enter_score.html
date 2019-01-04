@@ -12,8 +12,8 @@
       <div class="card-body">
         <ul class="row list-unstyled">
         {% for m in all_matches %}
-        <li class="col-xs-3">
-          <a href="{{ url_for('main.enter_score', id=m.id) }}">{{ m.date }} {{ m.opponent.name }} {{ m.home_away }} </a>
+        <li class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+          <a href="{{ url_for('main.enter_score', id=m.id) }}">{{ m.date }} {{ m.opponent.name }}</a>
         </li>
         {% endfor %}
         </ul>
@@ -29,26 +29,32 @@
     <div class="card h-100">
       <h2 class="card-header">Details and game scores</h2>
       <div class="card-body">
-      <h3 class="text-center text-muted"">{{ match.opponent.name }}, {{ match.home_away }} game on {{ match.date }}</h3>
+      <h3 class="text-center text-muted"">{{ match.opponent.name }} {{ match.home_away }} game on {{ match.date }}</h3>
       <form class="form" method="post" role="form">
         {{ form.hidden_tag() }}
         {{ wtf.form_errors(form, hiddens="only") }}
 
-        <div class="col-sm-6 my-1">
-          <div class="form-row- my-0">
-            <div class="col-md-6">
-            {{ form.win.label(class="pl-3") }}<br>{{ form.win(class="ml-5") }}
-            </div>
+        <div class="col-md-6 col-xs-12 my-1">
+          <div class="form-row my-0">
             <div class="col-md-3">
             {{ wtf.form_field(form.team_score,class="form-control form-control-sm") }}
             </div>
             <div class="col-md-3">
             {{ wtf.form_field(form.opponent_score,class="form-control form-control-sm") }}
             </div>
+            <div class="col-md-6 pt-2 text-center mb-3">
+            {{ form.win() }} {{ form.win.label(class="form-check-label") }} 
+              <div class="w-100"></div>
+            {{ form.overtime() }} {{ form.overtime.label(class="form-check-label") }} 
+            </div>
           </div>
+          <div class="form-row my-0">
+            <div class="col-md-12">
           {{ wtf.form_field(form.food,class="form-control form-control-sm") }}
+            </div>
+          </div>
         </div>
-        <div class="col-sm-6 my-1">
+        <div class="col-md-6 col-xs-12 my-1">
           {{ wtf.form_field(form.match_summary, rows='5',class="form-control form-control-sm") }}
         </div>
         {{ wtf.form_field(form.submit_details, button_map={'submit_details': 'primary my-1 btn-block'}) }}
@@ -58,12 +64,14 @@
         {% for game in form.d701 %}
         {% include '_doubles_game.html' %}
         {% endfor %}
-
+        </div>
+        <div class="col-xs-12 my-1">
         <h4>501 doubles</h4>
         {% for game in form.d501 %}
         {% include '_doubles_game.html' %}
         {% endfor %}
-
+        </div>
+        <div class="col-xs-12 my-1">
         <h4>501 singles</h4>
         {% for game in form.s501 %}
         {% include '_singles_game.html' %}

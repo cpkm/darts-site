@@ -35,53 +35,46 @@
 </div>
 
 
-  <div class="col-12 mt-2 mx-auto">
-    <div class="card h-100">
-      <h2 class="card-header">Player Statisitics</h2>
-      <div class="card-body">
-        <table class="table text-center table-hover">
-          <thead>
-            <tr>
-              <th scope="col">Season</th>
-              <th scope="col" data-toggle="tooltip" data-placement="top" title="Matches played">MP</th>
-              <th scope="col" data-toggle="tooltip" data-placement="top" title="Match wins">MW</th>
-              <th scope="col" data-toggle="tooltip" data-placement="top" title="Match losses">ML</th>
-              <th scope="col" data-toggle="tooltip" data-placement="top" title="Games played">GP</th>
-              <th scope="col" data-toggle="tooltip" data-placement="top" title="Game wins">GW</th>
-              <th scope="col" data-toggle="tooltip" data-placement="top" title="Game losses">GL</th>
-              <th scope="col" data-toggle="tooltip" data-placement="top" title="Total Stars">TS</th>
-              <th scope="col" data-toggle="tooltip" data-placement="top" title="Total High Scores">HS</th>
-              <th scope="col" data-toggle="tooltip" data-placement="top" title="Total Low Score">LS</th>
-          </thead>
-          <tbody>
-            {% for season in seasons %}
-            <tr>
-              <th scope="row">{{ season.season.season_name }}</th>
-              <td>{{ season.matches_played }}</td>
-              <td>{{ season.matches_won }}</td>
-              <td>{{ season.matches_lost }}</td>
-              <td>{{ season.games_played }}</td>
-              <td>{{ season.games_won }}</td>
-              <td>{{ season.games_lost }}</td>
-              <td>{{ season.total_stars }}</td>
-              <td>{{ season.total_high_scores }}</td>
-              <td>{{ season.total_low_scores }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+<div class="col-12 mt-2 mx-auto">
+  <div class="card h-100">
+    <h2 class="card-header">Player Statisitics</h2>
+    <div class="card-body table-responsive">
+      <table id="pStats" class="table table-hover text-center">
+        <thead>
+          <tr>
+            <th scope="col">Season</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Matches played">MP</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Match wins">MW</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Match losses">ML</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Games played">GP</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Game wins">GW</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Game losses">GL</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Total Stars">TS</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Total High Scores">HS</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Total Low Score">LS</th>
+        </thead>
+        <tbody>
+          {% for season in seasons %}
+          <tr>
+            <th scope="row">{{ season.season.season_name }}</th>
+            <td>{{ season.matches_played }}</td>
+            <td>{{ season.matches_won }}</td>
+            <td>{{ season.matches_lost }}</td>
+            <td>{{ season.games_played }}</td>
+            <td>{{ season.games_won }}</td>
+            <td>{{ season.games_lost }}</td>
+            <td>{{ season.total_stars }}</td>
+            <td>{{ season.total_high_scores }}</td>
+            <td>{{ season.total_low_scores }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
 
 
-      </div>
     </div>
   </div>
-
-<!--
-    total_stars = db.Column(db.Integer)
-    total_high_scores = db.Column(db.Integer)
-    total_low_scores = db.Column(db.Integer)
-  -->
-
+</div>
 
 {% endblock %}
 {% block scripts %}
@@ -90,5 +83,12 @@
   $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
+</script>
+<script>
+$(document).ready( function () {
+    $('#pStats').DataTable({
+    "paging": false
+  });
+} );
 </script>
 {% endblock %}

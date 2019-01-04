@@ -168,6 +168,7 @@ def enter_score(id):
 
     if form.submit_details.data and form.validate() and match is not None:
         match.win = form.win.data
+        match.overtime = form.overtime.data
         match.team_score = form.team_score.data
         match.opponent_score = form.opponent_score.data
         match.food = form.food.data
@@ -284,6 +285,11 @@ def opponent(id):
     matches = Match.query.filter_by(opponent=opponent).order_by(Match.date).all()
     all_teams = Team.query.all()
     return render_template('opponent.html', opponent=opponent, all_teams=all_teams, matches=matches)
+
+@bp.route('/match/<id>',  methods=['GET', 'POST'])
+def match(id):
+    match = Match.query.filter_by(id=id).first_or_404()
+    return render_template('match.html', match=match)
 
 
 
