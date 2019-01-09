@@ -237,10 +237,12 @@ class HLScoreForm(FlaskForm):
         for i,p in enumerate(all_p):
             self.hl_scores[i].player.data = p.nickname
             for j,s in enumerate(match.high_scores.filter_by(player=p).all()):
-                self.hl_scores[i].high_scores[j].data = s.score
+                if j < self.hl_scores[i].high_scores.max_entries:
+                    self.hl_scores[i].high_scores[j].data = s.score
 
             for j,s in enumerate(match.low_scores.filter_by(player=p).all()):
-                self.hl_scores[i].low_scores[j].data = s.score
+                if j < self.hl_scores[i].low_scores.max_entries - 1:
+                    self.hl_scores[i].low_scores[j].data = s.score
         return
 
             

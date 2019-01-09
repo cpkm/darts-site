@@ -219,6 +219,7 @@ def enter_score(id):
             p.update_activity()
 
         update_all_team_stats()
+        match.update_match_stats()
         flash('Match {} {} {} scores entered successfully!'.format(match.date, match.opponent.name, match.home_away), 'success')
         return redirect(url_for('main.enter_score', id=match.id))
 
