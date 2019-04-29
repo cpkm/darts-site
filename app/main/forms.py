@@ -2,7 +2,7 @@ from flask import request, flash
 from flask_wtf import FlaskForm
 from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, RadioField, 
     FieldList, FormField, DateField, SelectField, IntegerField)
-from wtforms.validators import ValidationError, DataRequired, Length, Email
+from wtforms.validators import ValidationError, DataRequired, InputRequired, Length, Email
 from app import db
 from app.models import Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, season_from_date
 from app.validators import Unique
@@ -119,17 +119,23 @@ class SinglesGameForm(FlaskForm):
 class EnterScoresForm(FlaskForm):
     win = BooleanField('Match won')
     overtime = BooleanField('Overtime')
-    team_score = IntegerField('Us', validators=[DataRequired()])
-    opponent_score = IntegerField('Them', validators=[DataRequired()])
+    team_score = IntegerField('Us', validators=[InputRequired()])
+    opponent_score = IntegerField('Them', validators=[InputRequired()])
     food = StringField('Food')
     match_summary = TextAreaField('Game summary', validators=[Length(min=0, max=320)])
 
-    d701 = FieldList(FormField(DoublesGameForm), min_entries=4)
-    d501 = FieldList(FormField(DoublesGameForm), min_entries=4)
-    s501 = FieldList(FormField(SinglesGameForm), min_entries=8)
+    d701 = FieldList(FormField(DoublesGameForm), min_entries=4, max_entries=4)
+    d501 = FieldList(FormField(DoublesGameForm), min_entries=4, max_entries=4)
+    s501 = FieldList(FormField(SinglesGameForm), min_entries=8, max_entries=8)
 
     submit_scores = SubmitField('Submit Scores')
     submit_details = SubmitField('Submit Details')
+
+    def __init__(self,*args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for f in self.d701:
+            f.p1_stars.choices =[('0','0'),('1','1')]
+            f.p2_stars.choices =[('0','0'),('1','1')]
 
     def load_games(self, match):
         if match.games.all() is None:
@@ -202,11 +208,10 @@ class HLScoreForm(FlaskForm):
     add_btn = SubmitField('+')
     rem_btn = SubmitField('-')
 
-    submit_scores = SubmitField('Submit scores')
+    submit_hl_scores = SubmitField('Submit scores')
 
     def save_scores(self, match):
         for row in self.hl_scores:
-            print(row.player.data)
             if row.player.data != 'Dummy':
                 player = Player.query.filter_by(nickname=row.player.data).first()
                 for hs in row.high_scores:

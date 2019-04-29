@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+<div class="col-12 mt-2 mx-auto">
+  <div class="card h-100">
+    <h2 class="card-header">Player Statisitics</h2>
+    <div class="card-body table-responsive">
+      <table id="pStats" class="table table-hover text-center">
+        <thead>
+          <tr>
+            <th scope="col">Player</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Matches played">MP</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Games played">GP</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Game wins">GW</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Game losses">GL</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Total Stars">TS</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Total High Scores">HS</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Total Low Score">LS</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Win:Loss">W:L</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Stars per game">SpG</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="High:Low scores">Hi:Lo</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="High scores per game">HpG</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Low scores per game">LpG</th>
+        </thead>
+        <tbody>
+          {% for s in stats %}
+          <tr>
+            <th scope="row"><a href="{{ url_for('main.player', nickname=s.player.nickname) }}">{{ s.player.nickname }}</a></th>
+            <td>{{ s.matches_played }}</td>
+            <td>{{ s.games_played }}</td>
+            <td>{{ s.games_won }}</td>
+            <td>{{ s.games_lost }}</td>
+            <td>{{ s.total_stars }}</td>
+            <td>{{ s.total_high_scores }}</td>
+            <td>{{ s.total_low_scores }}</td>
+            <td>{% if s.games_lost > 0 %}{{ (s.games_won/s.games_lost)|round(1, 'common') }}{% endif %}</td>
+            <td>{% if s.games_played > 0 %}{{ (s.total_stars/s.games_played)|round(1, 'common') }}{% endif %}</td>
+            <td>{% if s.total_low_scores  > 0 %}{{ (s.total_high_scores/s.total_low_scores)|round(1, 'common') }}{% endif %}</td>
+            <td>{% if s.games_played > 0 %}{{ (s.total_high_scores/s.games_played)|round(1, 'common') }}{% endif %}</td>
+            <td>{% if s.games_played > 0 %}{{ (s.total_low_scores/s.games_played)|round(1, 'common') }}{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+<script>
+$(document).ready( function () {
+    $('#pStats').DataTable({
+    "paging": false,
+    "order": [[ 3, "desc" ]]
+  });
+} );
+</script>
+{% endblock %}
