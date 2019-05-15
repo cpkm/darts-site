@@ -21,11 +21,14 @@ def index():
     next_url = url_for('main.index', page=schedule.next_num) \
         if schedule.has_next else None
     prev_url = url_for('main.index', page=schedule.prev_num) \
-        if schedule.has_prev else None
-    return render_template('index.html', title=None, 
-        schedule=schedule.items, next_url=next_url, prev_url=prev_url, 
-        all_players=all_players, last_match=last_match)
+		if schedule.has_prev else None
+    top_stars = PlayerSeasonStats.query.join(Player).order_by(PlayerSeasonStats.total_stars.desc()).limit(4).all()
+    top_high_scores = PlayerSeasonStats.query.join(Player).order_by(PlayerSeasonStats.total_high_scores.desc()).limit(4).all()
+    top_low_scores = PlayerSeasonStats.query.join(Player).order_by(PlayerSeasonStats.total_low_scores.desc()).limit(4).all()
 
+    return render_template('index.html', title=None,
+        schedule=schedule.items, next_url=next_url, prev_url=prev_url, 
+        all_players=all_players, last_match=last_match, top_stars=top_stars, top_high_scores=top_high_scores, top_low_scores=top_low_scores)
 
 @bp.route('/player_edit',  methods=['GET', 'POST'], defaults={'nickname': None})
 @bp.route('/player_edit/<nickname>',  methods=['GET', 'POST'])
