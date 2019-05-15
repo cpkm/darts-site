@@ -30,4 +30,16 @@ From here normal python cammands can by issued. Most app funcions and database c
 Match.query.all()
 ```
 
-## App structure
+## Updating the database
+If the structure of the database is changed, i.e. changes to [models.py](app/models.py), it must be migrated and upgraded before use. To migrate run
+```
+flask db migrate -m "<insert breif description of changes>"
+```
+This will run a check of the code and list changes to the database. It will create a new migration file in [migrations/versions](migrations/versions). To upgrade to this newly created version, run
+```
+flask db upgrade
+```
+You can revert to previous migration versions using
+```
+flask db downgrade
+```
