@@ -303,7 +303,7 @@ def player(nickname):
         page, current_app.config['MATCH_PER_PAGE'], False)
     next_url = url_for('main.player', nickname=player.nickname, page=matches.next_num) \
         if matches.has_next else None
-    prev_url = url_for('main.player', username=player.nickname, page=matches.prev_num) \
+    prev_url = url_for('main.player', nickname=player.nickname, page=matches.prev_num) \
         if matches.has_prev else None
     return render_template('player.html', next_url=next_url, prev_url=prev_url,
             player=player, matches=matches.items, seasons=seasons)
