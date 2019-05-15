@@ -60,7 +60,9 @@
     {% endif %}
     <ul class="navbar-nav mt-2 mt-lg-0">
     {% if current_user.is_anonymous %}
-      <li><a href="">Login</a></li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+      </li>
     {% else %}
     <div class="dropdown-divider"></div>
       <li class="nav-item">
@@ -76,7 +78,7 @@
         <a class="nav-link" href="{{ url_for('main.enter_score') }}">Scores</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="">Logout</a>
+        <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
       </li>
     {% endif %}
     </ul>

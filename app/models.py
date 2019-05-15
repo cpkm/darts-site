@@ -5,6 +5,7 @@ from sqlalchemy import MetaData, alias, func, join
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method, Comparator
 from sqlalchemy.sql import select
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date, timedelta
 from hashlib import md5
 from app import db, login
@@ -407,3 +408,7 @@ def update_all_team_stats():
             stats = TeamSeasonStats(season=season)
         stats.update_team_stats()
 
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
