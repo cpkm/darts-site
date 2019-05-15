@@ -21,7 +21,7 @@ def index():
     next_url = url_for('main.index', page=schedule.next_num) \
         if schedule.has_next else None
     prev_url = url_for('main.index', page=schedule.prev_num) \
-		if schedule.has_prev else None
+        if schedule.has_prev else None
     top_stars = PlayerSeasonStats.query.join(Player).order_by(PlayerSeasonStats.total_stars.desc()).limit(4).all()
     top_high_scores = PlayerSeasonStats.query.join(Player).order_by(PlayerSeasonStats.total_high_scores.desc()).limit(4).all()
     top_low_scores = PlayerSeasonStats.query.join(Player).order_by(PlayerSeasonStats.total_low_scores.desc()).limit(4).all()
