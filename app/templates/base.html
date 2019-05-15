@@ -59,7 +59,7 @@
       </form>
     {% endif %}
     <ul class="navbar-nav mt-2 mt-lg-0">
-    {% if False %}
+    {% if current_user.is_anonymous %}
       <li><a href="">Login</a></li>
     {% else %}
     <div class="dropdown-divider"></div>

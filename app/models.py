@@ -1,24 +1,47 @@
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 from sqlalchemy import MetaData, alias, func, join
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method, Comparator
 from sqlalchemy.sql import select
 from datetime import date, timedelta
 from hashlib import md5
-from app import db
+from app import db, login
 
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), index=True, unique=True)
+    email = db.Column(db.String(120), index=True, unique=True)
+    password_hash = db.Column(db.String(128))
 
-class PlayerGame(db.Model):
-    player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
-    game_id = db.Column(db.Integer, db.ForeignKey('game.id'), primary_key=True)
-    stars = db.Column(db.Integer, index=True)
+    def set_password(self,password):
+        self.password_hash = generate_password_hash(password)
 
-    player = db.relationship('Player', backref=db.backref('games_association', lazy='dynamic'))
-    game = db.relationship('Game', backref=db.backref('players_association', lazy='dynamic'))
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def avatar(self, size):
+        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+            digest, size)
+
+    def get_reset_password_token(self, expires_in=600):
+        return jwt.encode(
+            {'reset_password': self.id, 'exp': time() + expires_in},
+            current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(token, current_app.config['SECRET_KEY'],
+                            algorithms=['HS256'])['reset_password']
+        except:
+            return
+        return User.query.get(id)
 
     def __repr__(self):
-        return '<Player {}, Game {}>'.format(self.player_id,self.game_id)
+        return '<User {}>'.format(self.username)
 
 
 class Player(db.Model):
@@ -104,6 +127,18 @@ class Game(db.Model):
     def __repr__(self):
         return '<Game {:02d}, {}>'.format(self.game_num, self.match.date) if self.match \
             else '<Game_id {}>'.format(self.id)
+
+
+class PlayerGame(db.Model):
+    player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'), primary_key=True)
+    stars = db.Column(db.Integer, index=True)
+
+    player = db.relationship('Player', backref=db.backref('games_association', lazy='dynamic'))
+    game = db.relationship('Game', backref=db.backref('players_association', lazy='dynamic'))
+
+    def __repr__(self):
+        return '<Player {}, Game {}>'.format(self.player_id,self.game_id)
 
 
 class Match(db.Model):
