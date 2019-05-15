@@ -216,11 +216,13 @@ class HLScoreForm(FlaskForm):
                 player = Player.query.filter_by(nickname=row.player.data).first()
                 for hs in row.high_scores:
                     if hs.data is not None:
+                        print(hs.data)
                         entry = HighScore(player=player, score=hs.data, match_id=match.id)
                         db.session.add(entry)
                         db.session.commit()
                 for ls in row.low_scores:
                     if ls.data is not None:
+                        print(ls.data)
                         entry = LowScore(player=player, score=ls.data, match_id=match.id)
                         db.session.add(entry)
                         db.session.commit()

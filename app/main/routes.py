@@ -175,17 +175,6 @@ def enter_score(id):
     for row in hl_form.hl_scores:
         print(row.player.data)
 
-    if request.method=='POST' and match is not None:
-        form.load_games(match)
-        hl_form.load_scores(match)
-        print('2.5')
-
-    print(form.food.data, form.d701[0].p1.data, form.d701[0].p2.data)
-
-    for row in hl_form.hl_scores:
-        print(row.player.data)
-
-
     if form.submit_details.data and form.validate() and match is not None:
         match.win = form.win.data
         match.overtime = form.overtime.data
@@ -273,6 +262,7 @@ def enter_score(id):
     print('5')
 
     if hl_form.submit_hl_scores.data and match is not None:
+        print('5.5',match)
         match.delete_all_books()
         hl_form.save_scores(match)
         for p in match.get_roster():
@@ -290,6 +280,11 @@ def enter_score(id):
         print('6.5')
 
     print('7')
+
+    if request.method=='POST' and match is not None:
+        form.load_games(match)
+        hl_form.load_scores(match)
+        print('2.5')
 
 
 
