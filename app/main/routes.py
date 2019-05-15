@@ -182,7 +182,7 @@ def enter_score(id):
     for row in hl_form.hl_scores:
         print(row.player.data)
 
-    '''
+
     if form.submit_details.data and form.validate() and match is not None:
         match.win = form.win.data
         match.overtime = form.overtime.data
@@ -196,7 +196,7 @@ def enter_score(id):
             p.update_player_stats()
         flash('Match {} {} {} details edited!'.format(match.date, match.opponent.name, match.home_away))
         return redirect(url_for('main.enter_score', id=match.id))
-    '''
+
      
     if form.submit_scores.data and form.validate() and match is not None:
 
