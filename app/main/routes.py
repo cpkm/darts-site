@@ -5,7 +5,7 @@ from datetime import datetime, date
 from app import db
 from app.main import bp
 from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm
-from app.models import (Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
+from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
     season_from_date, update_all_team_stats)
 from wtforms.validators import ValidationError
 
@@ -32,6 +32,7 @@ def index():
 
 @bp.route('/player_edit',  methods=['GET', 'POST'], defaults={'nickname': None})
 @bp.route('/player_edit/<nickname>',  methods=['GET', 'POST'])
+@login_required
 def player_edit(nickname):
     player = Player.query.filter_by(nickname=nickname).first()
     form = EditPlayerForm(obj=player)
@@ -76,6 +77,7 @@ def player_edit(nickname):
 
 @bp.route('/team_edit',  methods=['GET', 'POST'], defaults={'name': None})
 @bp.route('/team_edit/<name>',  methods=['GET', 'POST'])
+@login_required
 def team_edit(name):
     team = Team.query.filter_by(name=name).first()
     form = EditTeamForm(obj=team)
@@ -114,6 +116,7 @@ def team_edit(name):
 
 @bp.route('/match_edit',  methods=['GET', 'POST'], defaults={'id': None})
 @bp.route('/match_edit/<id>',  methods=['GET', 'POST'])
+@login_required
 def match_edit(id):
     match = Match.query.filter_by(id=id).first()
     form = EditMatchForm(match=match)
@@ -163,6 +166,7 @@ def search():
 
 @bp.route('/enter_score',  methods=['GET', 'POST'], defaults={'id': None})
 @bp.route('/enter_score/<id>',  methods=['GET', 'POST'])
+@login_required
 def enter_score(id):
     match = Match.query.filter_by(id=id).first()
     form = EnterScoresForm(obj=match)

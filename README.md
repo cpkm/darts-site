@@ -29,3 +29,5 @@ From here normal python cammands can by issued. Most app funcions and database c
 ```python
 Match.query.all()
 ```
+
+## App structure
