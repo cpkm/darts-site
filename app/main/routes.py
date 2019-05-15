@@ -164,16 +164,10 @@ def search():
 @bp.route('/enter_score',  methods=['GET', 'POST'], defaults={'id': None})
 @bp.route('/enter_score/<id>',  methods=['GET', 'POST'])
 def enter_score(id):
-    print('1')
     match = Match.query.filter_by(id=id).first()
     form = EnterScoresForm(obj=match)
     all_matches = Match.query.order_by(Match.date).all()
     hl_form = HLScoreForm()
-    print('2')
-
-    print(form.food.data, form.d701[0].p1.data, form.d701[0].p2.data)
-    for row in hl_form.hl_scores:
-        print(row.player.data)
 
     if form.submit_details.data and form.validate() and match is not None:
         match.win = form.win.data
@@ -243,8 +237,6 @@ def enter_score(id):
         flash('Match {} {} {} scores entered successfully!'.format(match.date, match.opponent.name, match.home_away), 'success')
         return redirect(url_for('main.enter_score', id=match.id))
 
-    print('3')
-
     if hl_form.add_btn.data:
         new_row = hl_form.hl_scores.append_entry()
         new_row.player.choices = [(p.nickname,p.nickname) for p in Player.query.all()]
@@ -252,17 +244,12 @@ def enter_score(id):
         return render_template('enter_score.html', title='Enter Scores', 
         form=form, hl_form=hl_form, match=match, all_matches=all_matches)
 
-    print('4')
-
     if hl_form.rem_btn.data:
         hl_form.hl_scores.pop_entry()
         return render_template('enter_score.html', title='Enter Scores', 
         form=form, hl_form=hl_form, match=match, all_matches=all_matches)
 
-    print('5')
-
     if hl_form.submit_hl_scores.data and match is not None:
-        print('5.5',match)
         match.delete_all_books()
         hl_form.save_scores(match)
         for p in match.get_roster():
@@ -272,21 +259,13 @@ def enter_score(id):
         flash('Match {} {} {} high/low scores entered successfully!'.format(match.date, match.opponent.name, match.home_away), 'success')
         return redirect(url_for('main.enter_score', id=match.id))
 
-    print('6')
-
     if request.method=='GET' and match is not None:
         form.load_games(match)
         hl_form.load_scores(match)
-        print('6.5')
-
-    print('7')
 
     if request.method=='POST' and match is not None:
         form.load_games(match)
         hl_form.load_scores(match)
-        print('2.5')
-
-
 
     return render_template('enter_score.html', title='Enter Scores', 
         form=form, hl_form=hl_form, match=match, all_matches=all_matches), print('emd')

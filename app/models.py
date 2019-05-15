@@ -187,15 +187,12 @@ class Match(db.Model):
         db.session.commit()
 
     def delete_all_books(self):
-        print('delete_all_books')
         high_scores = self.high_scores.all()
         for hs in high_scores:
-            print(hs)
             db.session.delete(hs)
         db.session.commit()
         low_scores = self.low_scores.all()
         for ls in low_scores:
-            print(ls)
             db.session.delete(ls)
         db.session.commit()
 
