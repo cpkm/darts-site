@@ -5,11 +5,16 @@ from datetime import datetime, date
 from app import db
 from app.main import bp
 from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm
-from app.models import (Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
+from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
     season_from_date, update_all_team_stats)
 from wtforms.validators import ValidationError
 
 from app.main.leaderboard_card import LeaderBoardCard
+
+@bp.before_request
+def before_request():
+    g.all_seasons = Season.query.all()
+
 
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
@@ -33,6 +38,7 @@ def index():
 
 @bp.route('/player_edit',  methods=['GET', 'POST'], defaults={'nickname': None})
 @bp.route('/player_edit/<nickname>',  methods=['GET', 'POST'])
+@login_required
 def player_edit(nickname):
     player = Player.query.filter_by(nickname=nickname).first()
     form = EditPlayerForm(obj=player)
@@ -77,6 +83,7 @@ def player_edit(nickname):
 
 @bp.route('/team_edit',  methods=['GET', 'POST'], defaults={'name': None})
 @bp.route('/team_edit/<name>',  methods=['GET', 'POST'])
+@login_required
 def team_edit(name):
     team = Team.query.filter_by(name=name).first()
     form = EditTeamForm(obj=team)
@@ -115,6 +122,7 @@ def team_edit(name):
 
 @bp.route('/match_edit',  methods=['GET', 'POST'], defaults={'id': None})
 @bp.route('/match_edit/<id>',  methods=['GET', 'POST'])
+@login_required
 def match_edit(id):
     match = Match.query.filter_by(id=id).first()
     form = EditMatchForm(match=match)
@@ -164,29 +172,13 @@ def search():
 
 @bp.route('/enter_score',  methods=['GET', 'POST'], defaults={'id': None})
 @bp.route('/enter_score/<id>',  methods=['GET', 'POST'])
+@login_required
 def enter_score(id):
-    print('1')
     match = Match.query.filter_by(id=id).first()
     form = EnterScoresForm(obj=match)
     all_matches = Match.query.order_by(Match.date).all()
     hl_form = HLScoreForm()
-    print('2')
 
-    print(form.food.data, form.d701[0].p1.data, form.d701[0].p2.data)
-    for row in hl_form.hl_scores:
-        print(row.player.data)
-
-    if request.method=='POST' and match is not None:
-        form.load_games(match)
-        hl_form.load_scores(match)
-        print('2.5')
-
-    print(form.food.data, form.d701[0].p1.data, form.d701[0].p2.data)
-
-    for row in hl_form.hl_scores:
-        print(row.player.data)
-
-    '''
     if form.submit_details.data and form.validate() and match is not None:
         match.win = form.win.data
         match.overtime = form.overtime.data
@@ -200,7 +192,7 @@ def enter_score(id):
             p.update_player_stats()
         flash('Match {} {} {} details edited!'.format(match.date, match.opponent.name, match.home_away))
         return redirect(url_for('main.enter_score', id=match.id))
-    '''
+
      
     if form.submit_scores.data and form.validate() and match is not None:
 
@@ -255,8 +247,6 @@ def enter_score(id):
         flash('Match {} {} {} scores entered successfully!'.format(match.date, match.opponent.name, match.home_away), 'success')
         return redirect(url_for('main.enter_score', id=match.id))
 
-    print('3')
-
     if hl_form.add_btn.data:
         new_row = hl_form.hl_scores.append_entry()
         new_row.player.choices = [(p.nickname,p.nickname) for p in Player.query.all()]
@@ -264,14 +254,10 @@ def enter_score(id):
         return render_template('enter_score.html', title='Enter Scores', 
         form=form, hl_form=hl_form, match=match, all_matches=all_matches)
 
-    print('4')
-
     if hl_form.rem_btn.data:
         hl_form.hl_scores.pop_entry()
         return render_template('enter_score.html', title='Enter Scores', 
         form=form, hl_form=hl_form, match=match, all_matches=all_matches)
-
-    print('5')
 
     if hl_form.submit_hl_scores.data and match is not None:
         match.delete_all_books()
@@ -283,16 +269,13 @@ def enter_score(id):
         flash('Match {} {} {} high/low scores entered successfully!'.format(match.date, match.opponent.name, match.home_away), 'success')
         return redirect(url_for('main.enter_score', id=match.id))
 
-    print('6')
-
     if request.method=='GET' and match is not None:
         form.load_games(match)
         hl_form.load_scores(match)
-        print('6.5')
 
-    print('7')
-
-
+    if request.method=='POST' and match is not None:
+        form.load_games(match)
+        hl_form.load_scores(match)
 
     return render_template('enter_score.html', title='Enter Scores', 
         form=form, hl_form=hl_form, match=match, all_matches=all_matches), print('emd')
@@ -307,7 +290,7 @@ def player(nickname):
         page, current_app.config['MATCH_PER_PAGE'], False)
     next_url = url_for('main.player', nickname=player.nickname, page=matches.next_num) \
         if matches.has_next else None
-    prev_url = url_for('main.player', username=player.nickname, page=matches.prev_num) \
+    prev_url = url_for('main.player', nickname=player.nickname, page=matches.prev_num) \
         if matches.has_prev else None
     return render_template('player.html', next_url=next_url, prev_url=prev_url,
             player=player, matches=matches.items, seasons=seasons)
