@@ -1,30 +1,14 @@
+{% macro draw_leaderboard(leaderboard_card) %}
 <div class="col-lg-4 mb-4">
     <div class="card h-100">
-        <h4 class="card-header">Stars</h4>
+        <h4 class="card-header">{{leaderboard_card.name}}</h4>
         <div class="card-body">
             <table style="width:100%">
-                {% for i in top_stars %}
-                    <tr>
-                        <td> {{ i.player.nickname }} </td>
-                        <td> {{ i.total_stars }} </td>
-                    </tr>
-                {% endfor %}
-            </table>
-        </div>
-        <div class="card-footer">
-            <a href="#" class="btn btn-primary">Full leaderboard</a>
-        </div>
-    </div>
-</div>
-<div class="col-lg-4 mb-4">
-    <div class="card h-100">
-        <h4 class="card-header">High scores</h4>
-        <div class="card-body">
-            <table style="width:100%">
-                {% for i in top_high_scores %}
+                {% for rows in leaderboard_card.get_list() %}
                 <tr>
-                    <td> {{ i.player.nickname }} </td>
-                    <td> {{ i.total_high_scores }} </td>
+                    {% for i in rows %}
+                        <td> {{ i }} </td>
+                    {% endfor %}
                 </tr>
                 {% endfor %}
             </table>
@@ -34,22 +18,4 @@
         </div>
     </div>
 </div>
-<div class="col-lg-4 mb-4">
-    <div class="card h-100">
-        <h4 class="card-header">Low scores</h4>
-        <div class="card-body">
-            <table style="width:100%">
-                {% for i in top_low_scores %}
-                <tr>
-                    <td> {{ i.player.nickname }} </td>
-                    <td> {{ i.total_low_scores }} </td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-        <div class="card-footer">
-            <a href="#" class="btn btn-primary">Full leaderboard</a>
-        </div>
-    </div>
-</div>
-
+{% endmacro %}
