@@ -2,10 +2,6 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-<div class="container">
-  
-</div>
-
 
 <div class="col-12 mt-2 mx-auto">
   <div class="card h-100">
@@ -18,7 +14,14 @@
       {% else %}
       <div class="col-xs-12 col-md-6">
         <h4 class="card-title">{{ match.date.strftime('%d-%b %Y') }}</h4>
-        <h6 class="card-subtitle mb-2 text-muted">Against <a class="font-weight-bold text-uppercase">{{ match.opponent.name }}</a> at {{ match.opponent.home_location }} ({{ match.home_away }})</h6>
+        <h5 class="card-subtitle mb-2">
+          {% if match.match_type == "playoff" %}
+          Playoff game
+          {% elif match.match_type == "regular" %}
+          Regular season game
+          {% endif %}
+        </h5>
+        <h6 class="card-subtitle mb-2 text-muted">Against <a class="font-weight-bold text-uppercase">{{ match.opponent.name }}</a> at {{ match.location }} ({{ match.home_away }})</h6>
         <p class="h5 font-weight-bold text-uppercase">{{ match.team_score }} - {{ match.opponent_score }} &emsp;
         {% if match.win %}Win
         {% else %}Loss{% endif %}</p>

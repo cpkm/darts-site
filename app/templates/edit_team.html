@@ -19,7 +19,7 @@
         <h4 class="text-center text-muted">{{ team.name }}</h4>
         {{ wtf.form_field(form.submit_edit, button_map={'submit_edit': 'info my-1 btn-block'}) }}
         {{ wtf.form_field(form.submit_delete, hidden="true", button_map={'submit_delete': 'danger my-1 btn-block'}) }}
-        <button type="button" id="modal-click" class="btn btn-danger btn-block my-1" data-toggle="modal" data-target="#confirmModal">Delete Player</button>
+        <button type="button" id="modal-click" class="btn btn-danger btn-block my-1" data-toggle="modal" data-target="#confirmModal">Delete Team</button>
         {% else %}
         {{ wtf.form_field(form.submit_new, button_map={'submit_new': 'primary my-1 btn-block'}) }}
         {% endif %}
@@ -48,7 +48,7 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title" id="confirmModalLabel">Confirm player delete</h4>
+        <h4 class="modal-title" id="confirmModalLabel">Confirm team delete</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
