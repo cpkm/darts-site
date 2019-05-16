@@ -35,8 +35,8 @@
           
           <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
             <a class="dropdown-item" href="{{ url_for('main.schedule') }}">Current</a>
-            {% if all_seasons %}
-            {% for s in all_seasons %}
+            {% if g.all_seasons %}
+            {% for s in g.all_seasons %}
             <a class="dropdown-item" href="{{ url_for('main.schedule', id=s.id) }}">{{ s.season_name }}</a>
             {% endfor %}
             {% endif %}
@@ -48,8 +48,8 @@
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('main.opponent') }}">Opponents</a>
       </li>
-
     </ul>
+
     {% if g.search_form %}
       <form class="navbar-form navbar-left" method="get"
           action="{{ url_for('main.search') }}">
@@ -65,19 +65,16 @@
       </li>
     {% else %}
     <div class="dropdown-divider"></div>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.match_edit') }}">Match editor</a>
+      <li class="nav-item dropdown">
+          <a class="btn nav-link dropdown-toggle" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Editing Tools</a>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+            <a class="dropdown-item" href="{{ url_for('main.match_edit') }}">Match editor</a>
+            <a class="dropdown-item" href="{{ url_for('main.player_edit') }}">Player editor</a>
+            <a class="dropdown-item" href="{{ url_for('main.team_edit') }}">Team editor</a>
+            <a class="dropdown-item" href="{{ url_for('main.enter_score') }}">Enter scores</a>
+          </div>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.player_edit') }}">Player editor</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.team_edit') }}">Team editor</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.enter_score') }}">Scores</a>
-      </li>
-      <li class="nav-item">
+      <li class="nav-item active">
         <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
       </li>
     {% endif %}

@@ -9,6 +9,9 @@ from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeaso
     season_from_date, update_all_team_stats)
 from wtforms.validators import ValidationError
 
+@bp.before_request
+def before_request():
+    g.all_seasons = Season.query.all()
 
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
