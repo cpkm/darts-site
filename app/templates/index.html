@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
 
+{% from "_leaderboard.html" import draw_leaderboard with context %}
+
 {% block app_content %}
   <h1>Welcome to ICC4!</h1>
   <br>
@@ -49,65 +51,11 @@
   </div>
   <br>
   <div class="container">
-
     <h2 class="my-4">Leaderboards</h2>
-
     <div class="row">
-      <div class="col-lg-4 mb-4">
-        <div class="card h-100">
-          <h4 class="card-header">Stars</h4>
-          <div class="card-body">
-              <table style="width:100%">
-                  {% for i in top_stars %}
-                    <tr>
-                        <td> {{ i.player.nickname }} </td>
-                        <td> {{ i.total_stars }} </td>
-                    </tr>
-                    {% endfor %}
-              </table>
-          </div>
-          <div class="card-footer">
-            <a href="#" class="btn btn-primary">Full leaderboard</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-4 mb-4">
-        <div class="card h-100">
-          <h4 class="card-header">High scores</h4>
-          <div class="card-body">
-              <table style="width:100%">
-                {% for i in top_high_scores %}
-                    <tr>
-                        <td> {{ i.player.nickname }} </td>
-                        <td> {{ i.total_high_scores }} </td>
-                    </tr>
-                {% endfor %}
-              </table>
-          </div>
-          <div class="card-footer">
-            <a href="#" class="btn btn-primary">Full leaderboard</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-4 mb-4">
-        <div class="card h-100">
-          <h4 class="card-header">Low scores</h4>
-          <div class="card-body">
-              <table style="width:100%">
-                {% for i in top_low_scores %}
-                    <tr>
-                        <td> {{ i.player.nickname }} </td>
-                        <td> {{ i.total_low_scores }} </td>
-                    </tr>
-                {% endfor %}
-              </table>
-          </div>
-          <div class="card-footer">
-            <a href="#" class="btn btn-primary">Full leaderboard</a>
-          </div>
-        </div>
-      </div>
+        {% for card in leader_board_list %}
+            {{  draw_leaderboard(card)  }}
+        {% endfor %}
     </div>
   </div>
-  
 {% endblock %}

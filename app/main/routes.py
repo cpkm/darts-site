@@ -9,9 +9,12 @@ from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeaso
     season_from_date, update_all_team_stats)
 from wtforms.validators import ValidationError
 
+from app.main.leaderboard_card import LeaderBoardCard
+
 @bp.before_request
 def before_request():
     g.all_seasons = Season.query.all()
+
 
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
@@ -24,14 +27,14 @@ def index():
     next_url = url_for('main.index', page=schedule.next_num) \
         if schedule.has_next else None
     prev_url = url_for('main.index', page=schedule.prev_num) \
-		if schedule.has_prev else None
-    top_stars = PlayerSeasonStats.query.join(Player).order_by(PlayerSeasonStats.total_stars.desc()).limit(4).all()
-    top_high_scores = PlayerSeasonStats.query.join(Player).order_by(PlayerSeasonStats.total_high_scores.desc()).limit(4).all()
-    top_low_scores = PlayerSeasonStats.query.join(Player).order_by(PlayerSeasonStats.total_low_scores.desc()).limit(4).all()
+        if schedule.has_prev else None
+
+    leader_board_list = [ LeaderBoardCard('Stars',PlayerSeasonStats.query.join(Player).with_entities(Player.nickname,PlayerSeasonStats.total_stars).order_by(PlayerSeasonStats.total_stars.desc()).limit(4).all()),LeaderBoardCard('High Scores',PlayerSeasonStats.query.join(Player).with_entities(Player.nickname,PlayerSeasonStats.total_high_scores).order_by(PlayerSeasonStats.total_high_scores.desc()).limit(4).all()),LeaderBoardCard('Low Scores',PlayerSeasonStats.query.join(Player).with_entities(Player.nickname,PlayerSeasonStats.total_low_scores).order_by(PlayerSeasonStats.total_low_scores.desc()).limit(4).all()) ]
 
     return render_template('index.html', title=None,
         schedule=schedule.items, next_url=next_url, prev_url=prev_url, 
-        all_players=all_players, last_match=last_match, top_stars=top_stars, top_high_scores=top_high_scores, top_low_scores=top_low_scores)
+        all_players=all_players, last_match=last_match,leader_board_list=leader_board_list)
+
 
 @bp.route('/player_edit',  methods=['GET', 'POST'], defaults={'nickname': None})
 @bp.route('/player_edit/<nickname>',  methods=['GET', 'POST'])
