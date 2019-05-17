@@ -1,25 +1,23 @@
 <div class="match-card">
-  <div class="team-avatar">
-      <a href="{{ url_for('main.match', id=match.id) }}">
+    <a class="divLink" href="{{ url_for('main.match', id=match.id) }}"> </a>
+    <div class="team-avatar">
         <img src="{{ match.opponent.avatar(70) }}">
-      </a>
     </div>
     <div class="team-info">
-      <a href="{{ url_for('main.opponent', id=match.opponent_id) }}">
-        {{ match.opponent.name }}
-      </a> 
-       - {{ match.date.strftime('%d-%b %Y') }}
-      <br>
-      {% if match.home_away == 'away' %}
-       &emsp;at {{ match.opponent.home_location }}
-      {% else %}
-      &emsp;at Italian Canadian Club
-      {% endif %}
-      {% if match.win != None %}
-      <h5>{% if match.win == True %}W{% else %}L{% endif %}&ensp;
-      <small>{{ match.team_score }} - {{ match.opponent_score }}</small>
-      </h5>
-      {% endif %}
-      </div>
-  </div>
+        <a href="{{ url_for('main.opponent', id=match.opponent_id) }}">
+            {{ match.opponent.name }}
+        </a>
+        - {{ match.date.strftime('%d-%b %Y') }}
+        <br>
+        {% if match.home_away == 'away' %}
+        &emsp;at {{ match.opponent.home_location }}
+        {% else %}
+        &emsp;at Italian Canadian Club
+        {% endif %}
+        {% if match.win != None %}
+        <h5>{% if match.win == True %}W{% else %}L{% endif %}&ensp;
+            <small>{{ match.team_score }} - {{ match.opponent_score }}</small>
+        </h5>
+        {% endif %}
+    </div>
 </div>

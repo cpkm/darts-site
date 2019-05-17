@@ -5,22 +5,46 @@ html
 
 .match-card{
     border-top: 1px solid rgba(0,0,0,.125);
+    text-decoration: none;
+    display: block;
+    position:relative;
 }
 
 .match-card:hover {
     background: #f8f9fa;
-    
 }
 
 .team-avatar {
-    display: block;
+    display: inline-block;
     float: left;
     padding: 8px;
     
 }
 
 .team-info {
-    display:block;
+    display:inline-block;
     padding: 8px;
+    z-index: 2;
+    position:relative;
 }
 
+.divLink {
+    display:block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    text-decoration: none;
+    overflow:auto;
+    opacity:0.99;
+    /* Makes sure the link doesn't get underlined */
+    z-index: 0;
+    /* raises anchor tag above everything else in div */
+    background-color: white;
+    /*workaround to make clickable in IE */
+    opacity: 0;
+    /*workaround to make clickable in IE */
+    filter: alpha(opacity=0);
+    /*workaround to make clickable in IE */
+}
