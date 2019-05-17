@@ -1,12 +1,15 @@
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, g
 from flask_login import current_user, login_user, logout_user
 from werkzeug.urls import url_parse
 from app import db
 from app.auth import bp
 from app.auth.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
-from app.models import User
+from app.models import User, Season
 #from app.auth.email import send_password_reset_email
 
+@bp.before_request
+def before_request():
+    g.all_seasons = Season.query.all()
 
 @bp.route('/login', methods=['GET','POST'])
 def login():
