@@ -2,3 +2,25 @@ html
 {
     font-size: 100%;
 }
+
+.match-card{
+    border-top: 1px solid rgba(0,0,0,.125);
+}
+
+.match-card:hover {
+    background: #f8f9fa;
+    
+}
+
+.team-avatar {
+    display: block;
+    float: left;
+    padding: 8px;
+    
+}
+
+.team-info {
+    display:block;
+    padding: 8px;
+}
+
