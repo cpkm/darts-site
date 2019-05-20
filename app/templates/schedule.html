@@ -30,11 +30,11 @@
       <div class="card-body">
         <h4 class="card-title">Season {{ season.season_name }}</h4>
         <h6 class="card-subtitle mb-2 text-muted">From {{ season.start_date.strftime('%d-%b %Y') }} to {{ season.end_date.strftime('%d-%b %Y') }}</h6>
-        <table class="table table-hover">
+        <div class="table">
         {% for match in matches %}
           {% include '_match.html' %}
         {% endfor %}
-        </table>
+        </div>
       </div>
     </div>
   </div>
