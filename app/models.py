@@ -241,7 +241,7 @@ class Match(db.Model):
                 self.location = 'Italian Canadian Club'
 
     def get_roster(self):
-        return Player.query.join(PlayerGame).join(Game).filter_by(match=self).all()
+        return Player.query.join(PlayerGame).join(Game).filter_by(match=self).order_by(Player.nickname).all()
 
     def __repr__(self):
         return '<Match {}>'.format(self.date)
