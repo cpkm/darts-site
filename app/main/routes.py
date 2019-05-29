@@ -19,7 +19,7 @@ def before_request():
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
 def index():
-    all_players = Player.query.all()
+    all_players = Player.query.order_by(Player.nickname).all()
     page = request.args.get('page', 1, type=int)
     last_match = Match.query.filter(Match.date<date.today()).order_by(Match.date.desc()).first()
     schedule = Match.query.filter(Match.date>=date.today()).order_by(Match.date).paginate(
@@ -42,7 +42,7 @@ def index():
 def player_edit(nickname):
     player = Player.query.filter_by(nickname=nickname).first()
     form = EditPlayerForm(obj=player)
-    all_players = Player.query.all()
+    all_players = Player.query.order_by(Player.nickname).all()
     
     if form.submit_new.data and form.validate():
         newplayer = Player(
@@ -87,7 +87,7 @@ def player_edit(nickname):
 def team_edit(name):
     team = Team.query.filter_by(name=name).first()
     form = EditTeamForm(obj=team)
-    all_teams = Team.query.all()
+    all_teams = Team.query.order_by(Team.name).all()
     
     if form.submit_new.data and form.validate():
         newteam = Team(
@@ -312,7 +312,7 @@ def schedule(id):
 def opponent(id):
     opponent = Team.query.filter_by(id=id).first()
     matches = Match.query.filter_by(opponent=opponent).order_by(Match.date).all()
-    all_teams = Team.query.all()
+    all_teams = Team.query.order_by(Team.name).all()
     return render_template('opponent.html', opponent=opponent, all_teams=all_teams, matches=matches)
 
 @bp.route('/match/<id>',  methods=['GET', 'POST'])
