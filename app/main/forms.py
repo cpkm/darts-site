@@ -51,7 +51,7 @@ class EditMatchForm(FlaskForm):
     date = DateField('Date', format='%Y-%m-%d', default=datetime.today().date, validators=[DataRequired()])
     opponent = SelectField('Opponent', choices=[], validators=[DataRequired()])
     home_away = RadioField('Location', choices=[('home','Home'),('away','Away')], default='home', validators=[DataRequired()])
-    match_type = RadioField('Match Type', choices=[('regular','Regular'),('playoffs','Playoffs')], default='regular', validators=[DataRequired()])
+    match_type = RadioField('Match Type', choices=[('r','Regular'),('p','Playoffs')], default='regular', validators=[DataRequired()])
 
     submit_new = SubmitField('Submit')
     submit_edit = SubmitField('Edit Match')

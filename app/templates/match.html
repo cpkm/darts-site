@@ -17,9 +17,9 @@
       <div class="col-xs-12 col-md-6">
         <h4 class="card-title">{{ match.date.strftime('%d-%b %Y') }}</h4>
         <h5 class="card-subtitle mb-2">
-          {% if match.match_type == "playoff" %}
+          {% if match.match_type == "p" %}
           Playoff game
-          {% elif match.match_type == "regular" %}
+          {% elif match.match_type == "r" %}
           Regular season game
           {% endif %}
         </h5>
