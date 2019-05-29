@@ -182,7 +182,8 @@ class Match(db.Model):
             db.session.add(game)
             db.session.commit()
 
-    def is_game(self, game=None, game_id=None):
+    def is_game(self, game=None):
+        '''Check if game is in match'''
         if game:
             return self.games.filter_by(id=game.id).count() > 0
         return self.games.filter_by(id=game_id).count() > 0

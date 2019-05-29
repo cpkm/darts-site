@@ -318,7 +318,8 @@ def opponent(id):
 @bp.route('/match/<id>',  methods=['GET', 'POST'])
 def match(id):
     match = Match.query.filter_by(id=id).first_or_404()
-    return render_template('match.html', match=match)
+    roster = match.get_roster()
+    return render_template('match.html', match=match, roster=roster)
 
 @bp.route('/leaderboard',  methods=['GET', 'POST'])
 def leaderboard():
