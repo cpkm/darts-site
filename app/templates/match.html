@@ -119,13 +119,25 @@
       <div class="col-xs-12 col-md-6">
         <div class="container">
           <h5 class="card-subtitle">High Scores</h5>
-
+          {% for p in roster %}
+          <span>{{ p.nickname }}: 
+          {% for s in match.high_scores.filter_by(player=p).all() %}
+          {{ s.score }},
+          {% endfor %}
+          </span><br>
+          {% endfor %}
         </div>
       </div>
       <div class="col-xs-12 col-md-6">
         <div class="container">
           <h5 class="card-subtitle">Low Scores</h5>
-
+          {% for p in roster %}
+          <span>{{ p.nickname }}: 
+          {% for s in match.low_scores.filter_by(player=p).all() %}
+          {{ s.score }},
+          {% endfor %}
+          </span><br>
+          {% endfor %}
         </div>
       </div>
     </div>
