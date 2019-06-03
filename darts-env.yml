@@ -7,13 +7,9 @@ dependencies:
   - bzip2=1.0.6=1
   - ca-certificates=2018.10.15=ha4d7672_0
   - certifi=2018.10.15=py36_1000
-  - flask-wtf=0.14.2=py_1
-  - openssl=1.0.2p=h470a237_1
-  - python=3.6.6=h5001a0f_0
-  - python-dotenv=0.9.1=py_0
-  - wtforms=2.1=py36_0
   - click=7.0=py36_0
   - flask=1.0.2=py36_1
+  - flask-wtf=0.14.2=py_1
   - itsdangerous=1.1.0=py36_0
   - jinja2=2.10=py36_0
   - libcxx=4.0.1=hcfea43d_1
@@ -22,13 +18,17 @@ dependencies:
   - libffi=3.2.1=h475c297_4
   - markupsafe=1.0=py36h1de35cc_1
   - ncurses=6.1=h0a44026_0
+  - openssl=1.0.2p=h470a237_1
   - pip=18.1=py36_0
+  - python=3.6.6=h5001a0f_0
+  - python-dotenv=0.9.1=py_0
   - readline=7.0=h1de35cc_5
   - setuptools=40.5.0=py36_0
   - sqlite=3.25.2=ha441bb4_0
   - tk=8.6.8=ha441bb4_0
   - werkzeug=0.14.1=py36_0
   - wheel=0.32.2=py36_0
+  - wtforms=2.1=py36_0
   - xz=5.2.4=h1de35cc_4
   - zlib=1.2.11=hf3cbc9b_2
   - pip:
@@ -44,7 +44,9 @@ dependencies:
     - flask-migrate==2.3.0
     - flask-moment==0.6.0
     - flask-sqlalchemy==2.3.2
+    - gunicorn==19.9.0
     - mako==1.0.7
+    - psycopg2==2.8.2
     - pyjwt==1.6.4
     - python-dateutil==2.7.5
     - python-editor==1.0.3
