@@ -33,7 +33,7 @@ def upgrade():
     sa.Column('total_low_scores', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['player_id'], ['player.id'], name=op.f('fk_player_season_stats_player_id_player')),
     sa.ForeignKeyConstraint(['season_id'], ['season.id'], name=op.f('fk_player_season_stats_season_id_season')),
-    sa.PrimaryKeyConstraint('id', 'matches_played', 'matches_won', 'matches_lost', 'games_played', 'games_won', 'games_lost', 'total_stars', 'total_high_scores', 'total_low_scores', name=op.f('pk_player_season_stats'))
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_player_season_stats'))
     )
     op.create_table('team_season_stats',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -47,7 +47,7 @@ def upgrade():
     sa.Column('total_high_scores', sa.Integer(), nullable=False),
     sa.Column('total_low_scores', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['season_id'], ['season.id'], name=op.f('fk_team_season_stats_season_id_season')),
-    sa.PrimaryKeyConstraint('id', 'matches_played', 'matches_won', 'matches_lost', 'games_played', 'games_won', 'total_stars', 'total_high_scores', 'total_low_scores', name=op.f('pk_team_season_stats'))
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_team_season_stats'))
     )
     op.drop_table('player_season_statistics')
     op.drop_table('team_season_statistics')
