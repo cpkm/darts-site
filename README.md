@@ -47,6 +47,6 @@ flask db downgrade
 ## Updating evironment files
 If new packages are installed, or there are other changes to the virtual environment, you must update the [darts-env.yml](darts-env.yml) and [requirements.txt](requirements.txt) files:
 ```
-conda export darts-env.yml
+conda env export > darts-env.yml
 pip freeze > requirements.txt
 ```
