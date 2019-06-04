@@ -39,12 +39,12 @@
     
     <div class="col-md-6 mt-2">
       <div class="card h-100">
-        <h2 class="card-header">Current season</h2>
+        <h2 class="card-header">All matches</h2>
         <div class="card-body">
           <ul class="row list-unstyled">
           {% for m in all_matches %}
           <li class="col-xs-6">
-            <a href="{{ url_for('main.match_edit', id=m.id) }}">{{ m.date }} {{ m.opponent.name }} {{ m.home_away }} </a>
+            <a href="{{ url_for('main.match_edit', id=m.id) }}">{{ m.date.strftime('%Y-%m-%d') }} {{ m.opponent.name }} {{ m.home_away }} </a>
           </li>
           {% endfor %}
           </ul>
