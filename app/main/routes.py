@@ -278,7 +278,7 @@ def enter_score(id):
         hl_form.load_scores(match)
 
     return render_template('enter_score.html', title='Enter Scores', 
-        form=form, hl_form=hl_form, match=match, all_matches=all_matches), print('emd')
+        form=form, hl_form=hl_form, match=match, all_matches=all_matches)
 
 
 @bp.route('/player/<nickname>',  methods=['GET', 'POST'])

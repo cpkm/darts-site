@@ -227,12 +227,10 @@ class HLScoreForm(FlaskForm):
         return
 
     def load_scores(self, match):
-        if match.high_scores.all() is None and match.low_scores.all():
+        if match.high_scores.all() is None and match.low_scores.all() is None:
             return
-        hp = [s.player for s in match.high_scores.group_by(HighScore.player_id).all()]
-        lp = [s.player for s in match.low_scores.group_by(LowScore.player_id).all()]
-        all_p = hp + list(set(lp)-set(hp))
 
+        all_p = match.get_roster()
         diff = len(all_p) - len(self.hl_scores)
 
         if diff > 0:
