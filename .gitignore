@@ -38,5 +38,3 @@ nosetests.xml
 .pydevproject
 
 .env
-
-
