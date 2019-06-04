@@ -13,7 +13,7 @@
         <ul class="row list-unstyled">
         {% for m in all_matches %}
         <li class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-          <a href="{{ url_for('main.enter_score', id=m.id) }}">{{ m.date }} {{ m.opponent.name }}</a>
+          <a href="{{ url_for('main.enter_score', id=m.id) }}">{{ m.date.strftime('%Y-%m-%d') }} {{ m.opponent.name }}</a>
         </li>
         {% endfor %}
         </ul>
@@ -29,7 +29,7 @@
     <div class="card h-100">
       <h2 class="card-header">Details and game scores</h2>
       <div class="card-body">
-      <h3 class="text-center text-muted"">{{ match.opponent.name }} {{ match.home_away }} game on {{ match.date }}</h3>
+      <h3 class="text-center text-muted">{{ match.opponent.name }} {{ match.home_away }} game on {{ match.date.strftime('%Y-%m-%d') }}</h3>
       <form class="form" method="post" role="form">
         {{ form.hidden_tag() }}
         {{ wtf.form_errors(form, hiddens="only") }}
