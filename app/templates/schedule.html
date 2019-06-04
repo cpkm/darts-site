@@ -28,8 +28,10 @@
     <div class="card h-100">
       <div class="card-header">Current season</div>
       <div class="card-body">
+        {% if season %}
         <h4 class="card-title">Season {{ season.season_name }}</h4>
         <h6 class="card-subtitle mb-2 text-muted">From {{ season.start_date.strftime('%d-%b %Y') }} to {{ season.end_date.strftime('%d-%b %Y') }}</h6>
+        {% endif %}
         <div class="table">
         {% for match in matches %}
           {% include '_match.html' %}
