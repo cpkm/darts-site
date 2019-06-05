@@ -50,6 +50,7 @@ class Player(db.Model):
     nickname = db.Column(db.String(64), index=True, unique=True)
     first_name = db.Column(db.String(64), index=True)
     last_name = db.Column(db.String(64), index=True)
+    is_active = db.Column(db.Boolean, index=True, default=True)
     games = association_proxy('games_association', 'game')
     last_match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
     last_match = db.relationship('Match', foreign_keys=[last_match_id])
