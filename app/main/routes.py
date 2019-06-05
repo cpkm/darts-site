@@ -4,7 +4,7 @@ from werkzeug.urls import url_parse
 from datetime import datetime, date
 from app import db
 from app.main import bp
-from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm
+from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
     season_from_date, update_all_team_stats)
 from wtforms.validators import ValidationError
@@ -43,6 +43,7 @@ def player_edit(nickname):
     player = Player.query.filter_by(nickname=nickname).first()
     form = EditPlayerForm(obj=player)
     all_players = Player.query.order_by(Player.nickname).all()
+    roster_form = RosterForm()
     
     if form.submit_new.data and form.validate():
         newplayer = Player(
@@ -78,7 +79,7 @@ def player_edit(nickname):
         return redirect(url_for('main.player_edit'))
 
     return render_template('edit_player.html', title='Player Editor', 
-        form=form, player=player, all_players=all_players)
+        form=form, player=player, all_players=all_players, roster_form=roster_form)
 
 
 @bp.route('/team_edit',  methods=['GET', 'POST'], defaults={'name': None})

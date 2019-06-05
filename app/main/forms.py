@@ -27,6 +27,22 @@ class EditPlayerForm(FlaskForm):
         if new_player_test is not None and self.original_nickname.data is not nickname.data:
             raise ValidationError('Player nickname must be unique.')
 
+class ActivePlayerForm(FlaskForm):
+    player = StringField('Nickname',validators=[DataRequired()])
+    is_active = BooleanField('Active')
+
+class RosterForm(FlaskForm):
+    roster = FieldList(FormField(ActivePlayerForm))
+    submit = SubmitField('Submit Roster')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args,**kwargs)
+        all_players = Player.query.order_by(Player.nickname).all()
+
+        for i,p in enumerate(all_players):
+            self.roster.append_entry()
+            self.roster[i].player.data = p.nickname
+            self.roster[i].is_active.data = p.is_active
 
 class EditTeamForm(FlaskForm):
     name = StringField('Team Name', validators=[DataRequired()])
