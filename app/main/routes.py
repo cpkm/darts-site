@@ -190,7 +190,7 @@ def enter_score(id):
         db.session.commit()
         for p in match.get_roster():
             p.update_player_stats()
-        flash('Match {} {} {} details edited!'.format(match.date, match.opponent.name, match.home_away))
+        flash('Match {} {} {} details edited!'.format(match.date.strftime('%Y-%m-%d'), match.opponent.name, match.home_away))
         return redirect(url_for('main.enter_score', id=match.id))
 
      
@@ -244,7 +244,7 @@ def enter_score(id):
 
         update_all_team_stats()
         match.update_match_stats()
-        flash('Match {} {} {} scores entered successfully!'.format(match.date, match.opponent.name, match.home_away), 'success')
+        flash('Match {} {} {} scores entered successfully!'.format(match.date.strftime('%Y-%m-%d'), match.opponent.name, match.home_away), 'success')
         return redirect(url_for('main.enter_score', id=match.id))
 
     if hl_form.add_btn.data:
@@ -266,7 +266,7 @@ def enter_score(id):
             p.update_player_stats(match.season.season_name)
             p.update_activity()
         update_all_team_stats()
-        flash('Match {} {} {} high/low scores entered successfully!'.format(match.date, match.opponent.name, match.home_away), 'success')
+        flash('Match {} {} {} high/low scores entered successfully!'.format(match.date.strftime('%Y-%m-%d'), match.opponent.name, match.home_away), 'success')
         return redirect(url_for('main.enter_score', id=match.id))
 
     if request.method=='GET' and match is not None:
