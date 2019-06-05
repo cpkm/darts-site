@@ -1,7 +1,7 @@
 from flask import request, flash
 from flask_wtf import FlaskForm
 from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, RadioField, 
-    FieldList, FormField, DateField, SelectField, IntegerField)
+    FieldList, FormField, DateField, SelectField, IntegerField, HiddenField)
 from wtforms.validators import ValidationError, DataRequired, InputRequired, Length, Email
 from app import db
 from app.models import Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, season_from_date
@@ -27,6 +27,24 @@ class EditPlayerForm(FlaskForm):
         if new_player_test is not None and self.original_nickname.data is not nickname.data:
             raise ValidationError('Player nickname must be unique.')
 
+class ActivePlayerForm(FlaskForm):
+    player = HiddenField('', validators=[DataRequired()])
+    is_active = BooleanField('')
+
+class RosterForm(FlaskForm):
+    roster = FieldList(FormField(ActivePlayerForm))
+    submit = SubmitField('Submit Roster')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args,**kwargs)
+
+    def fill_roster(self):
+        all_players = Player.query.order_by(Player.nickname).all()
+
+        for i,p in enumerate(all_players):
+            self.roster.append_entry()
+            self.roster[i].player.data = p.nickname
+            self.roster[i].is_active.data = p.is_active
 
 class EditTeamForm(FlaskForm):
     name = StringField('Team Name', validators=[DataRequired()])

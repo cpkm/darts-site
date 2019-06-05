@@ -4,7 +4,7 @@ from werkzeug.urls import url_parse
 from datetime import datetime, date
 from app import db
 from app.main import bp
-from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm
+from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
     season_from_date, update_all_team_stats)
 from wtforms.validators import ValidationError
@@ -19,7 +19,7 @@ def before_request():
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
 def index():
-    all_players = Player.query.order_by(Player.nickname).all()
+    all_players = Player.query.filter_by(is_active=True).order_by(Player.nickname).all()
     page = request.args.get('page', 1, type=int)
     last_match = Match.query.filter(Match.date<date.today()).order_by(Match.date.desc()).first()
     schedule = Match.query.filter(Match.date>=date.today()).order_by(Match.date).paginate(
@@ -43,6 +43,7 @@ def player_edit(nickname):
     player = Player.query.filter_by(nickname=nickname).first()
     form = EditPlayerForm(obj=player)
     all_players = Player.query.order_by(Player.nickname).all()
+    roster_form = RosterForm()
     
     if form.submit_new.data and form.validate():
         newplayer = Player(
@@ -77,8 +78,21 @@ def player_edit(nickname):
             player.nickname, player.first_name, player.last_name), 'danger')
         return redirect(url_for('main.player_edit'))
 
+    if roster_form.validate_on_submit():
+        for player_form in roster_form.roster:
+
+            if player_form.player.data is not None:
+                p = Player.query.filter_by(nickname=player_form.player.data).first()
+                p.is_active = player_form.is_active.data
+                db.session.add(p)
+                db.session.commit()
+        flash('Updated active roster!')
+        return redirect(url_for('main.player_edit'))
+    elif request.method == 'GET':
+        roster_form.fill_roster()
+
     return render_template('edit_player.html', title='Player Editor', 
-        form=form, player=player, all_players=all_players)
+        form=form, player=player, all_players=all_players, roster_form=roster_form)
 
 
 @bp.route('/team_edit',  methods=['GET', 'POST'], defaults={'name': None})

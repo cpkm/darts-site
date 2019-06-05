@@ -1,4 +1,4 @@
-"""empty message
+"""add season stats
 
 Revision ID: 2c52e2402092
 Revises: 588aee487285
