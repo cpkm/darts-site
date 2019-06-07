@@ -29,8 +29,11 @@ From here normal python cammands can by issued. Most app funcions and database c
 ```python
 Match.query.all()
 ```
+## Databse usage
+### Sample data
+The SQLite database, [app.db](app.db), contains sample data. You may or may not choose to use this locally. Just ensure your local database is kept up to date with the flask-migration files. See below. 
 
-## Updating the database
+### Updating the database
 If the structure of the database is changed, i.e. changes to [models.py](app/models.py), it must be migrated and upgraded before use. To migrate run
 ```
 flask db migrate -m "<insert breif description of changes>"
@@ -50,3 +53,13 @@ If new packages are installed, or there are other changes to the virtual environ
 conda env export > darts-env.yml
 pip freeze > requirements.txt
 ```
+
+## Dot env
+Use a local .env file in the app folder to set configuration variables, such as DATABASE_URL (sets location of database). For example:
+```
+SECRET_KEY=a-long-top-secret-key
+DATABASE_URL=sqlite://app.db
+```
+
+
+
