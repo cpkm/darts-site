@@ -1,0 +1,10 @@
+Dear {{ user.username }},
+
+Thank you for registering with ICC4-darts. To finish setting up your account, please verify your email by clicking the link below:
+{{ url_for('auth.verify_email', token=token, _external=True) }}
+
+If you have recieved this email in error simply ignore this message.
+
+Sincerely,
+
+The ICC4 pub darts team
