@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_login import LoginManager
+from flask_mail import Mail
 from config import Config
 from sqlalchemy import MetaData
 
@@ -19,6 +20,7 @@ db = SQLAlchemy(metadata=MetaData(naming_convention=naming_convention))
 
 migrate = Migrate()
 bootstrap = Bootstrap()
+mail = Mail()
 moment = Moment()
 login = LoginManager()
 login.login_view = 'auth.login'
@@ -32,6 +34,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db, render_as_batch=True)
     bootstrap.init_app(app)
+    mail.init_app(app)
     moment.init_app(app)
     login.init_app(app)
 
