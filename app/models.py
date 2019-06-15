@@ -1,3 +1,4 @@
+import jwt
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
@@ -7,6 +8,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method, Comparator
 from sqlalchemy.sql import select
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date, timedelta
+from time import time
 from hashlib import md5
 from app import db, login
 
@@ -15,6 +17,9 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    registered_on = db.Column(db.Date, index=True, default=date.today())
+    verified = db.Column(db.Boolean, index=True, default=False)
+    verified_on = db.Column(db.Date, index=True, default=None)
 
     def set_password(self,password):
         self.password_hash = generate_password_hash(password)
@@ -32,11 +37,25 @@ class User(UserMixin, db.Model):
             {'reset_password': self.id, 'exp': time() + expires_in},
             current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
+    def get_user_token(self, task, expires_in=600):
+        return jwt.encode(
+            {task: self.id, 'exp': time() + expires_in},
+            current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
     @staticmethod
     def verify_reset_password_token(token):
         try:
             id = jwt.decode(token, current_app.config['SECRET_KEY'],
                             algorithms=['HS256'])['reset_password']
+        except:
+            return
+        return User.query.get(id)
+
+    @staticmethod
+    def verify_user_token(token, task):
+        try:
+            id = jwt.decode(token, current_app.config['SECRET_KEY'],
+                            algorithms=['HS256'])[task]
         except:
             return
         return User.query.get(id)
