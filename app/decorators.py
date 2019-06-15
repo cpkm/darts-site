@@ -9,7 +9,7 @@ def check_verification(func):
     def decorated_function(*args, **kwargs):
         if not current_user.verified:
             flash('Please verify your account!', 'warning')
-            return redirect(url_for('auth.verify_email'))
+            return redirect(url_for('auth.unverified_email'))
         return func(*args, **kwargs)
 
     return decorated_function

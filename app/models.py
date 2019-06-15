@@ -1,3 +1,4 @@
+import jwt
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
@@ -7,6 +8,7 @@ from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method, Comparator
 from sqlalchemy.sql import select
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date, timedelta
+from time import time
 from hashlib import md5
 from app import db, login
 
