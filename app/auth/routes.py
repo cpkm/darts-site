@@ -119,4 +119,5 @@ def unverified_email():
 def resend_email_verification():
     print('resend')
     send_verification_email(current_user)
+    flash('Verification email has been sent, please check your inbox.')
     return redirect(url_for('auth.unverified_email'))
