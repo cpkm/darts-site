@@ -346,6 +346,14 @@ def leaderboard():
     stats = PlayerSeasonStats.query.filter_by(season=season)
     return render_template('leaderboard.html', roster=roster, stats=stats, season=season)
 
+@bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    print(current_user.role)
+    return render_template('profile.html')
+
+
+
 
 
 
