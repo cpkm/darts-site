@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+<div class="col-12 mt-2 mx-auto">
+  <div class="card h-100">
+    <h2 class="card-header">Player Profile</h2>
+    <div class="col-12 mt-2 mx-auto">
+      <p>Username: {{ current_user.username }}</p>
+      <p>Email: {{ current_user.email }}</p>
+      <p>Role: {{ current_user.role }}</p>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
