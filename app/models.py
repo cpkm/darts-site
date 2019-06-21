@@ -43,6 +43,13 @@ class User(UserMixin, db.Model):
             {task: self.id, 'exp': time() + expires_in},
             current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
+    def check_role(self, roles):
+        if self.role in roles:
+            return True
+        else:
+            return False
+
+
     @staticmethod
     def verify_reset_password_token(token):
         try:

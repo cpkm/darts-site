@@ -68,7 +68,7 @@
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('main.profile') }}">Profile</a>
       </li>
-      {% if (current_user.role == 'captain') or (current_user.role == 'admin') %}
+      {% if current_user.check_role(['admin', 'captain']) %}
       <div class="dropdown-divider"></div>
       <li class="nav-item dropdown">
           <a class="btn nav-link dropdown-toggle" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Editing Tools</a>
