@@ -64,7 +64,12 @@
         <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
       </li>
     {% else %}
-    <div class="dropdown-divider"></div>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.profile') }}">Profile</a>
+      </li>
+      {% if current_user.check_role(['admin', 'captain']) %}
+      <div class="dropdown-divider"></div>
       <li class="nav-item dropdown">
           <a class="btn nav-link dropdown-toggle" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Editing Tools</a>
           <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
@@ -74,6 +79,7 @@
             <a class="dropdown-item" href="{{ url_for('main.enter_score') }}">Enter scores</a>
           </div>
       </li>
+      {% endif %}
       <li class="nav-item active">
         <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
       </li>

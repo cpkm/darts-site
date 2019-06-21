@@ -8,7 +8,7 @@ from app.main import bp
 from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
     season_from_date, update_all_team_stats)
-from app.decorators import check_verification
+from app.decorators import check_verification, check_role
 from app.main.leaderboard_card import LeaderBoardCard
 
 @bp.before_request
@@ -40,6 +40,7 @@ def index():
 @bp.route('/player_edit/<nickname>',  methods=['GET', 'POST'])
 @login_required
 @check_verification
+@check_role(['admin','captain'])
 def player_edit(nickname):
     player = Player.query.filter_by(nickname=nickname).first()
     form = EditPlayerForm(obj=player)
@@ -100,6 +101,7 @@ def player_edit(nickname):
 @bp.route('/team_edit/<name>',  methods=['GET', 'POST'])
 @login_required
 @check_verification
+@check_role(['admin','captain'])
 def team_edit(name):
     team = Team.query.filter_by(name=name).first()
     form = EditTeamForm(obj=team)
@@ -140,6 +142,7 @@ def team_edit(name):
 @bp.route('/match_edit/<id>',  methods=['GET', 'POST'])
 @login_required
 @check_verification
+@check_role(['admin','captain'])
 def match_edit(id):
     match = Match.query.filter_by(id=id).first()
     form = EditMatchForm(match=match)
@@ -182,15 +185,12 @@ def match_edit(id):
     return render_template('edit_match.html', title='Match Editor', 
         form=form, match=match, all_matches=all_matches)
 
-@bp.route('/search')
-@login_required
-def search():
-    return 0
 
 @bp.route('/enter_score',  methods=['GET', 'POST'], defaults={'id': None})
 @bp.route('/enter_score/<id>',  methods=['GET', 'POST'])
 @login_required
 @check_verification
+@check_role(['admin','captain'])
 def enter_score(id):
     match = Match.query.filter_by(id=id).first()
     form = EnterScoresForm(obj=match)
@@ -345,6 +345,19 @@ def leaderboard():
     season = season_from_date(date.today())
     stats = PlayerSeasonStats.query.filter_by(season=season)
     return render_template('leaderboard.html', roster=roster, stats=stats, season=season)
+
+@bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    print(current_user.role)
+    return render_template('profile.html')
+
+@bp.route('/search')
+@login_required
+def search():
+    return 0
+
+
 
 
 

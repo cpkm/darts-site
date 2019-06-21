@@ -17,6 +17,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    role = db.Column(db.String(32), index=True, default='player')
     registered_on = db.Column(db.Date, index=True, default=date.today())
     verified = db.Column(db.Boolean, index=True, default=False)
     verified_on = db.Column(db.Date, index=True, default=None)
@@ -41,6 +42,13 @@ class User(UserMixin, db.Model):
         return jwt.encode(
             {task: self.id, 'exp': time() + expires_in},
             current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+    def check_role(self, roles):
+        if self.role in roles:
+            return True
+        else:
+            return False
+
 
     @staticmethod
     def verify_reset_password_token(token):

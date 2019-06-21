@@ -1,13 +1,12 @@
 <p>Dear {{ user.username }},</p>
 <p>
-    Thank you for registering with ICC4-darts. To finish setting up your account, please verify your email by clicking the link below:
+    Thank you for registering with ICC4-darts. To finish setting up your account, please verify your email by
     <a href="{{ url_for('auth.verify_email', token=token, _external=True) }}">
-        click here
-    </a>.
+        clicking here</a>.
 </p>
 <p>Alternatively, you can paste the following link in your browser's address bar:</p>
 <p>{{ url_for('auth.verify_email', token=token, _external=True) }}</p>
-<p>This link will remain active for 24hrs</p>
+<p>This link will remain active for 24hrs.</p>
 <p>If you have recieved this email in error simply ignore this message.</p>
 <p>Sincerely,</p>
 <p>The ICC4 pub darts team</p>
