@@ -343,7 +343,7 @@ def match(id):
 def leaderboard():
     roster = Player.query.all()
     season = season_from_date(date.today())
-    stats = PlayerSeasonStats.query.filter_by(season=season)
+    stats = PlayerSeasonStats.query.filter_by()
     return render_template('leaderboard.html', roster=roster, stats=stats, season=season)
 
 @bp.route('/profile', methods=['GET', 'POST'])
