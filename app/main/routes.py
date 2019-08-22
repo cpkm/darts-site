@@ -339,12 +339,20 @@ def match(id):
     roster = match.get_roster()
     return render_template('match.html', match=match, roster=roster)
 
-@bp.route('/leaderboard',  methods=['GET', 'POST'])
-def leaderboard():
+@bp.route('/leaderboard',  methods=['GET', 'POST'], defaults={'year_str':None})
+@bp.route('/leaderboard/',  methods=['GET', 'POST'], defaults={'year_str':None})
+@bp.route('/leaderboard/<year_str>',  methods=['GET', 'POST'])
+def leaderboard(year_str):
     roster = Player.query.all()
     season = season_from_date(date.today())
-    stats = PlayerSeasonStats.query.filter_by()
-    return render_template('leaderboard.html', roster=roster, stats=stats, season=season)
+    all_seasons = Season.query.order_by(Season.season_name.desc())
+    if(year_str is None):
+      stats = PlayerSeasonStats.query.all()
+      year_str = 'All Time'
+    else:
+      year_str = year_str.replace('-','/') # This is to allow date name to be 'url-friendly'
+      stats = PlayerSeasonStats.query.join(Season).filter_by(season_name=year_str).all()
+    return render_template('leaderboard.html', roster=roster, stats=stats,all_seasons=all_seasons,year_str=year_str)
 
 @bp.route('/profile', methods=['GET', 'POST'])
 @login_required
