@@ -156,6 +156,7 @@ def match_edit(id):
             opponent=Team.query.filter_by(name=form.opponent.data).first(), 
             home_away=form.home_away.data, match_type=form.match_type.data)
         newmatch.set_location()
+        newmatch.set_season()
         db.session.add(newmatch)
         db.session.commit()
         flash('Match {} {} {} added!'.format(newmatch.date, form.opponent.data, form.home_away.data))
@@ -167,6 +168,7 @@ def match_edit(id):
         match.home_away = form.home_away.data
         match.match_type = form.match_type.data
         match.set_location()
+        match.set_season()
         db.session.add(match)
         db.session.commit()
         flash('Match {} {} {} modified!'.format(form.date.data, form.opponent.data, form.home_away.data))
