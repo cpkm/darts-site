@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+
+  <div class="card h-100">
+    <h2 class="card-header">Captain's Portal</h2>
+    <div class="col-12 mt-2 mx-auto">
+      <p>Username: {{ current_user.username }}</p>
+      <p>Email: {{ current_user.email }}</p>
+      <p>Role: {{ current_user.role }}</p>
+    </div>
+  </div>
+  <div class="card h-100">
+    <h2 class="card-header">Active roster</h2>
+    <div class="col-12 mt-2 mx-auto">
+      <form class="form" method="post" role="form">
+        {{ roster_form.hidden_tag() }}
+        {{ wtf.form_errors(roster_form, hiddens="only") }}
+
+        <div>
+          <table class="table">
+            <tr>
+              <th> Player </th>
+              <th> Active </th>
+            </tr>
+            {% for p in roster_form.roster %}
+            {{ p.hidden_tag() }}
+            {{ wtf.form_errors(p, hiddens="only") }}
+            <tr>
+                <td>{{ p.player }}{{ p.player.data }}</td>
+                <td>{{ p.is_active }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+        {{ wtf.form_field(roster_form.submit, button_map={'submit': 'info my-1 btn-block'}) }}
+      </form>
+    </div>
+  </div> 
+
+
+{% endblock %}
