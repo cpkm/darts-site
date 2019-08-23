@@ -63,8 +63,8 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-info mr-auto" data-dismiss="modal">Cancel</button>
-        <form action="{{url_for('main.index')}}" method="post">
-          <input type="submit" value="Send Email" class="btn btn-danger">
+        <form action="{{ url_for('main.send_reminder_email', token=current_user.get_user_token(task='send_reminder_email')) }}" method="post">
+          <input type="submit" name="sendreminder" value="Send Email" class="btn btn-danger">
         </form>
       </div>
     </div>

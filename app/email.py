@@ -13,3 +13,13 @@ def send_email(subject, sender, recipients, text_body, html_body):
     msg.html = html_body
     Thread(target=send_async_email, 
       args=(current_app._get_current_object(), msg)).start()
+
+def send_bulk_email(subject, sender, recipients, text_body, html_body):
+    with mail.connect() as conn:
+        for i,r in enumerate(recipients):
+            msg = Message(subject, sender=sender, recipients=[recipients[i]])
+            msg.body = text_body[i]
+            msg.html = html_body[i]
+
+            Thread(target=send_async_email, 
+                args=(current_app._get_current_object(), msg)).start()

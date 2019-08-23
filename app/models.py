@@ -39,8 +39,11 @@ class User(UserMixin, db.Model):
             current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
     def get_user_token(self, task, expires_in=600):
-        return jwt.encode(
-            {task: self.id, 'exp': time() + expires_in},
+        params = {task: self.id}
+        if expires_in is not None:
+            params['exp'] = time() + expires_in
+
+        return jwt.encode(params,
             current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
     def check_role(self, roles):
@@ -446,6 +449,9 @@ def update_all_team_stats():
         if stats is None:
             stats = TeamSeasonStats(season=season)
         stats.update_team_stats()
+
+def current_roster():
+    return Player.query.filter_by(is_active=True).all()
 
 
 @login.user_loader
