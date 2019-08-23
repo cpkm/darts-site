@@ -360,6 +360,28 @@ def profile():
     print(current_user.role)
     return render_template('profile.html')
 
+
+@bp.route('/captain', methods=['GET', 'POST'])
+@login_required
+@check_verification
+@check_role(['admin','captain'])
+def captain():
+    roster_form = RosterForm()
+    if roster_form.validate_on_submit():
+        for player_form in roster_form.roster:
+
+            if player_form.player.data is not None:
+                p = Player.query.filter_by(nickname=player_form.player.data).first()
+                p.is_active = player_form.is_active.data
+                db.session.add(p)
+                db.session.commit()
+        flash('Updated active roster!')
+        return redirect(url_for('main.captain'))
+    elif request.method == 'GET':
+        roster_form.fill_roster()
+
+    return render_template('captain.html', roster_form=roster_form)
+
 @bp.route('/search')
 @login_required
 def search():
