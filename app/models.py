@@ -450,6 +450,9 @@ def update_all_team_stats():
             stats = TeamSeasonStats(season=season)
         stats.update_team_stats()
 
+def current_roster():
+    return Player.query.filter_by(is_active=True).all()
+
 
 @login.user_loader
 def load_user(id):
