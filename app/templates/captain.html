@@ -13,6 +13,13 @@
     </div>
   </div>
   <div class="card h-100">
+    <h2 class="card-header">Emails</h2>
+    <div class="col-12 mt-2 mx-auto">
+        <button type="button" id="modal-click" class="btn btn-danger btn-block my-1" data-toggle="modal" data-target="#confirmModal">Send Reminder Email</button>
+
+    </div>
+  </div>
+  <div class="card h-100">
     <h2 class="card-header">Active roster</h2>
     <div class="col-12 mt-2 mx-auto">
       <form class="form" method="post" role="form">
@@ -38,7 +45,31 @@
         {{ wtf.form_field(roster_form.submit, button_map={'submit': 'info my-1 btn-block'}) }}
       </form>
     </div>
-  </div> 
+  </div>
+
+<!-- Modal -->
+<div class="modal" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="confirmModalLabel">Confirm send email</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>This will send a reminder email to all active roster players.</p>
+        <p class="text-center">Are you sure you want to send this email?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-info mr-auto" data-dismiss="modal">Cancel</button>
+        <form action="{{url_for('main.index')}}" method="post">
+          <input type="submit" value="Send Email" class="btn btn-danger">
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
 
 
 {% endblock %}
