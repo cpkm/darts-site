@@ -18,6 +18,8 @@
         <h5>{% if match.win == True %}W{% else %}L{% endif %}&ensp;
             <small>{{ match.team_score }} - {{ match.opponent_score }}</small>
         </h5>
+        {% else %}
+        <h5>&ensp;</h5>
         {% endif %}
     </div>
 </div>
