@@ -41,32 +41,6 @@
       </div>
     </div>
   </div>
-
-  <div class="row">
-    <div class="col-md-12"><h2>Active roster</h2>
-      <form class="form" method="post" role="form">
-        {{ roster_form.hidden_tag() }}
-        {{ wtf.form_errors(roster_form, hiddens="only") }}
-
-        <div>
-          <table class="table">
-            <tr>
-              <th> Player </th>
-              <th> Active </th>
-            </tr>
-            {% for p in roster_form.roster %}
-            {{ p.hidden_tag() }}
-            {{ wtf.form_errors(p, hiddens="only") }}
-            <tr>
-                <td>{{ p.player }}{{ p.player.data }}</td>
-                <td>{{ p.is_active }}</td>
-            </tr>
-            {% endfor %}
-          </table>
-        </div>
-        {{ wtf.form_field(roster_form.submit, button_map={'submit': 'info my-1 btn-block'}) }}
-      </form>
-  </div>  
 </div>
 
 

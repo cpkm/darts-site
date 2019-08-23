@@ -185,18 +185,20 @@ class Match(db.Model):
     overtime = db.Column(db.Boolean, index=True, default=False)
     match_summary = db.Column(db.String(512))
     food = db.Column(db.String(128))
-
+    season_id = db.Column(db.Integer, db. ForeignKey('season.id'))
+    season = db.relationship('Season', back_populates='matches')
+    
     match_stats = db.relationship('MatchStats', uselist=False, back_populates='match')
     high_scores = db.relationship('HighScore', back_populates='match', lazy='dynamic')
     low_scores = db.relationship('LowScore', back_populates='match', lazy='dynamic')
 
-    @hybrid_property
-    def season(self):
-        return season_from_date(self.date)
+    # @hybrid_property
+    # def season(self):
+    #     return season_from_date(self.date)
 
-    @season.expression
-    def season(cls):
-        return season_from_date(cls.date)
+    # @season.expression
+    # def season(cls):
+    #     return season_from_date(cls.date)
 
     def add_game(self, game):
         if not self.is_game(game):
@@ -261,6 +263,10 @@ class Match(db.Model):
             db.session.delete(ls)
         db.session.commit()
 
+    def set_season(self):
+        if self.date is not None:
+            self.season = season_from_date(self.date)
+
     def set_location(self):
         if self.opponent is not None:
             if self.home_away == 'away':
@@ -272,7 +278,7 @@ class Match(db.Model):
         return Player.query.join(PlayerGame).join(Game).filter_by(match=self).order_by(Player.nickname).all()
 
     def __repr__(self):
-        return '<Match {}>'.format(self.date)
+        return '<Match {}>'.format(self.date.strftime('%Y-%m-%d'))
 
 
 class Team(db.Model):
@@ -385,6 +391,7 @@ class Season(db.Model):
     season_name = db.Column(db.String(64), index=True, unique=True)
     start_date = db.Column(db.Date, index=True)
     end_date = db.Column(db.Date, index=True)
+    matches = db.relationship('Match', back_populates='season', lazy='dynamic')
 
     def __repr__(self):
         return '<Season {}>'.format(self.season_name)
@@ -422,6 +429,9 @@ class MatchStats(db.Model):
 
 def season_from_date(date):
     season = Season.query.filter(Season.start_date <= date).filter(Season.end_date >= date).first()
+
+    if season is None:
+        season = Season.query.order_by(Season.end_date.desc()).first()
     return season
 
 def update_all_player_stats():

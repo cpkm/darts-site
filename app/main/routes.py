@@ -156,6 +156,7 @@ def match_edit(id):
             opponent=Team.query.filter_by(name=form.opponent.data).first(), 
             home_away=form.home_away.data, match_type=form.match_type.data)
         newmatch.set_location()
+        newmatch.set_season()
         db.session.add(newmatch)
         db.session.commit()
         flash('Match {} {} {} added!'.format(newmatch.date, form.opponent.data, form.home_away.data))
@@ -167,6 +168,7 @@ def match_edit(id):
         match.home_away = form.home_away.data
         match.match_type = form.match_type.data
         match.set_location()
+        match.set_season()
         db.session.add(match)
         db.session.commit()
         flash('Match {} {} {} modified!'.format(form.date.data, form.opponent.data, form.home_away.data))
@@ -359,6 +361,28 @@ def leaderboard(year_str):
 def profile():
     print(current_user.role)
     return render_template('profile.html')
+
+
+@bp.route('/captain', methods=['GET', 'POST'])
+@login_required
+@check_verification
+@check_role(['admin','captain'])
+def captain():
+    roster_form = RosterForm()
+    if roster_form.validate_on_submit():
+        for player_form in roster_form.roster:
+
+            if player_form.player.data is not None:
+                p = Player.query.filter_by(nickname=player_form.player.data).first()
+                p.is_active = player_form.is_active.data
+                db.session.add(p)
+                db.session.commit()
+        flash('Updated active roster!')
+        return redirect(url_for('main.captain'))
+    elif request.method == 'GET':
+        roster_form.fill_roster()
+
+    return render_template('captain.html', roster_form=roster_form)
 
 @bp.route('/search')
 @login_required
