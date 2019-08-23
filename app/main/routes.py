@@ -10,6 +10,7 @@ from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeaso
     season_from_date, update_all_team_stats)
 from app.decorators import check_verification, check_role
 from app.main.leaderboard_card import LeaderBoardCard
+from app.main.email import send_reminder_email as reminder_email
 
 @bp.before_request
 def before_request():
@@ -384,16 +385,23 @@ def captain():
 
     return render_template('captain.html', roster_form=roster_form)
 
+
+@bp.route('/send_reminder_email/<token>', methods=['POST'])
+@login_required
+@check_verification
+@check_role(['admin','captain'])
+def send_reminder_email(token):
+    user = User.verify_user_token(token, task='send_reminder_email')
+    if not user:
+        return redirect(url_for('main.index'))
+
+    reminder_email(recipients='me',match='next')
+    flash('Reminder email sent!')
+
+    return redirect(url_for('main.captain'))
+
+
 @bp.route('/search')
 @login_required
 def search():
     return 0
-
-
-
-
-
-
-
-
-

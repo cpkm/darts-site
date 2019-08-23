@@ -1,12 +1,11 @@
 from flask import render_template, current_app
-from app.email import send_email
+from app.email import send_bulk_email
 
-def send_reminder_email(user):
-    token = user.get_reset_password_token(task='verify_email', expires_in=86400)
-    send_email('[ICC4] Reset Your Password',
-               sender=current_app.config['ADMINS'][0],
-               recipients=[user.email],
-               text_body=render_template('email/reset_password.txt',
-                                         user=user, token=token),
-               html_body=render_template('email/reset_password.html',
-                                         user=user, token=token))
+def send_reminder_email(users, match):
+    print('sending email to {} for {} match.'.format(users,match))
+    token = [u.get_user_token(task='checkin') for u in users]
+    send_bulk_email('ICC4 Event reminder: {} at {}'.format(match.date.strftime('%d-%b'), match.location),
+              sender=current_app.config['ADMINS'][0],
+              recipients=[u.email for u in users],
+              text_body=[render_template('email/event_reminder.txt', match=match, user=u, token=t) for u,t in zip(users,token)],
+              html_body=[render_template('email/event_reminder.html', match=match, user=u, token=t) for u,t in zip(users,token)])
