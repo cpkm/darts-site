@@ -30,9 +30,19 @@
         </div>    
       </div>
       <div class="tab-pane" id="player" role="tabpanel" aria-labelledby="player-tab">
-        <div class="col-12 mt-2 mx-auto">
+        <div class="col-6 mt-2 mx-auto">
         {% if not current_user.player %}
-            <p>You have not selected a player.</p>
+            <p>You have not selected a player. Please complete the details below:</p>
+            <form class="form" method="post" role="form">
+                {{ player_form.hidden_tag() }}
+                {{ wtf.form_errors(player_form, hiddens="only") }}
+
+                {{ wtf.form_field(player_form.nickname) }}
+                {{ wtf.form_field(player_form.first_name) }}
+                {{ wtf.form_field(player_form.last_name) }}
+
+                {{ wtf.form_field(player_form.submit_edit, button_map={'submit_edit': 'info my-1 btn-block'}) }}
+              </form>
         {% else %}
             <p>Playername: {{ current_user.nickname }}</p>
             <p>Firstname: {{ current_user.first_name }}</p>
@@ -51,4 +61,21 @@
   </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+$(function(){
+  var hash = window.location.hash;
+  hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+  $('.nav-tabs a').click(function (e) {
+    $(this).tab('show');
+    var scrollmem = $('body').scrollTop() || $('html').scrollTop();
+    window.location.hash = this.hash;
+    $('html,body').scrollTop(scrollmem);
+  });
+});
+</script>
 {% endblock %}

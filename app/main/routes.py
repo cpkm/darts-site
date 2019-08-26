@@ -360,8 +360,12 @@ def leaderboard(year_str):
 @bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    print(current_user.role)
-    return render_template('profile.html')
+    if current_user.player:
+        player=Player.query.filter_by(nickname=current_user.player.nickname).first()
+    else:
+        player=None
+    player_form = EditPlayerForm(obj=player)
+    return render_template('profile.html', player_form=player_form)
 
 
 @bp.route('/captain', methods=['GET', 'POST'])
