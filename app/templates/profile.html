@@ -6,11 +6,48 @@
 <div class="col-12 mt-2 mx-auto">
   <div class="card h-100">
     <h2 class="card-header">Player Profile</h2>
-    <div class="col-12 mt-2 mx-auto">
-      <p>Username: {{ current_user.username }}</p>
-      <p>Email: {{ current_user.email }}</p>
-      <p>Role: {{ current_user.role }}</p>
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">Profile</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="player-tab" data-toggle="tab" href="#player" role="tab" aria-controls="player" aria-selected="false">Player</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false">Settings</a>
+      </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <div class="tab-pane active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+        <div class="col-12 mt-2 mx-auto">
+          <p>Username: {{ current_user.username }}</p>
+          <p>Email: {{ current_user.email }}</p>
+          <p>Role: {{ current_user.role }}</p>
+        </div>    
+      </div>
+      <div class="tab-pane" id="player" role="tabpanel" aria-labelledby="player-tab">
+        <div class="col-12 mt-2 mx-auto">
+        {% if not current_user.player %}
+            <p>You have not selected a player.</p>
+        {% else %}
+            <p>Playername: {{ current_user.nickname }}</p>
+            <p>Firstname: {{ current_user.first_name }}</p>
+            <p>Lastname: {{ current_user.last_name }}</p>
+            <p>Active: {% if current_user.is_active %}Yes{% else %}No{% endif %}</p>
+            <p>Player page: <a href="{{ url_for('main.player', nickname=player.nickname) }}">link</a></p>
+        {% endif %}
+        </div>
+      </div>
+      <div class="tab-pane" id="settings" role="tabpanel" aria-labelledby="settings-tab">...</div>
     </div>
+
+
+
+
   </div>
 </div>
 
