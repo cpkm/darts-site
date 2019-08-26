@@ -22,6 +22,8 @@ class User(UserMixin, db.Model):
     verified = db.Column(db.Boolean, index=True, default=False)
     verified_on = db.Column(db.Date, index=True, default=None)
 
+    player = db.relationship('Player', uselist=False, back_populates='user')
+
     def set_password(self,password):
         self.password_hash = generate_password_hash(password)
 
@@ -89,6 +91,9 @@ class Player(db.Model):
 
     high_scores = db.relationship('HighScore', back_populates='player', lazy='dynamic')
     low_scores = db.relationship('LowScore', back_populates='player', lazy='dynamic')
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', back_populates='player')
 
     def avatar(self, size):
         digest = md5(self.nickname.lower().encode('utf-8')).hexdigest()
