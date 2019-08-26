@@ -96,7 +96,10 @@ class Player(db.Model):
     user = db.relationship('User', back_populates='player')
 
     def avatar(self, size):
-        digest = md5(self.nickname.lower().encode('utf-8')).hexdigest()
+        if self.user:
+            return self.user.avatar(size)
+        else:
+            digest = md5(self.nickname.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
             digest, size)
 
