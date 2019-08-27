@@ -45,7 +45,6 @@ def index():
 @check_role(['admin','captain'])
 def player_edit(nickname):
     player = Player.query.filter_by(nickname=nickname).first()
-    print(nickname,player.nickname)
     form = EditPlayerForm(nickname)
     all_players = Player.query.order_by(Player.nickname).all()
     
@@ -64,7 +63,6 @@ def player_edit(nickname):
             newplayer.nickname, newplayer.first_name, newplayer.last_name), 'warning')
 
     if form.submit_edit.data and form.validate() and player is not None:
-        print('edit')
         player.first_name = form.first_name.data
         player.last_name = form.last_name.data
         player.nickname = form.nickname.data
@@ -83,7 +81,7 @@ def player_edit(nickname):
             player.nickname, player.first_name, player.last_name), 'danger')
         return redirect(url_for('main.player_edit'))
 
-    elif request.method == 'GET':
+    elif request.method == 'GET' and player is not None:
         form.first_name.data = player.first_name
         form.last_name.data = player.last_name
         form.nickname.data = player.nickname
@@ -355,10 +353,12 @@ def leaderboard(year_str):
 @login_required
 def profile():
     if current_user.player:
-        player=Player.query.filter_by(nickname=current_user.player.nickname).first()
+        nickname = current_user.player.nickname
+        player=Player.query.filter_by(nickname=nickname).first()
     else:
-        player=None
-    player_form = EditPlayerForm(obj=player)
+        player = None
+        nickname = None
+    player_form = EditPlayerForm(nickname)
     claim_form = ClaimPlayerForm()
 
     if request.method=='POST' and claim_form.submit_claim.data and claim_form.validate():
@@ -366,6 +366,9 @@ def profile():
         current_user.player = claimed_player
         db.session.add(current_user)
         db.session.commit()
+
+        flash('Player {} ({} {}) claimed!'.format(
+            claimed_player.nickname, claimed_player.first_name, claimed_player.last_name))
 
     if request.method=='POST' and player_form.submit_new.data and player_form.validate():
         new_player = Player(nickname=player_form.nickname.data,
@@ -378,6 +381,25 @@ def profile():
         current_user.player = Player.query.filter_by(nickname=new_player.nickname).first()
         db.session.add(current_user)
         db.session.commit()
+
+        flash('Player {} ({} {}) assigned!'.format(
+            new_player.nickname, new_player.first_name, new_player.last_name))
+        return redirect(url_for('main.profile'))
+
+    if request.method=='POST' and player_form.submit_edit.data and player_form.validate() and player is not None:
+        player.first_name = player_form.first_name.data
+        player.last_name = player_form.last_name.data
+        player.nickname = player_form.nickname.data
+        db.session.add(player)
+        db.session.commit()
+        flash('Player {} ({} {}) modified!'.format(
+            player.nickname, player.first_name, player.last_name))
+        return redirect(url_for('main.profile'))
+
+    elif request.method == 'GET' and player is not None:
+        player_form.first_name.data = player.first_name
+        player_form.last_name.data = player.last_name
+        player_form.nickname.data = player.nickname
 
     return render_template('profile.html', player_form=player_form, claim_form=claim_form)
 

@@ -70,11 +70,16 @@ def reset_password_request():
 
 @bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
-    if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
-    user = User.verify_reset_password_token(token)
+    user = User.verify_user_token(token, task='reset_password')
     if not user:
+        flash('Invalid token', 'danger')
         return redirect(url_for('main.index'))
+
+    print(user,current_user,(current_user is user), (current_user==user))
+    if current_user.is_authenticated and current_user != user:
+        flash('You do not have authorization to complete this task.', 'danger')
+        return redirect(url_for('main.index'))
+
     form = ResetPasswordForm()
     if form.validate_on_submit():
         user.set_password(form.password.data)
