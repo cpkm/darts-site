@@ -35,11 +35,6 @@ class User(UserMixin, db.Model):
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
             digest, size)
 
-    # def get_reset_password_token(self, expires_in=600):
-    #     return jwt.encode(
-    #         {'reset_password': self.id, 'exp': time() + expires_in},
-    #         current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
-
     def get_user_token(self, task, expires_in=600):
         params = {task: self.id}
         if expires_in is not None:
@@ -53,16 +48,6 @@ class User(UserMixin, db.Model):
             return True
         else:
             return False
-
-
-    #@staticmethod
-    # def verify_reset_password_token(token):
-    #     try:
-    #         id = jwt.decode(token, current_app.config['SECRET_KEY'],
-    #                         algorithms=['HS256'])['reset_password']
-    #     except:
-    #         return
-    #     return User.query.get(id)
 
     @staticmethod
     def verify_user_token(token, task):
@@ -203,14 +188,6 @@ class Match(db.Model):
     high_scores = db.relationship('HighScore', back_populates='match', lazy='dynamic')
     low_scores = db.relationship('LowScore', back_populates='match', lazy='dynamic')
 
-    # @hybrid_property
-    # def season(self):
-    #     return season_from_date(self.date)
-
-    # @season.expression
-    # def season(cls):
-    #     return season_from_date(cls.date)
-
     def add_game(self, game):
         if not self.is_game(game):
             game.match=self
@@ -324,48 +301,9 @@ class PlayerSeasonStats(db.Model):
     total_high_scores = db.Column(db.Integer)
     total_low_scores = db.Column(db.Integer)
 
-    '''
-    filters = [filter1,filter2,...]
-    query....filter(*filters).count()
-    '''
-
-    @hybrid_property
-    def gp(self):
-        return PlayerGame.query.filter_by(player_id=self.player_id).join(Game).join(Match).\
-                filter_by(season=self.season).distinct().count()
-    
-    @gp.expression
-    def gp(cls):
-        j = join(PlayerGame,Game).join(Match)
-        return select([func.count(PlayerGame.player_id)]).where(PlayerGame.player_id==cls.player_id).\
-        select_from(j).where(Match.season.id==cls.season_id).label('gp')
-
-    @hybrid_property
-    def gw(self):
-        return PlayerGame.query.filter_by(player_id=self.player_id).join(Game).filter_by(win=True).join(Match).\
-                filter_by(season=self.season).distinct().count()
-    
-    @gw.expression
-    def gw(cls):
-        j = join(PlayerGame,Game).join(Match)
-        return select([func.count(PlayerGame.player_id)]).where(PlayerGame.player_id==cls.player_id).\
-        select_from(j).where(Game.win==True & Match.season.id==cls.season_id).label('gw')
-
-    @hybrid_property
-    def gl(self):
-        return PlayerGame.query.filter_by(player_id=self.player_id).join(Game).filter_by(win=False).join(Match).\
-                filter_by(season=self.season).distinct().count()
-    
-    @gl.expression
-    def gl(cls):
-        j = join(PlayerGame,Game).join(Match)
-        return select([func.count(PlayerGame.player_id)]).where(PlayerGame.player_id==cls.player_id).\
-        select_from(j).where(Game.win==False & Match.season.id==cls.season_id).label('gw')
-
-
-
     def __repr__(self):
         return '<{} {}>'.format(self.player.nickname,self.season.season_name)
+
 
 class TeamSeasonStats(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -406,6 +344,7 @@ class Season(db.Model):
 
     def __repr__(self):
         return '<Season {}>'.format(self.season_name)
+
 
 class HighScore(db.Model):
     id = db.Column(db.Integer, primary_key=True)
