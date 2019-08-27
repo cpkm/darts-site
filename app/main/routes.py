@@ -5,7 +5,8 @@ from werkzeug.urls import url_parse
 from datetime import datetime, date
 from app import db
 from app.main import bp
-from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm
+from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
+    ClaimPlayerForm)
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
     season_from_date, update_all_team_stats, current_roster)
 from app.decorators import check_verification, check_role
@@ -44,9 +45,8 @@ def index():
 @check_role(['admin','captain'])
 def player_edit(nickname):
     player = Player.query.filter_by(nickname=nickname).first()
-    form = EditPlayerForm(obj=player)
+    form = EditPlayerForm(nickname)
     all_players = Player.query.order_by(Player.nickname).all()
-    roster_form = RosterForm()
     
     if form.submit_new.data and form.validate():
         newplayer = Player(
@@ -81,21 +81,13 @@ def player_edit(nickname):
             player.nickname, player.first_name, player.last_name), 'danger')
         return redirect(url_for('main.player_edit'))
 
-    if roster_form.validate_on_submit():
-        for player_form in roster_form.roster:
-
-            if player_form.player.data is not None:
-                p = Player.query.filter_by(nickname=player_form.player.data).first()
-                p.is_active = player_form.is_active.data
-                db.session.add(p)
-                db.session.commit()
-        flash('Updated active roster!')
-        return redirect(url_for('main.player_edit'))
-    elif request.method == 'GET':
-        roster_form.fill_roster()
+    elif request.method == 'GET' and player is not None:
+        form.first_name.data = player.first_name
+        form.last_name.data = player.last_name
+        form.nickname.data = player.nickname
 
     return render_template('edit_player.html', title='Player Editor', 
-        form=form, player=player, all_players=all_players, roster_form=roster_form)
+        form=form, player=player, all_players=all_players)
 
 
 @bp.route('/team_edit',  methods=['GET', 'POST'], defaults={'name': None})
@@ -360,8 +352,56 @@ def leaderboard(year_str):
 @bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    print(current_user.role)
-    return render_template('profile.html')
+    if current_user.player:
+        nickname = current_user.player.nickname
+        player=Player.query.filter_by(nickname=nickname).first()
+    else:
+        player = None
+        nickname = None
+    player_form = EditPlayerForm(nickname)
+    claim_form = ClaimPlayerForm()
+
+    if request.method=='POST' and claim_form.submit_claim.data and claim_form.validate():
+        claimed_player = Player.query.filter_by(nickname=claim_form.player.data).first()
+        current_user.player = claimed_player
+        db.session.add(current_user)
+        db.session.commit()
+
+        flash('Player {} ({} {}) claimed!'.format(
+            claimed_player.nickname, claimed_player.first_name, claimed_player.last_name))
+
+    if request.method=='POST' and player_form.submit_new.data and player_form.validate():
+        new_player = Player(nickname=player_form.nickname.data,
+            first_name=player_form.first_name.data,
+            last_name=player_form.last_name.data)
+
+        db.session.add(new_player)
+        db.session.commit()
+
+        current_user.player = Player.query.filter_by(nickname=new_player.nickname).first()
+        db.session.add(current_user)
+        db.session.commit()
+
+        flash('Player {} ({} {}) assigned!'.format(
+            new_player.nickname, new_player.first_name, new_player.last_name))
+        return redirect(url_for('main.profile'))
+
+    if request.method=='POST' and player_form.submit_edit.data and player_form.validate() and player is not None:
+        player.first_name = player_form.first_name.data
+        player.last_name = player_form.last_name.data
+        player.nickname = player_form.nickname.data
+        db.session.add(player)
+        db.session.commit()
+        flash('Player {} ({} {}) modified!'.format(
+            player.nickname, player.first_name, player.last_name))
+        return redirect(url_for('main.profile'))
+
+    elif request.method == 'GET' and player is not None:
+        player_form.first_name.data = player.first_name
+        player_form.last_name.data = player.last_name
+        player_form.nickname.data = player.nickname
+
+    return render_template('profile.html', player_form=player_form, claim_form=claim_form)
 
 
 @bp.route('/captain', methods=['GET', 'POST'])
@@ -372,7 +412,6 @@ def captain():
     roster_form = RosterForm()
     if roster_form.validate_on_submit():
         for player_form in roster_form.roster:
-
             if player_form.player.data is not None:
                 p = Player.query.filter_by(nickname=player_form.player.data).first()
                 p.is_active = player_form.is_active.data
