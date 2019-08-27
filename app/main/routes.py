@@ -45,9 +45,9 @@ def index():
 @check_role(['admin','captain'])
 def player_edit(nickname):
     player = Player.query.filter_by(nickname=nickname).first()
-    form = EditPlayerForm(obj=player)
+    print(nickname,player.nickname)
+    form = EditPlayerForm(nickname)
     all_players = Player.query.order_by(Player.nickname).all()
-    roster_form = RosterForm()
     
     if form.submit_new.data and form.validate():
         newplayer = Player(
@@ -64,6 +64,7 @@ def player_edit(nickname):
             newplayer.nickname, newplayer.first_name, newplayer.last_name), 'warning')
 
     if form.submit_edit.data and form.validate() and player is not None:
+        print('edit')
         player.first_name = form.first_name.data
         player.last_name = form.last_name.data
         player.nickname = form.nickname.data
@@ -82,21 +83,13 @@ def player_edit(nickname):
             player.nickname, player.first_name, player.last_name), 'danger')
         return redirect(url_for('main.player_edit'))
 
-    if roster_form.validate_on_submit():
-        for player_form in roster_form.roster:
-
-            if player_form.player.data is not None:
-                p = Player.query.filter_by(nickname=player_form.player.data).first()
-                p.is_active = player_form.is_active.data
-                db.session.add(p)
-                db.session.commit()
-        flash('Updated active roster!')
-        return redirect(url_for('main.player_edit'))
     elif request.method == 'GET':
-        roster_form.fill_roster()
+        form.first_name.data = player.first_name
+        form.last_name.data = player.last_name
+        form.nickname.data = player.nickname
 
     return render_template('edit_player.html', title='Player Editor', 
-        form=form, player=player, all_players=all_players, roster_form=roster_form)
+        form=form, player=player, all_players=all_players)
 
 
 @bp.route('/team_edit',  methods=['GET', 'POST'], defaults={'name': None})
@@ -368,9 +361,21 @@ def profile():
     player_form = EditPlayerForm(obj=player)
     claim_form = ClaimPlayerForm()
 
-    if request.method=='POST' and claim_form.submit_claim.data:
+    if request.method=='POST' and claim_form.submit_claim.data and claim_form.validate():
         claimed_player = Player.query.filter_by(nickname=claim_form.player.data).first()
         current_user.player = claimed_player
+        db.session.add(current_user)
+        db.session.commit()
+
+    if request.method=='POST' and player_form.submit_new.data and player_form.validate():
+        new_player = Player(nickname=player_form.nickname.data,
+            first_name=player_form.first_name.data,
+            last_name=player_form.last_name.data)
+
+        db.session.add(new_player)
+        db.session.commit()
+
+        current_user.player = Player.query.filter_by(nickname=new_player.nickname).first()
         db.session.add(current_user)
         db.session.commit()
 
