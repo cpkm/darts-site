@@ -5,7 +5,8 @@ from werkzeug.urls import url_parse
 from datetime import datetime, date
 from app import db
 from app.main import bp
-from app.main.forms import EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm
+from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
+    ClaimPlayerForm)
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
     season_from_date, update_all_team_stats, current_roster)
 from app.decorators import check_verification, check_role
@@ -365,7 +366,15 @@ def profile():
     else:
         player=None
     player_form = EditPlayerForm(obj=player)
-    return render_template('profile.html', player_form=player_form)
+    claim_form = ClaimPlayerForm()
+
+    if request.method=='POST' and claim_form.submit_claim.data:
+        claimed_player = Player.query.filter_by(nickname=claim_form.player.data).first()
+        current_user.player = claimed_player
+        db.session.add(current_user)
+        db.session.commit()
+
+    return render_template('profile.html', player_form=player_form, claim_form=claim_form)
 
 
 @bp.route('/captain', methods=['GET', 'POST'])
@@ -376,7 +385,6 @@ def captain():
     roster_form = RosterForm()
     if roster_form.validate_on_submit():
         for player_form in roster_form.roster:
-
             if player_form.player.data is not None:
                 p = Player.query.filter_by(nickname=player_form.player.data).first()
                 p.is_active = player_form.is_active.data

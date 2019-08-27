@@ -30,9 +30,28 @@
         </div>    
       </div>
       <div class="tab-pane" id="player" role="tabpanel" aria-labelledby="player-tab">
+        <div class="container">
+        <div class="row">
         <div class="col-6 mt-2 mx-auto">
         {% if not current_user.player %}
-            <p>You have not selected a player. Please complete the details below:</p>
+            <p>You have not selected a player. Find yourself in the dropdown menu, or complete the form to the right:</p>
+            <form class="form" method="post" role="form">
+                {{ claim_form.hidden_tag() }}
+                {{ wtf.form_errors(claim_form, hiddens="only") }}
+
+                {{ wtf.form_field(claim_form.player) }}
+                {{ wtf.form_field(claim_form.submit_claim, button_map={'submit_claim': 'info my-1'}) }}
+            </form>
+        {% else %}
+            <p>You may edit you player details using the form on the right.</p>
+            <h5>Playername: {{ current_user.player.nickname }}</h5>
+            <p>First name: {{ current_user.player.first_name }}</p>
+            <p>Last name: {{ current_user.player.last_name }}</p>
+            <p>Active: {% if current_user.player.is_active %}Yes{% else %}No{% endif %}</p>
+            <p>Player page: <a href="{{ url_for('main.player', nickname=current_user.player.nickname) }}">link</a></p>
+        {% endif %}
+        </div>
+        <div class="col-6 mt-2 mx-auto">
             <form class="form" method="post" role="form">
                 {{ player_form.hidden_tag() }}
                 {{ wtf.form_errors(player_form, hiddens="only") }}
@@ -41,15 +60,14 @@
                 {{ wtf.form_field(player_form.first_name) }}
                 {{ wtf.form_field(player_form.last_name) }}
 
+                {% if current_user.player %}
                 {{ wtf.form_field(player_form.submit_edit, button_map={'submit_edit': 'info my-1 btn-block'}) }}
+                {% else %}
+                {{ wtf.form_field(player_form.submit_new, button_map={'submit_new': 'primary my-1 btn-block'}) }}
+                {% endif %}
               </form>
-        {% else %}
-            <p>Playername: {{ current_user.nickname }}</p>
-            <p>Firstname: {{ current_user.first_name }}</p>
-            <p>Lastname: {{ current_user.last_name }}</p>
-            <p>Active: {% if current_user.is_active %}Yes{% else %}No{% endif %}</p>
-            <p>Player page: <a href="{{ url_for('main.player', nickname=player.nickname) }}">link</a></p>
-        {% endif %}
+        </div>
+        </div>
         </div>
       </div>
       <div class="tab-pane" id="settings" role="tabpanel" aria-labelledby="settings-tab">...</div>

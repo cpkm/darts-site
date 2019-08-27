@@ -46,6 +46,16 @@ class RosterForm(FlaskForm):
             self.roster[i].player.data = p.nickname
             self.roster[i].is_active.data = p.is_active
 
+class ClaimPlayerForm(FlaskForm):
+    player = SelectField('', choices=[], default='--Select Player--')
+    submit_claim = SubmitField('Claim Player')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        unclaimed_players = Player.query.filter(Player.nickname!='Dummy').filter(Player.user==None).all()
+        players = [(p.nickname,p.nickname+' ('+p.first_name+' '+p.last_name+')') for p in unclaimed_players]
+        self.player.choices = players
+
 class EditTeamForm(FlaskForm):
     name = StringField('Team Name', validators=[DataRequired()])
     home_location = StringField('Home Bar', validators=[DataRequired()])
