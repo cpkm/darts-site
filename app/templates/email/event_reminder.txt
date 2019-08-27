@@ -1,6 +1,6 @@
 ICC4 Event reminder
 
-Dear {{ user.username }},
+{{ user.player.nickname }},
 
 
     You have an event coming up: 7p.m. on {{ match.date.strftime('%d-%b') }} at {{ match.location }}.
