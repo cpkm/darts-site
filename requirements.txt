@@ -19,6 +19,7 @@ itsdangerous==1.1.0
 Jinja2==2.10.1
 Mako==1.0.7
 MarkupSafe==1.0
+newrelic==5.0.2.126
 psycopg2==2.8.2
 PyJWT==1.6.4
 python-dateutil==2.7.5
