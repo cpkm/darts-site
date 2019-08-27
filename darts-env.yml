@@ -45,6 +45,7 @@ dependencies:
     - gunicorn==19.9.0
     - jinja2==2.10.1
     - mako==1.0.7
+    - newrelic==5.0.2.126
     - psycopg2==2.8.2
     - pyjwt==1.6.4
     - python-dateutil==2.7.5
