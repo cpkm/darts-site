@@ -79,6 +79,8 @@ class Player(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', back_populates='player')
 
+    checked_matches = association_proxy('checked_matches_association', 'match')
+
     def avatar(self, size):
         if self.user:
             return self.user.avatar(size)
@@ -153,6 +155,18 @@ class Game(db.Model):
             else '<Game_id {}>'.format(self.id)
 
 
+class PlayerMatchCheckin(db.Model):
+    player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
+    match_id = db.Column(db.Integer, db.ForeignKey('match.id'), primary_key=True)
+    status = db.Column(db.String(4), index=True, default='out')
+
+    player = db.relationship('Player', backref=db.backref('checked_matches_association', lazy='dynamic'))
+    match = db.relationship('Match', backref=db.backref('checked_players_association', lazy='dynamic'))
+
+    def __repr__(self):
+        return '<Checkin Player {}, Match {}>'.format(self.player_id,self.match_id)
+
+
 class PlayerGame(db.Model):
     player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'), primary_key=True)
@@ -186,6 +200,8 @@ class Match(db.Model):
     match_stats = db.relationship('MatchStats', uselist=False, back_populates='match')
     high_scores = db.relationship('HighScore', back_populates='match', lazy='dynamic')
     low_scores = db.relationship('LowScore', back_populates='match', lazy='dynamic')
+
+    checked_players = association_proxy('checked_players_association', 'player')
 
     def add_game(self, game):
         if not self.is_game(game):
