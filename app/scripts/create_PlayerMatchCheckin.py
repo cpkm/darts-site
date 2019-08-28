@@ -1,6 +1,8 @@
 from app import create_app, db
 from app.models import Match, Player, PlayerMatchCheckin
 
+'''Run this script from the app root directory'''
+
 print('Initializing...')
 app = create_app()
 with app.app_context():

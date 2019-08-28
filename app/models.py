@@ -81,6 +81,19 @@ class Player(db.Model):
 
     checked_matches = association_proxy('checked_matches_association', 'match')
 
+    def create_checkins(self):
+        pwc = [PlayerMatchCheckin(match_id=m.id, player=self.id) for p in Match.query.all()]
+        db.session.add_all(pwc)
+        db.session.commit()
+        return
+
+    def destroy_checkins(self):
+        pwc = PlayerMatchCheckin.query.filter_by(player_id=self.id).all()
+        for p in pwc:
+            db.session.delete(p)
+        db.session.commit()
+        return
+
     def avatar(self, size):
         if self.user:
             return self.user.avatar(size)
@@ -276,6 +289,20 @@ class Match(db.Model):
                 self.location = self.opponent.home_location
             else:
                 self.location = 'Italian Canadian Club'
+
+    def create_checkins(self):
+        pwc = [PlayerMatchCheckin(match_id=self.id, player=p.id) for p in Player.query.all()]
+        db.session.add_all(pwc)
+        db.session.commit()
+        return
+
+    def destroy_checkins(self):
+        pwc = PlayerMatchCheckin.query.filter_by(match_id=self.id).all()
+        for p in pwc:
+            db.session.delete(p)
+        db.session.commit()
+        return
+
 
     def get_roster(self):
         return Player.query.join(PlayerGame).join(Game).filter_by(match=self).order_by(Player.nickname).all()
