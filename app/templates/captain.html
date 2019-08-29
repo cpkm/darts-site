@@ -4,48 +4,104 @@
 {% block app_content %}
 
 
-  <div class="card h-100">
-    <h2 class="card-header">Captain's Portal</h2>
-    <div class="col-12 mt-2 mx-auto">
-      <h4>Account details</h4>
-      <p>Email: {{ current_user.email }}</p>
-      <p>Role: {{ current_user.role }}</p>
-    </div>
-  </div>
-  <div class="card h-100">
-    <h2 class="card-header">Emails</h2>
-    <div class="col-12 mt-2 mx-auto">
-        <button type="button" id="modal-click" class="btn btn-danger btn-block my-1" data-toggle="modal" data-target="#confirmModal">Send Reminder Email</button>
+<div class="card h-100">
+  <h2 class="card-header">Captain's Portal</h2>
 
-    </div>
-  </div>
-  <div class="card h-100">
-    <h2 class="card-header">Active roster</h2>
-    <div class="col-12 mt-2 mx-auto">
-      <form class="form" method="post" role="form">
-        {{ roster_form.hidden_tag() }}
-        {{ wtf.form_errors(roster_form, hiddens="only") }}
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">Profile</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="roster-tab" data-toggle="tab" href="#roster" role="tab" aria-controls="roster" aria-selected="false">Roster</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="email-tab" data-toggle="tab" href="#email" role="tab" aria-controls="email" aria-selected="false">Email</a>
+    </li>
+  </ul>
 
-        <div>
-          <table class="table">
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div class="tab-pane active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+      <div class="col-12 mt-2 mx-auto">
+        <h4>Account details</h4>
+        <p>Email: {{ current_user.email }}</p>
+        <p>Role: {{ current_user.role }}</p>
+      </div>    
+    </div>
+
+    <div class="tab-pane" id="roster" role="tabpanel" aria-labelledby="roster-tab">
+      <div class="container">
+      <h3 class="card-header">Active roster</h3>
+        <div class="col-12 mt-2 mx-auto">
+          <form class="form" method="post" role="form">
+            {{ roster_form.hidden_tag() }}
+            {{ wtf.form_errors(roster_form, hiddens="only") }}
+
+            <div>
+              <table class="table">
+                <tr>
+                  <th>Player</th>
+                  <th>Lastname</th>
+                  <th>Firstname</th>
+                  <th>Active</th>
+                </tr>
+                {% for p in roster_form.roster %}
+                {{ p.hidden_tag() }}
+                {{ wtf.form_errors(p, hiddens="only") }}
+                <tr>
+                    <td>{{ p.player.data.nickname }}</td>
+                    <td>{{ p.player.data.last_name }}</td>
+                    <td>{{ p.player.data.first_name }}</td>
+                    <td>{{ p.is_active }}</td>
+                </tr>
+                {% endfor %}
+              </table>
+            </div>
+            {{ wtf.form_field(roster_form.submit, button_map={'submit': 'info my-1 btn-block'}) }}
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="email" role="tabpanel" aria-labelledby="email-tab">
+      <div class="container m-2">
+        {% if upcoming_matches %}
+        <table class="table">
+          <thead>
             <tr>
-              <th> Player </th>
-              <th> Active </th>
+              <th scope="col">Date</th>
+              <th scope="col">Team</th>
+              <th scope="col">Home/Away</th>
+              <th scope="col">Checked In</th>
+              <th scope="col"></th>
             </tr>
-            {% for p in roster_form.roster %}
-            {{ p.hidden_tag() }}
-            {{ wtf.form_errors(p, hiddens="only") }}
+          </thead>
+          <tbody>
+            {% for m in upcoming_matches %}
             <tr>
-                <td>{{ p.player }}{{ p.player.data }}</td>
-                <td>{{ p.is_active }}</td>
+              <th scope="row">{{ m.date.strftime('%b %d') }}</th> 
+              <td>{{ m.opponent.name }}</td>
+              <td>{{ m.home_away }}</td>
+              <td></td>
+              <td>
+                <a role="button" class="btn btn-danger btn-sm" data-id="{{ m.__repr__()[1:-1] }}" href="#" data-href="{{ url_for('main.send_reminder_email', token=current_user.get_user_token(task='send_reminder_email'), match_id=m.id) }}" data-toggle="modal" data-target="#confirmModal">Send Reminder Email</a>
+              </td>
             </tr>
             {% endfor %}
-          </table>
-        </div>
-        {{ wtf.form_field(roster_form.submit, button_map={'submit': 'info my-1 btn-block'}) }}
-      </form>
+          </tbody>
+        </table>
+        {% else %}
+        <p>You have no upcoming matches</p>
+        {% endif %}
+      </div>
     </div>
+  
   </div>
+
+</div>
+
+
 
 <!-- Modal -->
 <div class="modal" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
@@ -58,18 +114,44 @@
         </button>
       </div>
       <div class="modal-body">
+        <p class="debug-url"><p>
         <p>This will send a reminder email to all active roster players.</p>
         <p class="text-center">Are you sure you want to send this email?</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-info mr-auto" data-dismiss="modal">Cancel</button>
-        <form action="{{ url_for('main.send_reminder_email', token=current_user.get_user_token(task='send_reminder_email')) }}" method="post">
-          <input type="submit" name="sendreminder" value="Send Email" class="btn btn-danger">
-        </form>
+        <a class="btn btn-danger btn-ok">Confirm</a>
       </div>
     </div>
   </div>
 </div> 
 
+{% endblock %}
 
+{% block scripts %}
+{{ super() }}
+
+<script>
+$(function(){
+  var hash = window.location.hash;
+  hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+  $('.nav-tabs a').click(function (e) {
+    $(this).tab('show');
+    var scrollmem = $('body').scrollTop() || $('html').scrollTop();
+    window.location.hash = this.hash;
+    $('html,body').scrollTop(scrollmem);
+  });
+});
+</script>
+
+<script>
+$('#confirmModal').on('show.bs.modal', function(e) {
+    $(this).find('.btn-ok').attr('href', $(e.relatedTarget).data('href'));
+
+    $(this).find('.btn-ok').attr('id', $(e.relatedTarget).data('id'));
+    
+    $('.debug-url').html('Match: <strong>'+ $(this).find('.btn-ok').attr('id') + '</strong>');
+});
+</script>
 {% endblock %}

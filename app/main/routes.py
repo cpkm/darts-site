@@ -439,31 +439,35 @@ def captain():
     elif request.method == 'GET':
         roster_form.fill_roster()
 
-    return render_template('captain.html', roster_form=roster_form)
+    upcoming_matches = Match.query.filter(Match.date>=date.today()).order_by(Match.date).all()
+
+    return render_template('captain.html', roster_form=roster_form, upcoming_matches=upcoming_matches)
 
 
-@bp.route('/send_reminder_email/<token>', methods=['POST'])
+@bp.route('/send_reminder_email/<match_id>/<token>', methods=['GET','POST'])
 @login_required
 @check_verification
 @check_role(['admin','captain'])
-def send_reminder_email(token):
+def send_reminder_email(match_id, token):
     user = User.verify_user_token(token, task='send_reminder_email')
     if not user:
         return redirect(url_for('main.index'))
 
+    match = Match.query.filter_by(id=match_id).first()
+    #match=Match.query.order_by(Match.date.desc()).first()
+
     #users = [p.user for p in current_roster()]
     users = User.query.all()
     
-    reminder_email(users=users, match=Match.query.order_by(Match.date.desc()).first())
+    reminder_email(users=users,match=match)
     flash('Reminder email sent!')
+    return redirect(url_for('main.captain', _anchor="email"))
 
-    return redirect(url_for('main.captain'))
 
 @bp.route('/checkin/<player_id>/<match_id>/<status>', methods=['GET','POST'])
 def checkin(player_id, match_id, status):
     player = Player.query.filter_by(id=player_id).first()
     match = Match.query.filter_by(id=match_id).first()
-    print(match,player)
     player.checkin(match,status)
     return redirect(url_for('main.profile', _anchor='checkin'))
 

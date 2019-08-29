@@ -38,11 +38,11 @@ class RosterForm(FlaskForm):
         super().__init__(*args,**kwargs)
 
     def fill_roster(self):
-        all_players = Player.query.order_by(Player.nickname).all()
+        all_players = Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).order_by(Player.nickname).all()
 
         for i,p in enumerate(all_players):
             self.roster.append_entry()
-            self.roster[i].player.data = p.nickname
+            self.roster[i].player.data = p
             self.roster[i].is_active.data = p.is_active
 
 class ClaimPlayerForm(FlaskForm):
