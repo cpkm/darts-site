@@ -1,9 +1,12 @@
-<h3>ICC4 Event reminder</h3>
-<h5>{{ user.player.nickname }}</h5>
+<h1>ICC4 Event reminder</h1>
+<h3>{{ user.player.nickname }}</h3>
 <p>
-    You have an event coming up: 7p.m. on {{ match.date.strftime('%d-%b') }} at {{ match.location }}.
+    You have an event coming up: 7p.m. on {{ match.date.strftime('%B %-d') }} at {{ match.location }}.
 </p>
 <p>Currently you have checked-in as: </p>
 <p>Click the links below to change your status.</p>
+<button type="button" href="">In</button>
+<button type="button" href="">Out</button>
+<button type="button" href="">If Needed</button>
 <p>Sincerely,</p>
 <p>The ICC4 pub darts team</p>

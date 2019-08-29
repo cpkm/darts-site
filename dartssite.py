@@ -1,5 +1,5 @@
 from app import create_app, db
-from app.models import Player, Game, Match, PlayerGame, Team, Season, PlayerSeasonStats, MatchStats, User
+from app.models import Player, Game, Match, PlayerGame, Team, Season, PlayerSeasonStats, MatchStats, User, PlayerMatchCheckin
 
 app = create_app()
 
@@ -7,4 +7,4 @@ app = create_app()
 def make_shell_context():
     return {'db': db, 'Player': Player, 'Game': Game, 'Match': Match, 
         'PlayerGame': PlayerGame, 'Team': Team, 'Season': Season, 
-        'PlayerSeasonStats': PlayerSeasonStats, 'User': User}
+        'PlayerSeasonStats': PlayerSeasonStats, 'User': User , 'PlayerMatchCheckin':PlayerMatchCheckin}
