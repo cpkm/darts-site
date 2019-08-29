@@ -5,8 +5,8 @@
 </p>
 <p>Currently you have checked-in as: </p>
 <p>Click the links below to change your status.</p>
-<button type="button" href="">In</button>
-<button type="button" href="">Out</button>
-<button type="button" href="">If Needed</button>
+<button type="button"><a role="button" href="{{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='in', _external=True) }}">In</a></button>
+<button type="button"><a role="button" href="{{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='out', _external=True) }}">Out</a></button>
+<button type="button"><a role="button" href="{{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='ifn', _external=True) }}">If Needed</a></button>
 <p>Sincerely,</p>
 <p>The ICC4 pub darts team</p>

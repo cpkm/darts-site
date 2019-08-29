@@ -8,7 +8,11 @@ ICC4 Event reminder
 
 Currently you have checked-in as: placeholder
 
-Click the links below to change your status.
+Click the links below to change your status:
+
+In: {{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='in', _external=True) }}
+Out: {{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='out', _external=True) }}
+If Needed: {{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='ifn', _external=True) }}
 
 Sincerely,
 
