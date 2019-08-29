@@ -79,6 +79,40 @@ class Player(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', back_populates='player')
 
+    checked_matches = association_proxy('checked_matches_association', 'match')
+
+    def create_checkins(self):
+        matches = Match.query.filter(Match.date>=date.today()).all()
+        pwc = [PlayerMatchCheckin(match_id=m.id, player_id=self.id) for m in matches]
+        try:
+            db.session.add_all(pwc)
+            db.session.commit()
+        except:
+            return False
+
+        return True
+
+    def destroy_checkins(self):
+        pwc = PlayerMatchCheckin.query.filter_by(player_id=self.id).all()
+        for p in pwc:
+            db.session.delete(p)
+
+        db.session.commit()
+        return
+
+    def checkin(self, match, status):
+        pmc = PlayerMatchCheckin.query.filter_by(player_id=self.id,match_id=match.id).first()
+
+        if status.lower() in ['in','out','ifn'] and pmc:
+            pmc.status = status
+            db.session.add(pmc)
+            db.session.commit()
+            print('checked in {}: status {}'.format(match,status))
+            return True
+        else:
+            print('status not found')
+        return False
+
     def avatar(self, size):
         if self.user:
             return self.user.avatar(size)
@@ -153,6 +187,18 @@ class Game(db.Model):
             else '<Game_id {}>'.format(self.id)
 
 
+class PlayerMatchCheckin(db.Model):
+    player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
+    match_id = db.Column(db.Integer, db.ForeignKey('match.id'), primary_key=True)
+    status = db.Column(db.String(4), index=True, default='out')
+
+    player = db.relationship('Player', backref=db.backref('checked_matches_association', lazy='dynamic'))
+    match = db.relationship('Match', backref=db.backref('checked_players_association', lazy='dynamic'))
+
+    def __repr__(self):
+        return '<Checkin Player {}, Match {}>'.format(self.player_id,self.match_id)
+
+
 class PlayerGame(db.Model):
     player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'), primary_key=True)
@@ -186,6 +232,8 @@ class Match(db.Model):
     match_stats = db.relationship('MatchStats', uselist=False, back_populates='match')
     high_scores = db.relationship('HighScore', back_populates='match', lazy='dynamic')
     low_scores = db.relationship('LowScore', back_populates='match', lazy='dynamic')
+
+    checked_players = association_proxy('checked_players_association', 'player')
 
     def add_game(self, game):
         if not self.is_game(game):
@@ -260,6 +308,23 @@ class Match(db.Model):
                 self.location = self.opponent.home_location
             else:
                 self.location = 'Italian Canadian Club'
+
+    def create_checkins(self):
+        pwc = [PlayerMatchCheckin(match_id=self.id, player_id=p.id) for p in Player.query.all()]
+        try:
+            db.session.add_all(pwc)
+            db.session.commit()
+        except:
+            return False
+        return True
+
+    def destroy_checkins(self):
+        pwc = PlayerMatchCheckin.query.filter_by(match_id=self.id).all()
+        for p in pwc:
+            db.session.delete(p)
+        db.session.commit()
+        return
+
 
     def get_roster(self):
         return Player.query.join(PlayerGame).join(Game).filter_by(match=self).order_by(Player.nickname).all()

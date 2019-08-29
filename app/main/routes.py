@@ -55,7 +55,12 @@ def player_edit(nickname):
             nickname=form.nickname.data)
         if Player.query.filter_by(nickname=newplayer.nickname).first() is None:
             db.session.add(newplayer)
+            db.session.flush()
+            player_id = newplayer.id
             db.session.commit()
+            player = Player.query.filter_by(id=player_id).first()
+            player.create_checkins()
+
             flash('Player {} ({} {}) added!'.format(
                 newplayer.nickname, newplayer.first_name, newplayer.last_name))
             return redirect(url_for('main.player_edit'))
@@ -73,6 +78,7 @@ def player_edit(nickname):
         return redirect(url_for('main.player_edit', nickname=player.nickname))
 
     if  form.submit_delete.data and player is not None:
+        player.destroy_checkins()
         stats=PlayerSeasonStats.query.filter_by(player=player).all()
         for m in [player]+stats:
             db.session.delete(m)
@@ -151,7 +157,12 @@ def match_edit(id):
         newmatch.set_location()
         newmatch.set_season()
         db.session.add(newmatch)
+        db.session.flush()
+        match_id = newmatch.id
         db.session.commit()
+        match = Match.query.filter_by(id=match_id).first()
+        match.create_checkins()
+
         flash('Match {} {} {} added!'.format(newmatch.date, form.opponent.data, form.home_away.data))
         return redirect(url_for('main.match_edit'))
 
@@ -169,6 +180,7 @@ def match_edit(id):
 
     if  form.submit_delete.data and match is not None:
         match.delete_all_games()
+        match.destroy_checkins()
         db.session.delete(match)
         db.session.commit()
         flash('Match {} {} {} and all associated games deleted!'.format(form.date.data, form.opponent.data, form.home_away.data), 'danger')
@@ -354,10 +366,14 @@ def leaderboard(year_str):
 def profile():
     if current_user.player:
         nickname = current_user.player.nickname
-        player=Player.query.filter_by(nickname=nickname).first()
+        player = Player.query.filter_by(nickname=nickname).first()
+        checked_matches = player.checked_matches_association.\
+            join(Match).filter(Match.date>=date.today()).order_by(Match.date).all()
     else:
         player = None
         nickname = None
+        checked_matches = None
+
     player_form = EditPlayerForm(nickname)
     claim_form = ClaimPlayerForm()
 
@@ -401,7 +417,8 @@ def profile():
         player_form.last_name.data = player.last_name
         player_form.nickname.data = player.nickname
 
-    return render_template('profile.html', player_form=player_form, claim_form=claim_form)
+    return render_template('profile.html', player_form=player_form, claim_form=claim_form, 
+        checked_matches=checked_matches)
 
 
 @bp.route('/captain', methods=['GET', 'POST'])
@@ -441,6 +458,14 @@ def send_reminder_email(token):
     flash('Reminder email sent!')
 
     return redirect(url_for('main.captain'))
+
+@bp.route('/checkin/<player_id>/<match_id>/<status>', methods=['GET','POST'])
+def checkin(player_id, match_id, status):
+    player = Player.query.filter_by(id=player_id).first()
+    match = Match.query.filter_by(id=match_id).first()
+    print(match,player)
+    player.checkin(match,status)
+    return redirect(url_for('main.profile', _anchor='checkin'))
 
 
 @bp.route('/search')
