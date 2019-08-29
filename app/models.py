@@ -132,41 +132,46 @@ class Player(db.Model):
         db.session.commit()
         return
 
-    def update_player_stats(self, season_name='current'):
-        if season_name=='current':
-            season = season_from_date(date.today())
-        elif season_name=='last':
-            season = season_from_date(date.today()-timedelta(365))
+    def update_player_stats(self, season='all'):
+        if season=='current':
+            seasons = [season_from_date(date.today())]
+        elif season=='last':
+            seasons = [season_from_date(date.today()-timedelta(365))]
+        elif season=='all':
+            seasons = Season.query.all()
+        elif not isinstance(season, list):
+            seasons = [season]
         else:
-            season = Season.query.filter_by(season_name=season_name).first()
+            seasons = season
 
-        if season is None:
-            raise NameError('No season found')
+        for season in seasons:    
+            if season is None or not isinstance(season,Season):
+                raise NameError('No season found')
 
-        stats = PlayerSeasonStats.query.filter_by(player_id=self.id, season=season).first()
+            stats = PlayerSeasonStats.query.filter_by(player_id=self.id, season=season).first()
 
-        if stats is None:
-            stats = PlayerSeasonStats(season=season, player=self)
+            if stats is None:
+                stats = PlayerSeasonStats(season=season, player=self)
 
-        player_games = PlayerGame.query.filter_by(player=self).join(Game).join(Match).\
-                            filter(Match.season==season)
-        stats.matches_played = Match.query.filter(Match.season==season).\
-                                    join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
-        stats.matches_won = Match.query.filter_by(win=True).filter(Match.season==season).\
-                            join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
-        stats.matches_lost = Match.query.filter_by(win=False).filter(Match.season==season).\
-                            join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
-        stats.games_played = player_games.count()
-        stats.games_won = Game.query.filter_by(win=True).join(PlayerGame).filter_by(player_id=self.id).\
-                            join(Match).filter(Match.season==season).count()
-        stats.games_lost = Game.query.filter_by(win=False).join(PlayerGame).filter_by(player_id=self.id).\
-                            join(Match).filter(Match.season==season).count()
-        stats.total_stars = sum([pg.stars for pg in player_games.all()])
-        stats.total_high_scores = HighScore.query.filter_by(player=self).join(Match).filter(Match.season==season).count()
-        stats.total_low_scores = LowScore.query.filter_by(player=self).join(Match).filter(Match.season==season).count()
+            player_games = PlayerGame.query.filter_by(player=self).join(Game).join(Match).\
+                                filter(Match.season==season)
+            stats.matches_played = Match.query.filter(Match.season==season).\
+                                        join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
+            stats.matches_won = Match.query.filter_by(win=True).filter(Match.season==season).\
+                                join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
+            stats.matches_lost = Match.query.filter_by(win=False).filter(Match.season==season).\
+                                join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
+            stats.games_played = player_games.count()
+            stats.games_won = Game.query.filter_by(win=True).join(PlayerGame).filter_by(player_id=self.id).\
+                                join(Match).filter(Match.season==season).count()
+            stats.games_lost = Game.query.filter_by(win=False).join(PlayerGame).filter_by(player_id=self.id).\
+                                join(Match).filter(Match.season==season).count()
+            stats.total_stars = sum([pg.stars for pg in player_games.all()])
+            stats.total_high_scores = HighScore.query.filter_by(player=self).join(Match).filter(Match.season==season).count()
+            stats.total_low_scores = LowScore.query.filter_by(player=self).join(Match).filter(Match.season==season).count()
 
-        db.session.add(stats)
-        db.session.commit()
+            db.session.add(stats)
+            db.session.commit()
         return
 
     def __repr__(self):
@@ -456,17 +461,21 @@ def season_from_date(date):
         season = Season.query.order_by(Season.end_date.desc()).first()
     return season
 
-def update_all_player_stats():
+def update_all_player_stats(season='all'):
     players = Player.query.all()
     for p in players:
-        p.update_player_stats()
+        p.update_player_stats(season=season)
 
-def update_all_team_stats():
-    seasons = Season.query.all()
-    for season in seasons:
-        stats = TeamSeasonStats.query.filter_by(season=season).first()
+def update_all_team_stats(season='all'):
+    if season.lower() == 'all':
+        seasons = Season.query.all()
+    else:
+        seasons=[season]
+
+    for s in seasons:
+        stats = TeamSeasonStats.query.filter_by(season=s).first()
         if stats is None:
-            stats = TeamSeasonStats(season=season)
+            stats = TeamSeasonStats(season=s)
         stats.update_team_stats()
 
 def current_roster():

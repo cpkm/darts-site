@@ -15,7 +15,7 @@ from app.main.email import send_reminder_email as reminder_email
 
 @bp.before_request
 def before_request():
-    g.all_seasons = Season.query.all()
+    g.all_seasons = Season.query.order_by(Season.start_date.desc()).all()
 
 
 @bp.route('/', methods=['GET', 'POST'])
@@ -179,10 +179,18 @@ def match_edit(id):
         return redirect(url_for('main.match_edit', id=match.id))
 
     if  form.submit_delete.data and match is not None:
+        match_season = match.season
+        match_roster = match.get_roster()
         match.delete_all_games()
         match.destroy_checkins()
+
         db.session.delete(match)
         db.session.commit()
+
+        for p in match_roster:
+            p.update_player_stats(season=match_season)
+            p.update_activity()
+
         flash('Match {} {} {} and all associated games deleted!'.format(form.date.data, form.opponent.data, form.home_away.data), 'danger')
         return redirect(url_for('main.match_edit'))
 
@@ -213,8 +221,10 @@ def enter_score(id):
         match.match_summary = form.match_summary.data
         db.session.add(match)
         db.session.commit()
-        for p in match.get_roster():
-            p.update_player_stats()
+
+        for p in Player.query.all():
+            p.update_player_stats(season=match.season)
+
         flash('Match {} {} {} details edited!'.format(match.date.strftime('%Y-%m-%d'), match.opponent.name, match.home_away))
         return redirect(url_for('main.enter_score', id=match.id))
 
@@ -263,8 +273,8 @@ def enter_score(id):
             db.session.add_all([game,pg1])
             db.session.commit()
 
-        for p in match.get_roster():
-            p.update_player_stats(match.season.season_name)
+        for p in Player.query.all():
+            p.update_player_stats(season=match.season)
             p.update_activity()
 
         update_all_team_stats()
@@ -287,9 +297,11 @@ def enter_score(id):
     if hl_form.submit_hl_scores.data and match is not None:
         match.delete_all_books()
         hl_form.save_scores(match)
+
         for p in match.get_roster():
-            p.update_player_stats(match.season.season_name)
+            p.update_player_stats(season=match.season)
             p.update_activity()
+
         update_all_team_stats()
         flash('Match {} {} {} high/low scores entered successfully!'.format(match.date.strftime('%Y-%m-%d'), match.opponent.name, match.home_away), 'success')
         return redirect(url_for('main.enter_score', id=match.id))
@@ -328,7 +340,7 @@ def schedule(id):
         season = season_from_date(date.today())
     else:
         season = Season.query.filter_by(id=id).first_or_404()
-    all_seasons = Season.query.all()
+    all_seasons = Season.query.order_by(Season.start_date.desc()).all()
     matches = Match.query.filter_by(season=season).order_by(Match.date).all()
     return render_template('schedule.html', season=season, matches=matches, all_seasons=all_seasons)
 
