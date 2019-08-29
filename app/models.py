@@ -235,6 +235,8 @@ class Match(db.Model):
 
     checked_players = association_proxy('checked_players_association', 'player')
 
+    reminder_email_sent = db.Column(db.Date)
+
     def add_game(self, game):
         if not self.is_game(game):
             game.match=self
@@ -325,9 +327,15 @@ class Match(db.Model):
         db.session.commit()
         return
 
-
     def get_roster(self):
         return Player.query.join(PlayerGame).join(Game).filter_by(match=self).order_by(Player.nickname).all()
+
+    def get_checked_players(self):
+        ins = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='in').all()
+        out = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='out').all()
+        ifn = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='ifn').all()
+
+        return ins, out, ifn
 
     def __repr__(self):
         return '<Match {}>'.format(self.date.strftime('%Y-%m-%d'))
@@ -463,7 +471,6 @@ def update_all_team_stats():
 
 def current_roster():
     return Player.query.filter_by(is_active=True).all()
-
 
 @login.user_loader
 def load_user(id):
