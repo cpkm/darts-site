@@ -3,7 +3,6 @@
 
 {% block app_content %}
 
-
 <div class="card h-100">
   <h2 class="card-header">Captain's Portal</h2>
 
@@ -75,18 +74,21 @@
               <th scope="col">Home/Away</th>
               <th scope="col">Checked In</th>
               <th scope="col"></th>
+              <th scope="col">Reminder Sent</th>
             </tr>
           </thead>
           <tbody>
             {% for m in upcoming_matches %}
+            {% set ins,out,ifn = m.get_checked_players() %}
             <tr>
               <th scope="row">{{ m.date.strftime('%b %d') }}</th> 
               <td>{{ m.opponent.name }}</td>
               <td>{{ m.home_away }}</td>
-              <td></td>
+              <td>{{ ins|length }} ({{ ifn|length }})</td>
               <td>
                 <a role="button" class="btn btn-danger btn-sm" data-id="{{ m.__repr__()[1:-1] }}" href="#" data-href="{{ url_for('main.send_reminder_email', token=current_user.get_user_token(task='send_reminder_email'), match_id=m.id) }}" data-toggle="modal" data-target="#confirmModal">Send Reminder Email</a>
               </td>
+              <td>{% if m.reminder_email_sent %}{{ m.reminder_email_sent.strftime('%Y-%m-%d')}}{% endif %}</td>
             </tr>
             {% endfor %}
           </tbody>

@@ -454,12 +454,12 @@ def send_reminder_email(match_id, token):
         return redirect(url_for('main.index'))
 
     match = Match.query.filter_by(id=match_id).first()
-    #match=Match.query.order_by(Match.date.desc()).first()
-
-    #users = [p.user for p in current_roster()]
-    users = User.query.all()
+    users = [p.user for p in current_roster() if p.user is not None]
     
     reminder_email(users=users,match=match)
+    match.reminder_email_sent = date.today()
+    db.session.add(match)
+    db.session.commit()
     flash('Reminder email sent!')
     return redirect(url_for('main.captain', _anchor="email"))
 
