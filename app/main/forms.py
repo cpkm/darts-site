@@ -6,7 +6,7 @@ from wtforms.validators import ValidationError, DataRequired, InputRequired, Len
 from app import db
 from app.models import Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, season_from_date
 from app.validators import Unique
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class EditPlayerForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
@@ -114,6 +114,32 @@ class EditMatchForm(FlaskForm):
                 opponent_id=opp_id, match_type=self.match_type.data).first() is not None:
             flash('Match must be unique! Match not added', 'danger')
             raise ValidationError('Match details are not unique.')
+
+
+class EditSeasonForm(FlaskForm):
+    season_name = StringField('Season Name', validators=[DataRequired()])
+    start_date = DateField('Start Date', format='%Y-%m-%d', default=datetime.today().date, validators=[DataRequired()])
+    end_date = DateField('End Date', format='%Y-%m-%d', default=(datetime.today()+timedelta(364)).date, validators=[DataRequired()])
+
+    submit_new = SubmitField('Submit')
+    submit_edit = SubmitField('Edit Season')
+    submit_delete = SubmitField('Delete Season')
+
+    def __init__(self, season=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if season is not None:
+            self.original_season_name = season.season_name
+            self.original_start_date = season.start_date
+            self.original_end_date = season.end_date
+        else:
+            self.original_season_name = None
+            self.original_start_date = None
+            self.original_end_date = None
+
+    def load_season(self, season):
+        self.season_name.data = season.season_name
+        self.start_date.data = season.start_date
+        self.end_date.data = season.end_date
 
 
 class DoublesGameForm(FlaskForm):

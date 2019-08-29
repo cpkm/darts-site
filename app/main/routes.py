@@ -6,7 +6,7 @@ from datetime import datetime, date
 from app import db
 from app.main import bp
 from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
-    ClaimPlayerForm)
+    ClaimPlayerForm, EditSeasonForm)
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
     season_from_date, update_all_team_stats, current_roster)
 from app.decorators import check_verification, check_role
@@ -199,6 +199,73 @@ def match_edit(id):
 
     return render_template('edit_match.html', title='Match Editor', 
         form=form, match=match, all_matches=all_matches)
+
+@bp.route('/season_edit',  methods=['GET', 'POST'], defaults={'id': None})
+@bp.route('/season_edit/<id>',  methods=['GET', 'POST'])
+@login_required
+@check_verification
+@check_role(['admin','captain'])
+def season_edit(id):
+    season = Season.query.filter_by(id=id).first()
+    form = EditSeasonForm(season=season)
+
+    all_seasons = Season.query.order_by(Season.start_date.desc()).all()
+
+    if form.submit_new.data and form.validate():
+        new_season = Season(season_name=form.season_name.data,
+            start_date=form.start_date.data, end_date=form.end_date.data)
+        db.session.add(new_season)
+        db.session.commit()
+
+        for m in Match.query.all():
+            m.set_season()
+            db.session.add(m)
+            db.session.commit()
+
+        for p in Player.query.all():
+            p.update_player_stats(season='all')
+
+        flash('Season {} added and matches updated!'.format(new_season.season_name))
+        return redirect(url_for('main.season_edit'))
+
+    if form.submit_edit.data and form.validate() and season is not None:
+        season.season_name = form.season_name.data
+        season.start_date = form.start_date.data
+        season.end_date = form.end_date.data
+        db.session.add(season)
+        db.session.commit()
+
+        for m in Match.query.all():
+            m.set_season()
+            db.session.add(m)
+            db.session.commit()
+
+        for p in Player.query.all():
+            p.update_player_stats(season='all')
+
+        flash('Season {} updated!'.format(season.season_name))
+        return redirect(url_for('main.season_edit',id=season.id))
+
+    if  form.submit_delete.data and season is not None:
+        db.session.delete(season)
+        db.session.commit()
+
+        for m in Match.query.all():
+            m.set_season()
+            db.session.add(m)
+            db.session.commit()
+
+        for p in Player.query.all():
+            p.update_player_stats(season='all')
+
+        flash('Season {} deleted!'.format(season.season_name), 'danger')
+        return redirect(url_for('main.season_edit'))
+
+    if request.method=='GET' and season is not None:
+        form.load_season(season)
+
+    return render_template('edit_season.html', title='Season Editor', 
+        form=form, season=season, all_seasons=all_seasons)
 
 
 @bp.route('/enter_score',  methods=['GET', 'POST'], defaults={'id': None})
