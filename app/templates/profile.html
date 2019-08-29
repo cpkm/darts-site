@@ -16,6 +16,9 @@
         <a class="nav-link" id="player-tab" data-toggle="tab" href="#player" role="tab" aria-controls="player" aria-selected="false">Player</a>
       </li>
       <li class="nav-item">
+        <a class="nav-link" id="checkin-tab" data-toggle="tab" href="#checkin" role="tab" aria-controls="checkin" aria-selected="false">Checkin</a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false">Settings</a>
       </li>
     </ul>
@@ -70,12 +73,58 @@
             </div>
         </div>
       </div>
+      <div class="tab-pane" id="checkin" role="tabpanel" aria-labelledby="checkin-tab">
+        <div class="container m-2">
+          {% if checked_matches %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Team</th>
+                <th scope="col">Home/Away</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cm in checked_matches %}
+              <tr>
+                <th scope="row">{{ cm.match.date.strftime('%b %d') }}</th> 
+                <td>{{ cm.match.opponent.name }}</td>
+                <td>{{ cm.match.home_away }}</td>
+                <td>
+                  {% if cm.status == 'in'%}
+                  <a role="button" class="btn btn-success btn-sm">In</a>
+                  {% else %}
+                  <a role="button" class="btn btn-outline-success btn-sm" href="{{ url_for('main.checkin', player_id=current_user.player.id, match_id=cm.match_id, status='in') }}">In</a>
+                  {% endif %}
+
+                  {% if cm.status == 'out'%}
+                  <a role="button" class="btn btn-danger btn-sm">Out</a>
+                  {% else %}
+                  <a role="button" class="btn btn-outline-danger btn-sm" href="{{ url_for('main.checkin', player_id=current_user.player.id, match_id=cm.match_id, status='out') }}">Out</a>
+                  {% endif %}
+
+                  {% if cm.status == 'ifn'%}
+                  <a role="button" class="btn btn-warning btn-sm">If Needed</a>
+                  {% else %}
+                  <a role="button" class="btn btn-outline-warning btn-sm" href="{{ url_for('main.checkin', player_id=current_user.player.id, match_id=cm.match_id, status='ifn') }}">If Needed</a>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p>You have no upcoming matches</p>
+          {% endif %}
+        </div>
+      </div>
       <div class="tab-pane" id="settings" role="tabpanel" aria-labelledby="settings-tab">
-        <div class="container mt-2">
+        <div class="container m-2">
           <p>To change your account email, please contact the site administrator.</p>
           <p>To change your password, <a href="{{ url_for('auth.reset_password', token=current_user.get_user_token(task='reset_password', expires_in=10)) }}">Click Here</a>.</p>
         </div>
-      </div>
+      </div>      
     </div>
 
 

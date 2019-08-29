@@ -83,7 +83,7 @@ class Player(db.Model):
 
     def create_checkins(self):
         matches = Match.query.filter(Match.date>=date.today()).all()
-        pwc = [PlayerMatchCheckin(match_id=m.id, player=self.id) for m in matches]
+        pwc = [PlayerMatchCheckin(match_id=m.id, player_id=self.id) for m in matches]
         try:
             db.session.add_all(pwc)
             db.session.commit()
@@ -99,6 +99,19 @@ class Player(db.Model):
 
         db.session.commit()
         return
+
+    def checkin(self, match, status):
+        pmc = PlayerMatchCheckin.query.filter_by(player_id=self.id,match_id=match.id).first()
+
+        if status.lower() in ['in','out','ifn'] and pmc:
+            pmc.status = status
+            db.session.add(pmc)
+            db.session.commit()
+            print('checked in {}: status {}'.format(match,status))
+            return True
+        else:
+            print('status not found')
+        return False
 
     def avatar(self, size):
         if self.user:
@@ -297,7 +310,7 @@ class Match(db.Model):
                 self.location = 'Italian Canadian Club'
 
     def create_checkins(self):
-        pwc = [PlayerMatchCheckin(match_id=self.id, player=p.id) for p in Player.query.all()]
+        pwc = [PlayerMatchCheckin(match_id=self.id, player_id=p.id) for p in Player.query.all()]
         try:
             db.session.add_all(pwc)
             db.session.commit()
