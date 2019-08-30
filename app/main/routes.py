@@ -187,6 +187,10 @@ def match_edit(id):
         match.set_season()
         db.session.add(match)
         db.session.commit()
+
+        for p in match.get_roster():
+            p.update_activity()
+
         flash('Match {} {} {} modified!'.format(form.date.data, form.opponent.data, form.home_away.data))
         return redirect(url_for('main.match_edit', id=match.id))
 
