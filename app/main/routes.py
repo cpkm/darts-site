@@ -431,14 +431,16 @@ def match(id):
 def leaderboard(year_str):
     roster = Player.query.all()
     season = season_from_date(date.today())
-    all_seasons = Season.query.order_by(Season.season_name.desc())
+
     if(year_str is None):
-      stats = PlayerSeasonStats.query.all()
+      stats = PlayerSeasonStats.query.filter(PlayerSeasonStats.season==season_from_date(date.today()).\
+        join(Player).filter(~Player.nickname.in_(['Dummy','Sub']))).all()
       year_str = 'All Time'
     else:
       year_str = year_str.replace('-','/') # This is to allow date name to be 'url-friendly'
-      stats = PlayerSeasonStats.query.join(Season).filter_by(season_name=year_str).all()
-    return render_template('leaderboard.html', roster=roster, stats=stats,all_seasons=all_seasons,year_str=year_str)
+      stats = PlayerSeasonStats.query.join(Season).filter_by(season_name=year_str).\
+        join(Player).filter(~Player.nickname.in_(['Dummy','Sub'])).all()
+    return render_template('leaderboard.html', roster=roster, stats=stats, year_str=year_str)
 
 @bp.route('/profile', methods=['GET', 'POST'])
 @login_required
