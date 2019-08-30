@@ -276,7 +276,7 @@ def season_edit(id):
 def enter_score(id):
     match = Match.query.filter_by(id=id).first()
     form = EnterScoresForm(obj=match)
-    all_matches = Match.query.order_by(Match.date).all()
+    all_seasons = Season.query.order_by(Season.start_date.desc()).all()
     hl_form = HLScoreForm()
 
     if form.submit_details.data and form.validate() and match is not None:
@@ -382,7 +382,7 @@ def enter_score(id):
         hl_form.load_scores(match)
 
     return render_template('enter_score.html', title='Enter Scores', 
-        form=form, hl_form=hl_form, match=match, all_matches=all_matches)
+        form=form, hl_form=hl_form, match=match, all_seasons=all_seasons)
 
 
 @bp.route('/player/<nickname>',  methods=['GET', 'POST'])

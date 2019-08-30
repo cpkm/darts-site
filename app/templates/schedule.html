@@ -6,7 +6,7 @@
 
   <div class="col-md-3">
     <div id="accordion">
-      <div class="card">
+      <div class="card bg-light">
         <div class="card-header" id="headingOne">
           <h5 class="mb-0">
             <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
@@ -17,17 +17,15 @@
         <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
           <div class="card-body">
             <table class="table table-hover">
-            
             {% for season in all_seasons %}
               <tr>
                 <td>
-                <a href="{{ url_for('main.schedule', id=season.id) }}">{{ season.season_name }}</a>
-              </td>
+                  <a href="{{ url_for('main.schedule', id=season.id) }}">{{ season.season_name }}</a>
+                </td>
               </tr>
             {% endfor %}
             </table>
             <hr>
-            <a href="{{ url_for('main.season_edit') }}">Add new season</a>
           </div>
         </div>
       </div>
