@@ -14,7 +14,7 @@
             </table>
         </div>
         <div class="card-footer">
-            <a href="{{ url_for('main.leaderboard') }}" class="btn btn-primary">Full leaderboard</a>
+            <a href="{{ [url_for('main.leaderboard', year_str='current'), '?board=', leaderboard_card.name.lower()]|join('') }}" class="btn btn-primary">Full leaderboard</a>
         </div>
     </div>
 </div>

@@ -3,22 +3,27 @@
 
 {% block app_content %}
 
-<div class="dropdown">
-  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-   <span class="selection">{{ year_str }}</span>  
-  </button>
-  <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-    <a class="dropdown-item" href='/leaderboard'>All Time</a>
-    {% for s in all_seasons %}
-      <a class="dropdown-item" href={{  '/leaderboard/' + s.season_name.replace('/','-')  }}>{{   s.season_name }}</a>
-    {% endfor %}
-  </div>
-</div>
 
-<div class="col-12 mt-2 mx-auto">
-  <div class="card h-100">
+
+<div class="container">
+  <div class="card">
     <h2 class="card-header">Player Statisitics</h2>
-    <div class="card-body table-responsive">
+    <div class="form-group form-inline pt-2 px-2 pb-0">
+    <h5>Season</h5>
+      <div class="dropdown px-2">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+         <span class="selection">{{ year_str }}</span>  
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+          <a class="dropdown-item" href='/leaderboard'>All Time</a>
+          {% for s in g.all_seasons %}
+            <a class="dropdown-item" href={{  '/leaderboard/' + s.season_name.replace('/','-')  }}>{{   s.season_name }}</a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body table-responsive pt-0">
       <table id="pStats" class="table table-hover text-center">
         <thead>
           <tr>
@@ -67,16 +72,31 @@
 {% endblock %}
 {% block scripts %}
 {{ super() }}
+{% if board %}
+  {% if board=='stars' %}
+    {% set lb = 6 %}
+  {% elif board=='high scores' %}
+    {% set lb = 7 %}
+  {% elif board=='low scores' %}
+    {% set lb = 8 %}
+  {% else %}
+    {% set lb = 3 %}
+    {% endif %}
+{% else %}
+{% set lb = 3 %}
+{% endif %}
 <script>
   $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
 </script>
+
+
 <script>
 $(document).ready( function () {
     $('#pStats').DataTable({
     "paging": false,
-    "order": [[ 3, "desc" ]]
+    "order": [[ "{{ lb }}", "desc" ]]
   });
 } );
 </script>

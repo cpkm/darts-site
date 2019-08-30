@@ -5,21 +5,29 @@
 <div class="row">
 
   <div class="col-md-3">
-    <div class="card h-100 bg-light">
-      <div class="card-header">All seasons</div>
-      <div class="card-body">
-        <table class="table table-hover">
-        
-        {% for season in all_seasons %}
-          <tr>
-            <td>
-            <a href="{{ url_for('main.schedule', id=season.id) }}">{{ season.season_name }}</a>
-          </td>
-          </tr>
-        {% endfor %}
-        </table>
-        <hr>
-        <a href="{{ url_for('main.match_edit') }}">Add new season</a>
+    <div id="accordion">
+      <div class="card bg-light">
+        <div class="card-header" id="headingOne">
+          <h5 class="mb-0">
+            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+              All seasons
+            </button>
+          </h5>
+        </div>
+        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+          <div class="card-body">
+            <table class="table table-hover">
+            {% for season in all_seasons %}
+              <tr>
+                <td>
+                  <a href="{{ url_for('main.schedule', id=season.id) }}">{{ season.season_name }}</a>
+                </td>
+              </tr>
+            {% endfor %}
+            </table>
+            <hr>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -40,8 +48,7 @@
       </div>
     </div>
   </div>
-
-    
+ 
 </div>
 
 {% endblock %}
@@ -50,6 +57,17 @@
 <script>
   $(function () {
   $('[data-toggle="tooltip"]').tooltip()
-})
+});
+</script>
+
+<script>
+  $(window).on("load resize",function(e){
+  if(window.outerWidth < 767){
+    $('#collapseOne').collapse('hide');
+    
+  } else {
+  $('#collapseOne').collapse('show');    
+  }
+});
 </script>
 {% endblock %}
