@@ -134,9 +134,9 @@ class Player(db.Model):
 
     def update_player_stats(self, season='all'):
         if season=='current':
-            seasons = [season_from_date(date.today())]
+            seasons = [current_season()]
         elif season=='last':
-            seasons = [season_from_date(date.today()-timedelta(365))]
+            seasons = [current_season(1)]
         elif season=='all':
             seasons = Season.query.all()
         elif not isinstance(season, list):
@@ -453,6 +453,10 @@ class MatchStats(db.Model):
     stars_d5 = db.Column(db.Integer)
     stars_d7 = db.Column(db.Integer)
 
+
+def current_season(last=0):
+    '''use last=1 for previous season, last=2 for 2 seasons ago...'''
+    return season_from_date(date.today()-last*timedelta(365))
 
 def season_from_date(date):
     season = Season.query.filter(Season.start_date <= date).filter(Season.end_date >= date).first()

@@ -72,6 +72,19 @@
 {% endblock %}
 {% block scripts %}
 {{ super() }}
+{% if board %}
+  {% if board=='stars' %}
+    {% set lb = 6 %}
+  {% elif board=='high scores' %}
+    {% set lb = 7 %}
+  {% elif board=='low scores' %}
+    {% set lb = 8 %}
+  {% else %}
+    {% set lb = 3 %}
+    {% endif %}
+{% else %}
+{% set lb = 3 %}
+{% endif %}
 <script>
   $(function () {
   $('[data-toggle="tooltip"]').tooltip()
@@ -83,7 +96,7 @@
 $(document).ready( function () {
     $('#pStats').DataTable({
     "paging": false,
-    "order": [[ 3, "desc" ]]
+    "order": [[ "{{ lb }}", "desc" ]]
   });
 } );
 </script>

@@ -8,7 +8,7 @@ from app.main import bp
 from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
     ClaimPlayerForm, EditSeasonForm)
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
-    season_from_date, update_all_team_stats, current_roster)
+    season_from_date, update_all_team_stats, current_roster, current_season)
 from app.decorators import check_verification, check_role
 from app.main.leaderboard_card import LeaderBoardCard
 from app.main.email import send_reminder_email as reminder_email
@@ -31,7 +31,19 @@ def index():
     prev_url = url_for('main.index', page=schedule.prev_num) \
         if schedule.has_prev else None
 
-    leader_board_list = [ LeaderBoardCard('Stars',PlayerSeasonStats.query.join(Player).with_entities(Player.nickname,PlayerSeasonStats.total_stars).order_by(PlayerSeasonStats.total_stars.desc()).limit(4).all()),LeaderBoardCard('High Scores',PlayerSeasonStats.query.join(Player).with_entities(Player.nickname,PlayerSeasonStats.total_high_scores).order_by(PlayerSeasonStats.total_high_scores.desc()).limit(4).all()),LeaderBoardCard('Low Scores',PlayerSeasonStats.query.join(Player).with_entities(Player.nickname,PlayerSeasonStats.total_low_scores).order_by(PlayerSeasonStats.total_low_scores.desc()).limit(4).all()) ]
+    leader_board_list = [ 
+        LeaderBoardCard('Stars',PlayerSeasonStats.query.join(Player).\
+            filter(PlayerSeasonStats.season==current_season()).\
+            with_entities(Player.nickname,PlayerSeasonStats.total_stars).\
+            order_by(PlayerSeasonStats.total_stars.desc()).limit(4).all()),
+        LeaderBoardCard('High Scores',PlayerSeasonStats.query.join(Player).\
+            filter(PlayerSeasonStats.season==current_season()).\
+            with_entities(Player.nickname,PlayerSeasonStats.total_high_scores).\
+            order_by(PlayerSeasonStats.total_high_scores.desc()).limit(4).all()),
+        LeaderBoardCard('Low Scores',PlayerSeasonStats.query.join(Player).\
+            filter(PlayerSeasonStats.season==current_season()).\
+            with_entities(Player.nickname,PlayerSeasonStats.total_low_scores).\
+            order_by(PlayerSeasonStats.total_low_scores.desc()).limit(4).all()) ]
 
     return render_template('index.html', title=None,
         schedule=schedule.items, next_url=next_url, prev_url=prev_url, 
@@ -404,7 +416,7 @@ def player(nickname):
 @bp.route('/schedule/<id>',  methods=['GET', 'POST'])
 def schedule(id):
     if id is None:
-        season = season_from_date(date.today())
+        season = current_season()
     else:
         season = Season.query.filter_by(id=id).first_or_404()
     all_seasons = Season.query.order_by(Season.start_date.desc()).all()
@@ -429,18 +441,26 @@ def match(id):
 @bp.route('/leaderboard/',  methods=['GET', 'POST'], defaults={'year_str':None})
 @bp.route('/leaderboard/<year_str>',  methods=['GET', 'POST'])
 def leaderboard(year_str):
+    try:
+        board = request.args['board']
+    except:
+        board=None
+        pass
+
     roster = Player.query.all()
-    season = season_from_date(date.today())
 
     if(year_str is None):
-      stats = PlayerSeasonStats.query.filter(PlayerSeasonStats.season==season_from_date(date.today()).\
-        join(Player).filter(~Player.nickname.in_(['Dummy','Sub']))).all()
-      year_str = 'All Time'
+        stats = PlayerSeasonStats.query.join(Season).join(Player).\
+            filter(PlayerSeasonStats.season==current_season()).filter(~Player.nickname.in_(['Dummy','Sub'])).all()
+        year_str = 'All Time'
     else:
-      year_str = year_str.replace('-','/') # This is to allow date name to be 'url-friendly'
-      stats = PlayerSeasonStats.query.join(Season).filter_by(season_name=year_str).\
-        join(Player).filter(~Player.nickname.in_(['Dummy','Sub'])).all()
-    return render_template('leaderboard.html', roster=roster, stats=stats, year_str=year_str)
+        if year_str == 'current':
+            year_str = current_season().season_name
+        else:
+            year_str = year_str.replace('-','/') # This is to allow date name to be 'url-friendly'
+        stats = PlayerSeasonStats.query.join(Season).filter_by(season_name=year_str).\
+            join(Player).filter(~Player.nickname.in_(['Dummy','Sub'])).all()
+    return render_template('leaderboard.html', roster=roster, stats=stats, year_str=year_str, board=board)
 
 @bp.route('/profile', methods=['GET', 'POST'])
 @login_required
