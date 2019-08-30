@@ -3,21 +3,26 @@
 
 {% block app_content %}
 
-<div class="dropdown">
-  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-   <span class="selection">{{ year_str }}</span>  
-  </button>
-  <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-    <a class="dropdown-item" href='/leaderboard'>All Time</a>
-    {% for s in all_seasons %}
-      <a class="dropdown-item" href={{  '/leaderboard/' + s.season_name.replace('/','-')  }}>{{   s.season_name }}</a>
-    {% endfor %}
-  </div>
-</div>
 
-<div class="col-12 mt-2 mx-auto">
-  <div class="card h-100">
+
+<div class="container">
+  <div class="card">
     <h2 class="card-header">Player Statisitics</h2>
+    <div class="form-group form-inline p-2">
+    <h5>Season</h5>
+      <div class="dropdown px-2">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+         <span class="selection">{{ year_str }}</span>  
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+          <a class="dropdown-item" href='/leaderboard'>All Time</a>
+          {% for s in all_seasons %}
+            <a class="dropdown-item" href={{  '/leaderboard/' + s.season_name.replace('/','-')  }}>{{   s.season_name }}</a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
     <div class="card-body table-responsive">
       <table id="pStats" class="table table-hover text-center">
         <thead>

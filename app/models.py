@@ -355,7 +355,7 @@ class Team(db.Model):
 
     def avatar(self, size):
         digest = md5(self.name.lower().encode('utf-8')).hexdigest()
-        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+        return 'https://www.gravatar.com/avatar/{}?d=monsterid&s={}'.format(
             digest, size)
 
     def __repr__(self):
