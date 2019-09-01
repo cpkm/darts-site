@@ -3,58 +3,103 @@
 
 {% from "_leaderboard.html" import draw_leaderboard with context %}
 
+{% block head %}
+{{ super() }}
+<style CSS>
+@media (min-width:256px) {
+    .card-columns {
+      column-count: 3;
+    }
+}
+@media (min-width:576px) {
+    .card-columns {
+      column-count: 3;
+    }
+}
+  @media (min-width:768px) {
+    .card-columns {
+      column-count: 4;
+    }
+}
+@media (min-width:992px) {
+    .card-columns {
+      column-count: 2;
+    }
+}
+@media (min-width:1200px) {
+    .card-columns {
+      column-count: 3;
+    }
+}
+</style>
+{% endblock %}
+
 {% block app_content %}
-  <h1>Welcome to ICC4!</h1>
-  <br>
-  <div class="row">
-    <div class="col-md-6">
-    <h2 class="my-4">Schedule</h2>
-    <h4>Last match</h4>
-    {% if last_match %}
-    {% with match = last_match %}
-      {% include '_match.html' %}
-    {% endwith %}
-    {% endif %}
-    <h4>Upcoming matches</h4>
-    {% for match in schedule %}
-      {% include '_match.html' %}
-    {% endfor %}
-    
-      <nav aria-label="...">
-      <ul class="pager">
-        <li class="previous{% if not prev_url %} disabled{% endif %}">
-          <a href="{{ prev_url or '#' }}">
-            <span aria-hidden="true">&larr;</span>Nearer
-          </a>
-        </li>
-        <li class="next{% if not next_url %} disabled{% endif %}">
-          <a href="{{ next_url or '#' }}">
-            Further<span aria-hidden="true">&rarr;</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-    </div>
-    <div class="col-md-6">
-      <div class="card h-100">
-          <h2 class="card-header">Current Roster</h2>
-          <div class="card-body">
-            <ul class="list-unstyled">
-            {% for p in all_players %}
-            <li><a href="{{ url_for('main.player', nickname=p.nickname) }}">{{ p.nickname }}</a></li>
-            {% endfor %}
-            </ul>
-            <hr>
-          </div>
-        </div>
-  </div>
-  <br>
+<div class="jumbotron jumbotron-fluid">
   <div class="container">
+    <h1 class="display-4">Welcome to ICC4!</h1>
+    <p class="lead">Home of the best team in the Guelph Pub darts league!</p>
+  </div>
+</div>
+
+<div class="row">
+
+  <div class="col-lg-8">
+    <div class="col">
+      <h2 class="my-4">News</h2>
+      <p>A new season starts soon - stay tuned for details! In the meantime, 
+        <a href="{{ url_for('auth.login') }}"> register</a> if you haven't already!</p>
+    </div>
+
+    <div class="col">
+      <h2 class="my-4">Schedule</h2>
+      <h4>Last match</h4>
+      {% if last_match %}
+      {% with match = last_match %}
+        {% include '_match.html' %}
+      {% endwith %}
+      {% endif %}
+      <br>
+      <h4>Upcoming matches</h4>
+      {% for match in schedule %}
+        {% include '_match.html' %}
+      {% endfor %}
+      <nav aria-label="...">
+        <ul class="pager">
+          <li class="previous{% if not prev_url %} disabled{% endif %}">
+            <a href="{{ prev_url or '#' }}">
+              <span aria-hidden="true">&larr;</span>Nearer
+            </a>
+          </li>
+          <li class="next{% if not next_url %} disabled{% endif %}">
+            <a href="{{ next_url or '#' }}">
+              Further<span aria-hidden="true">&rarr;</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="col">
     <h2 class="my-4">Leaderboards</h2>
-    <div class="row">
-        {% for card in leader_board_list %}
-            {{  draw_leaderboard(card)  }}
-        {% endfor %}
+      <div class="row">
+          {% for card in leader_board_list %}
+              {{  draw_leaderboard(card)  }}
+          {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-lg-4">
+  <h2 class="my-4">Current Roster</h2>
+    <div class="card-columns">
+    {% for player in all_players %}
+    <!-- <li><a href="{{ url_for('main.player', nickname=player.nickname) }}">{{ player.nickname }}</a></li> -->
+    {% include '_player.html' %}
+    {% endfor %}
     </div>
   </div>
+</div>
+
 {% endblock %}

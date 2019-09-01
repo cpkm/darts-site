@@ -89,7 +89,8 @@
 <script>
 $(document).ready( function () {
     $('#pStats').DataTable({
-    "paging": false
+      "order": [[ 0, "desc" ]],
+      "paging": false
   });
 } );
 </script>

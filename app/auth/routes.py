@@ -15,6 +15,7 @@ def before_request():
 @bp.route('/login', methods=['GET','POST'])
 def login():
     if current_user.is_authenticated:
+        flash('You are already logged in!')
         return redirect(url_for('main.index'))
     form = LoginForm()
     if form.validate_on_submit():
