@@ -426,6 +426,7 @@ class Season(db.Model):
 class HighScore(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     score = db.Column(db.Integer)
+    out = db.Column(db.Boolean, index=True, default=False)
     player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
     player = db.relationship('Player', back_populates='high_scores')
