@@ -7,6 +7,21 @@ from app import db
 from app.models import Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, season_from_date
 from app.validators import Unique
 from datetime import datetime, timedelta
+import string
+
+
+def hl_score(allowed='0123456789*oO'):
+    message = 'Please enter a valid number.'
+
+    def _hl_score(self, score):
+        if not all([c in allowed for c in score.data]):
+            raise ValidationError(message)
+    return _hl_score
+
+def strip_score(score,allowed='0123456789*oO'):
+    not_allowed = string.printable.translate({ord(c): None for c in allowed})
+    return score.translate({ord(c): None for c in not_allowed})
+
 
 class EditPlayerForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
@@ -245,8 +260,8 @@ class EnterScoresForm(FlaskForm):
 
 class HLPlayerScoreForm(FlaskForm):
     player = SelectField('', choices=[], default='Dummy')
-    high_scores = FieldList(IntegerField('Score'), min_entries=12, max_entries=12)
-    low_scores = FieldList(IntegerField('Score'), min_entries=12, max_entries=12)
+    high_scores = FieldList(StringField('Score'), min_entries=12, max_entries=12)
+    low_scores = FieldList(StringField('Score'), min_entries=12, max_entries=12)
 
 
     def __init__(self, *args, **kwargs):
@@ -268,13 +283,25 @@ class HLScoreForm(FlaskForm):
             if row.player.data != 'Dummy':
                 player = Player.query.filter_by(nickname=row.player.data).first()
                 for hs in row.high_scores:
-                    if hs.data is not None:
-                        entry = HighScore(player=player, score=hs.data, match_id=match.id)
+                    markers = '*o'
+                    if all([hs.data is not bad for bad in ['',None]]):
+                        score = strip_score(hs.data.lower(), allowed=string.digits+markers)
+                        if any([m in score for m in markers]):
+                            out = True
+                            score = int(score.translate({ord(c): None for c in markers}))
+                        else:
+                            out = False
+                            score = int(score)
+
+                        entry = HighScore(player=player, score=score, out=out, match_id=match.id)
                         db.session.add(entry)
                         db.session.commit()
+
                 for ls in row.low_scores:
-                    if ls.data is not None:
-                        entry = LowScore(player=player, score=ls.data, match_id=match.id)
+                    score = strip_score(ls.data.lower(), allowed=string.digits)
+                    if all([score is not bad for bad in ['',None]]):
+                        score = int(score)
+                        entry = LowScore(player=player, score=score, match_id=match.id)
                         db.session.add(entry)
                         db.session.commit()
         return
@@ -294,11 +321,15 @@ class HLScoreForm(FlaskForm):
             self.hl_scores[i].player.data = p.nickname
             for j,s in enumerate(match.high_scores.filter_by(player=p).all()):
                 if j < self.hl_scores[i].high_scores.max_entries:
-                    self.hl_scores[i].high_scores[j].data = s.score
+                    if s.out:
+                        score = str(s.score) + '*'
+                    else:
+                        score = str(s.score)
+                    self.hl_scores[i].high_scores[j].data = score
 
             for j,s in enumerate(match.low_scores.filter_by(player=p).all()):
                 if j < self.hl_scores[i].low_scores.max_entries - 1:
-                    self.hl_scores[i].low_scores[j].data = s.score
+                    self.hl_scores[i].low_scores[j].data = str(s.score)
         return
 
             
