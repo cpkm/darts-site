@@ -370,12 +370,12 @@ def enter_score(id):
         new_row.player.choices = [(p.nickname,p.nickname) for p in Player.query.all()]
 
         return render_template('enter_score.html', title='Enter Scores', 
-        form=form, hl_form=hl_form, match=match, all_matches=all_matches)
+        form=form, hl_form=hl_form, match=match)
 
     if hl_form.rem_btn.data:
         hl_form.hl_scores.pop_entry()
         return render_template('enter_score.html', title='Enter Scores', 
-        form=form, hl_form=hl_form, match=match, all_matches=all_matches)
+        form=form, hl_form=hl_form, match=match)
 
     if hl_form.submit_hl_scores.data and match is not None:
 
