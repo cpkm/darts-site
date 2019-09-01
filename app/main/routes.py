@@ -378,6 +378,12 @@ def enter_score(id):
         form=form, hl_form=hl_form, match=match, all_matches=all_matches)
 
     if hl_form.submit_hl_scores.data and match is not None:
+
+        print(hl_form.validate())
+        for fieldName, errorMessages in hl_form.errors.items():
+            for err in errorMessages:
+                print(err)
+
         match.delete_all_books()
         hl_form.save_scores(match)
 
