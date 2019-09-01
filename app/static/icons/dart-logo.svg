@@ -18,7 +18,7 @@
    inkscape:version="0.92.4 (5da689c313, 2019-01-14)"><metadata
    id="metadata905"><rdf:RDF><cc:Work
        rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title /></cc:Work></rdf:RDF></metadata><defs
    id="defs903" /><sodipodi:namedview
    pagecolor="#ffffff"
    bordercolor="#666666"
@@ -32,7 +32,7 @@
    inkscape:window-height="784"
    id="namedview901"
    showgrid="false"
-   inkscape:zoom="1.3833855"
+   inkscape:zoom="1.2393674"
    inkscape:cx="208.90365"
    inkscape:cy="10.534265"
    inkscape:window-x="0"
@@ -50,7 +50,10 @@
 
 <g
    id="g917"
-   transform="translate(0,12.423344)"><path
+   transform="translate(0,12.423344)"
+   inkscape:export-filename="/Users/cpkmanchee/Documents/Code/darts-site/app/static/favicon.ico.png"
+   inkscape:export-xdpi="14.140032"
+   inkscape:export-ydpi="14.140032"><path
      id="path888"
      d="m 217.7,281.7 -7.1,-7.1 v 51.2 l 0.1,2.4 c 0,1.1 0.2,2.4 0.6,3.7 l 56.2,19.8 14,-6.2 v 0 z"
      inkscape:connector-curvature="0"
@@ -86,4 +89,5 @@
      x="308.07388"
      y="356.67746"
      style="font-style:normal;font-variant:normal;font-weight:800;font-stretch:normal;font-size:128px;font-family:Raleway;-inkscape-font-specification:'Raleway Ultra-Bold';fill:#231f20;fill-opacity:1">ICC4</tspan></text>
+
 </svg>
