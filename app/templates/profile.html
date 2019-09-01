@@ -62,6 +62,7 @@
                         {{ wtf.form_field(player_form.nickname) }}
                         {{ wtf.form_field(player_form.first_name) }}
                         {{ wtf.form_field(player_form.last_name) }}
+                        {{ wtf.form_field(player_form.tagline) }}
 
                         {% if current_user.player %}
                         {{ wtf.form_field(player_form.submit_edit, button_map={'submit_edit': 'info my-1 btn-block'}) }}

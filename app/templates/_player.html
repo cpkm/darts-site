@@ -2,7 +2,12 @@
   <a href="{{ url_for('main.player', nickname=player.nickname) }}"><img class="card-img-top" src="{{ player.avatar(256) }}" alt="{{ player.nickname }}"></a>
   <div class="card-body">
     <h5 class="card-title">{{ player.nickname }}</h5>
-    <p class="card-text">This player plays.</p>
+    <small><p>
+    {% if player.tagline %}{{ player.tagline }}
+    {% else %}Awesome shooter!
+    {% endif %}
+  </p>
+    </small>
   </div>
   <div class="card-footer">
     <small class="text-muted">Last played on {{ player.last_match.date.strftime('%B %d, %Y') }}</small>

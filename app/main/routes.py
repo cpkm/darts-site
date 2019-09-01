@@ -64,7 +64,8 @@ def player_edit(nickname):
         newplayer = Player(
             first_name=form.first_name.data,
             last_name=form.last_name.data,
-            nickname=form.nickname.data)
+            nickname=form.nickname.data,
+            tagline=form.tagline.data)
         if Player.query.filter_by(nickname=newplayer.nickname).first() is None:
             db.session.add(newplayer)
             db.session.flush()
@@ -83,6 +84,7 @@ def player_edit(nickname):
         player.first_name = form.first_name.data
         player.last_name = form.last_name.data
         player.nickname = form.nickname.data
+        player.tagline = form.tagline.data
         db.session.add(player)
         db.session.commit()
         flash('Player {} ({} {}) modified!'.format(
@@ -103,6 +105,7 @@ def player_edit(nickname):
         form.first_name.data = player.first_name
         form.last_name.data = player.last_name
         form.nickname.data = player.nickname
+        form.tagline.data = player.tagline
 
     return render_template('edit_player.html', title='Player Editor', 
         form=form, player=player, all_players=all_players)
@@ -517,6 +520,7 @@ def profile():
         player.first_name = player_form.first_name.data
         player.last_name = player_form.last_name.data
         player.nickname = player_form.nickname.data
+        player.tagline = player_form.tagline.data
         db.session.add(player)
         db.session.commit()
         flash('Player {} ({} {}) modified!'.format(
@@ -527,6 +531,7 @@ def profile():
         player_form.first_name.data = player.first_name
         player_form.last_name.data = player.last_name
         player_form.nickname.data = player.nickname
+        player_form.tagline.data = player.tagline
 
     return render_template('profile.html', player_form=player_form, claim_form=claim_form, 
         checked_matches=checked_matches)
