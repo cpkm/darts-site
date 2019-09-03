@@ -10,10 +10,10 @@
     <h5>Season</h5>
       <div class="dropdown px-2">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-         <span class="selection">{{ year_str }}</span>  
+         <span class="selection">{% if year_str=='all time' %}All Time{% else %}{{ year_str }}{% endif %}</span>  
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-          <a class="dropdown-item" href='/leaderboard'>All Time</a>
+          <a class="dropdown-item" href="/leaderboard" value="all time">All Time</a>
           {% for s in g.all_seasons %}
             <a class="dropdown-item" href={{  '/leaderboard/' + s.season_name.replace('/','-')  }}>{{   s.season_name }}</a>
           {% endfor %}
