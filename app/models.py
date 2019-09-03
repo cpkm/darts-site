@@ -460,6 +460,48 @@ class TeamSeasonStats(db.Model):
     total_high_scores = db.Column(db.Integer)
     total_low_scores = db.Column(db.Integer)
 
+    def __add__(self, other):
+        if self.season == other.season:
+            new_season = self.season
+        else:
+            new_season = None
+
+        return TeamSeasonStats(
+                id = None,
+                season = new_season,
+                season_id = None,
+                matches_played = self.matches_played + other.matches_played,
+                matches_won = self.matches_won + other.matches_won,
+                matches_lost = self.matches_lost + other.matches_lost,
+                games_played = self.games_played + other.games_played,
+                games_won = self.games_won + other.games_won,
+                games_lost = self.games_lost + other.games_lost,
+                total_stars = self.total_stars + other.total_stars,
+                total_high_scores = self.total_high_scores + other.total_high_scores,
+                total_low_scores = self.total_low_scores + other.total_low_scores,
+                )
+
+    def __sub__(self, other):
+        if self.season == other.season:
+            new_season = self.season
+        else:
+            new_season = None
+
+        return TeamSeasonStats(
+                id = None,
+                season = new_season,
+                season_id = None,
+                matches_played = self.matches_played - other.matches_played,
+                matches_won = self.matches_won - other.matches_won,
+                matches_lost = self.matches_lost - other.matches_lost,
+                games_played = self.games_played - other.games_played,
+                games_won = self.games_won - other.games_won,
+                games_lost = self.games_lost - other.games_lost,
+                total_stars = self.total_stars - other.total_stars,
+                total_high_scores = self.total_high_scores - other.total_high_scores,
+                total_low_scores = self.total_low_scores - other.total_low_scores,
+                )
+
     def update_team_stats(self):
         self.matches_played = Match.query.filter_by(season=self.season).count()
         self.matches_won = Match.query.filter_by(season=self.season, win=True).count()
@@ -517,6 +559,32 @@ class MatchStats(db.Model):
     stars_s5 = db.Column(db.Integer)
     stars_d5 = db.Column(db.Integer)
     stars_d7 = db.Column(db.Integer)
+
+    def __add__(self, other):
+        return MatchStats(
+                id = None,
+                match_id = None,
+                match = None,
+                wins_s5 = self.wins_s5 + other.wins_s5,
+                wins_d5 = self.wins_d5 + other.wins_d5,
+                wins_d7 = self.wins_d7 + other.wins_d7,
+                stars_s5 = self.stars_s5 + other.stars_s5,
+                stars_d5 = self.stars_d5 + other.stars_d5,
+                stars_d7 = self.stars_d7 + other.stars_d7
+                )
+
+    def __sub__(self, other):
+        return MatchStats(
+                id = None,
+                match_id = None,
+                match = None,
+                wins_s5 = self.wins_s5 - other.wins_s5,
+                wins_d5 = self.wins_d5 - other.wins_d5,
+                wins_d7 = self.wins_d7 - other.wins_d7,
+                stars_s5 = self.stars_s5 - other.stars_s5,
+                stars_d5 = self.stars_d5 - other.stars_d5,
+                stars_d7 = self.stars_d7 - other.stars_d7
+                )
 
 
 def current_season(last=0):
