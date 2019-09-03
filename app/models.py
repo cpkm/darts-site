@@ -85,11 +85,12 @@ class Player(db.Model):
 
     def tidbit(self):
 
-        phrases = ['Bull\'s eye hunter', 'Lean, mean outing machine', 'All about the bulls, no triples',
+        phrases = ['Bull\'s-eye hunter', 'Lean, mean, outing machine', 'All about the bulls, no triples',
             'Sprayin\' and prayin\'', 'Lover of ones', 'Only shoots 19\'s', 'Double 8 or bust', 'Triple 20 is my jam',
             'Fish and chips are good', 'Always wants to diddle', 'Big outs are for suckers', '60 counts as a book, right?',
             'One more Sleeman and I\'m good', 'Steady hands and a sharp eye', 'Will pay for triples', 'Shanghai for the win',
-            'Low scores are sexy', 'Always in the book', 'Seeing stars', 'Shooter McGavin']
+            'Low scores are sexy', 'Always in the book', 'Seeing stars', 'Shooter McGavin', 'Robin Hood',
+            'Is this board regulation height?', 'I\'m only here for the snacks', 'Chalker\'s beer royalty']
 
         return random.choice(phrases)
 

@@ -1,3 +1,8 @@
+{% extends "base_email.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
 <h2>Welcome to the ICC4 darts team!</h2>
 <p>
     Thank you for registering with ICC4-darts. To finish setting up your account, please verify your email by
@@ -10,3 +15,5 @@
 <p>If you have recieved this email in error simply ignore this message.</p>
 <p>Sincerely,</p>
 <p>The ICC4 pub darts team</p>
+
+{% endblock %}

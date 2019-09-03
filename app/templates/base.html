@@ -116,9 +116,17 @@
     {% endif %}
   {% endwith %}
     
-    {# application content needs to be provided in the app_content block #}
-    {% block app_content %}{% endblock %}
+  {# application content needs to be provided in the app_content block #}
+  {% block app_content %}{% endblock %}
   </div>
+  
+  {% block footer %}
+  <div class="container-fluid">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+      <small><p>&copy; 2019 <a class="text-muted" href="http://icc4-darts.herokuapp.com">ICC4-darts</a></p></small>
+    </nav>
+  </div>
+  {% endblock %}
 {% endblock %}
 
 {% block scripts %}

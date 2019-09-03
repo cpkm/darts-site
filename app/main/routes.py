@@ -499,6 +499,7 @@ def profile():
 
         flash('Player {} ({} {}) claimed!'.format(
             claimed_player.nickname, claimed_player.first_name, claimed_player.last_name))
+        return redirect(url_for('main.profile'))
 
     if request.method=='POST' and player_form.submit_new.data and player_form.validate():
         new_player = Player(nickname=player_form.nickname.data,
@@ -571,8 +572,9 @@ def send_reminder_email(match_id, token):
 
     match = Match.query.filter_by(id=match_id).first()
     users = [p.user for p in current_roster() if p.user is not None]
+    status = [u.player.checked_matches_association.filter_by(match_id=match.id).first().status for u in users]
     
-    reminder_email(users=users,match=match)
+    reminder_email(users=users,match=match,status=status)
     match.reminder_email_sent = date.today()
     db.session.add(match)
     db.session.commit()
@@ -580,12 +582,22 @@ def send_reminder_email(match_id, token):
     return redirect(url_for('main.captain', _anchor="email"))
 
 
-@bp.route('/checkin/<player_id>/<match_id>/<status>', methods=['GET','POST'])
-def checkin(player_id, match_id, status):
+@bp.route('/checkin/<player_id>/<match_id>/<status>/<token>', methods=['GET','POST'])
+def checkin(player_id, match_id, status, token):
+    user = User.verify_user_token(token, task='checkin')
+    if not user:
+        flash('Invalid token', 'danger')
+        return redirect(url_for('main.index'))
+
     player = Player.query.filter_by(id=player_id).first()
     match = Match.query.filter_by(id=match_id).first()
     player.checkin(match,status)
-    return redirect(url_for('main.profile', _anchor='checkin'))
+
+    flash('Thank you for checking in!', 'success')
+    if current_user == user:
+        return redirect(url_for('main.profile', _anchor='checkin'))
+    else:
+        return redirect(url_for('main.index'))
 
 
 @bp.route('/search')
