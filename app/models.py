@@ -392,8 +392,58 @@ class PlayerSeasonStats(db.Model):
     total_high_scores = db.Column(db.Integer)
     total_low_scores = db.Column(db.Integer)
 
+    def __add__(self, other):
+        if self.player == other.player:
+            new_player = self.player
+        else:
+            new_player = None
+
+        return PlayerSeasonStats(
+                id = None,
+                player_id = None,
+                player = new_player,
+                season_id = None,
+                season = None,
+                matches_played = self.matches_played + other.matches_played,
+                matches_won = self.matches_won + other.matches_won,
+                matches_lost = self.matches_lost + other.matches_lost,
+                games_played = self.games_played + other.games_played,
+                games_won = self.games_won + other.games_won,
+                games_lost = self.games_lost + other.games_lost,
+                total_stars = self.total_stars + other.total_stars,
+                total_high_scores = self.total_high_scores + other.total_high_scores,
+                total_low_scores = self.total_low_scores + other.total_low_scores,
+                )
+
+    def __sub__(self, other):
+        if self.player == other.player:
+            new_player = self.player
+        else:
+            new_player = None
+
+        return PlayerSeasonStats(
+                id = None,
+                player_id = None,
+                player = new_player,
+                season_id = None,
+                season = None,
+                matches_played = self.matches_played - other.matches_played,
+                matches_won = self.matches_won - other.matches_won,
+                matches_lost = self.matches_lost - other.matches_lost,
+                games_played = self.games_played - other.games_played,
+                games_won = self.games_won - other.games_won,
+                games_lost = self.games_lost - other.games_lost,
+                total_stars = self.total_stars - other.total_stars,
+                total_high_scores = self.total_high_scores - other.total_high_scores,
+                total_low_scores = self.total_low_scores - other.total_low_scores,
+                )
+
     def __repr__(self):
-        return '<{} {}>'.format(self.player.nickname,self.season.season_name)
+        if self.player and self.season:
+            return '<{} {}>'.format(self.player.nickname,self.season.season_name)
+        else:
+            return '{}'.format(type(self))
+        
 
 
 class TeamSeasonStats(db.Model):
