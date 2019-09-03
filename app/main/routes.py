@@ -450,8 +450,8 @@ def match(id):
     roster = match.get_roster()
     return render_template('match.html', match=match, roster=roster)
 
-@bp.route('/leaderboard',  methods=['GET', 'POST'], defaults={'year_str':None})
-@bp.route('/leaderboard/',  methods=['GET', 'POST'], defaults={'year_str':None})
+@bp.route('/leaderboard',  methods=['GET', 'POST'], defaults={'year_str':'all time'})
+@bp.route('/leaderboard/',  methods=['GET', 'POST'], defaults={'year_str':'all time'})
 @bp.route('/leaderboard/<year_str>',  methods=['GET', 'POST'])
 def leaderboard(year_str):
     try:
@@ -460,19 +460,19 @@ def leaderboard(year_str):
         board=None
         pass
 
-    roster = Player.query.all()
+    roster = Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).all()
 
-    if(year_str is None):
-        stats = PlayerSeasonStats.query.join(Season).join(Player).\
-            filter(PlayerSeasonStats.season==current_season()).filter(~Player.nickname.in_(['Dummy','Sub'])).all()
-        year_str = 'All Time'
+    if year_str.lower() == 'all time':
+        stats = [sum(PlayerSeasonStats.query.join(Player).filter(Player.nickname==p.nickname).all()) for p in roster] 
     else:
         if year_str == 'current':
             year_str = current_season().season_name
+        elif year_str == 'last':
+            year_str = current_season(last=1).season_name
         else:
             year_str = year_str.replace('-','/') # This is to allow date name to be 'url-friendly'
         stats = PlayerSeasonStats.query.join(Season).filter_by(season_name=year_str).\
-            join(Player).filter(~Player.nickname.in_(['Dummy','Sub'])).all()
+            join(Player).filter(Player.nickname.in_([p.nickname for p in roster])).all()
     return render_template('leaderboard.html', roster=roster, stats=stats, year_str=year_str, board=board)
 
 @bp.route('/profile', methods=['GET', 'POST'])

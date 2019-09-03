@@ -395,10 +395,16 @@ class PlayerSeasonStats(db.Model):
     def __add__(self, other):
         if not other:
             return self
+
+        if other.player == self.player:
+            new_player = self.player
+        else:
+            new_player = None
+
         return PlayerSeasonStats(
                 id = None,
                 player_id = None,
-                player = None,
+                player = new_player,
                 season_id = None,
                 season = None,
                 matches_played = self.matches_played + other.matches_played,
@@ -415,10 +421,16 @@ class PlayerSeasonStats(db.Model):
     def __radd__(self, other):
         if not other:
             return self
+
+        if other.player == self.player:
+            new_player = self.player
+        else:
+            new_player = None
+
         return PlayerSeasonStats(
                 id = None,
                 player_id = None,
-                player = None,
+                player = new_player,
                 season_id = None,
                 season = None,
                 matches_played = other.matches_played + self.matches_played,
