@@ -64,7 +64,8 @@ def player_edit(nickname):
         newplayer = Player(
             first_name=form.first_name.data,
             last_name=form.last_name.data,
-            nickname=form.nickname.data)
+            nickname=form.nickname.data,
+            tagline=form.tagline.data)
         if Player.query.filter_by(nickname=newplayer.nickname).first() is None:
             db.session.add(newplayer)
             db.session.flush()
@@ -83,6 +84,7 @@ def player_edit(nickname):
         player.first_name = form.first_name.data
         player.last_name = form.last_name.data
         player.nickname = form.nickname.data
+        player.tagline = form.tagline.data
         db.session.add(player)
         db.session.commit()
         flash('Player {} ({} {}) modified!'.format(
@@ -103,6 +105,7 @@ def player_edit(nickname):
         form.first_name.data = player.first_name
         form.last_name.data = player.last_name
         form.nickname.data = player.nickname
+        form.tagline.data = player.tagline
 
     return render_template('edit_player.html', title='Player Editor', 
         form=form, player=player, all_players=all_players)
@@ -496,6 +499,7 @@ def profile():
 
         flash('Player {} ({} {}) claimed!'.format(
             claimed_player.nickname, claimed_player.first_name, claimed_player.last_name))
+        return redirect(url_for('main.profile'))
 
     if request.method=='POST' and player_form.submit_new.data and player_form.validate():
         new_player = Player(nickname=player_form.nickname.data,
@@ -517,6 +521,7 @@ def profile():
         player.first_name = player_form.first_name.data
         player.last_name = player_form.last_name.data
         player.nickname = player_form.nickname.data
+        player.tagline = player_form.tagline.data
         db.session.add(player)
         db.session.commit()
         flash('Player {} ({} {}) modified!'.format(
@@ -527,6 +532,7 @@ def profile():
         player_form.first_name.data = player.first_name
         player_form.last_name.data = player.last_name
         player_form.nickname.data = player.nickname
+        player_form.tagline.data = player.tagline
 
     return render_template('profile.html', player_form=player_form, claim_form=claim_form, 
         checked_matches=checked_matches)
@@ -566,8 +572,9 @@ def send_reminder_email(match_id, token):
 
     match = Match.query.filter_by(id=match_id).first()
     users = [p.user for p in current_roster() if p.user is not None]
+    status = [u.player.checked_matches_association.filter_by(match_id=match.id).first().status for u in users]
     
-    reminder_email(users=users,match=match)
+    reminder_email(users=users,match=match,status=status)
     match.reminder_email_sent = date.today()
     db.session.add(match)
     db.session.commit()
@@ -575,12 +582,22 @@ def send_reminder_email(match_id, token):
     return redirect(url_for('main.captain', _anchor="email"))
 
 
-@bp.route('/checkin/<player_id>/<match_id>/<status>', methods=['GET','POST'])
-def checkin(player_id, match_id, status):
+@bp.route('/checkin/<player_id>/<match_id>/<status>/<token>', methods=['GET','POST'])
+def checkin(player_id, match_id, status, token):
+    user = User.verify_user_token(token, task='checkin')
+    if not user:
+        flash('Invalid token', 'danger')
+        return redirect(url_for('main.index'))
+
     player = Player.query.filter_by(id=player_id).first()
     match = Match.query.filter_by(id=match_id).first()
     player.checkin(match,status)
-    return redirect(url_for('main.profile', _anchor='checkin'))
+
+    flash('Thank you for checking in!', 'success')
+    if current_user == user:
+        return redirect(url_for('main.profile', _anchor='checkin'))
+    else:
+        return redirect(url_for('main.index'))
 
 
 @bp.route('/search')

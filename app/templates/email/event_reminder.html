@@ -1,12 +1,30 @@
+{% extends "base_email.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+<div class="container">
 <h1>ICC4 Event reminder</h1>
 <h3>{{ user.player.nickname }}</h3>
 <p>
-    You have an event coming up: 7p.m. on {{ match.date.strftime('%B %-d') }} at {{ match.location }}.
+    You have an event coming up: 
+
+    8p.m. on {{ match.date.strftime('%B %-d') }} against <b>{{ match.opponent.name }}</b> at {{ match.location }}.
 </p>
-<p>Currently you have checked-in as: </p>
-<p>Click the links below to change your status.</p>
-<button type="button"><a role="button" href="{{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='in', _external=True) }}">In</a></button>
-<button type="button"><a role="button" href="{{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='out', _external=True) }}">Out</a></button>
-<button type="button"><a role="button" href="{{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='ifn', _external=True) }}">If Needed</a></button>
+<p>Currently you have checked-in as: <b>
+{% if not status %}OUT
+{% elif status.lower()=='in' %}IN
+{% elif status.lower()=='ifn' %}IF NEEDED
+{% else %}OUT
+{% endif %}
+</b></p>
+<p>Click the links below to change your status:<br>
+<button type="button"><a role="button" href="{{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='in', token=token, _external=True) }}">In</a></button>
+<button type="button"><a role="button" href="{{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='out', token=token, _external=True) }}">Out</a></button>
+<button type="button"><a role="button" href="{{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='ifn', token=token,  _external=True) }}">If Needed</a></button>
+</p>
 <p>Sincerely,</p>
 <p>The ICC4 pub darts team</p>
+</div>
+
+{% endblock %}

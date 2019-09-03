@@ -27,6 +27,7 @@ class EditPlayerForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
     last_name = StringField('Last Name', validators=[DataRequired()])
     nickname = StringField('Nickname', validators=[DataRequired()])
+    tagline = StringField('Tagline', validators=[Length(max=64)])
     submit_new = SubmitField('Submit')
     submit_edit = SubmitField('Edit Player')
     submit_delete = SubmitField('Delete Player')

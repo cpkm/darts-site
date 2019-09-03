@@ -104,7 +104,9 @@
 
     <div id="hl_scores" class="card">
       <h2 class="card-header">High and low scores</h2>
+      <small class="p-2">Use a <i>*</i> or <i>o</i> to indicate a high score as a big out, e.g. <i>96*</i> or <i>104o</i>.</small>
       <div class="card-body">
+
         <form class="form" method="post" role="form">
         {{ hl_form.hidden_tag() }}
         {{ wtf.form_errors(hl_form, hiddens="only") }}

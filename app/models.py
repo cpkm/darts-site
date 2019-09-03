@@ -1,4 +1,5 @@
 import jwt
+import random
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
@@ -66,6 +67,7 @@ class Player(db.Model):
     nickname = db.Column(db.String(64), index=True, unique=True)
     first_name = db.Column(db.String(64), index=True)
     last_name = db.Column(db.String(64), index=True)
+    tagline = db.Column(db.String(64))
     is_active = db.Column(db.Boolean, index=True, default=True)
     games = association_proxy('games_association', 'game')
     last_match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
@@ -80,6 +82,18 @@ class Player(db.Model):
     user = db.relationship('User', back_populates='player')
 
     checked_matches = association_proxy('checked_matches_association', 'match')
+
+    def tidbit(self):
+
+        phrases = ['Bull\'s-eye hunter', 'Lean, mean, outing machine', 'All about the bulls, no triples',
+            'Sprayin\' and prayin\'', 'Lover of ones', 'Only shoots 19\'s', 'Double 8 or bust', 'Triple 20 is my jam',
+            'Fish and chips are good', 'Always wants to diddle', 'Big outs are for suckers', '60 counts as a book, right?',
+            'One more Sleeman and I\'m good', 'Steady hands and a sharp eye', 'Will pay for triples', 'Shanghai for the win',
+            'Low scores are sexy', 'Always in the book', 'Seeing stars', 'Shooter McGavin', 'Robin Hood',
+            'Is this board regulation height?', 'I\'m only here for the snacks', 'Chalker\'s beer royalty']
+
+        return random.choice(phrases)
+
 
     def create_checkins(self):
         matches = Match.query.filter(Match.date>=date.today()).all()

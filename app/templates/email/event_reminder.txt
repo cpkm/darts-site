@@ -3,16 +3,16 @@ ICC4 Event reminder
 {{ user.player.nickname }},
 
 
-    You have an event coming up: 7p.m. on {{ match.date.strftime('%d-%b') }} at {{ match.location }}.
+    You have an event coming up: 8p.m. on {{ match.date.strftime('%d-%b') }} against {{ match.opponent.name }} at {{ match.location }}.
 
 
-Currently you have checked-in as: placeholder
+Currently you have checked-in as: {{ status }}
 
 Click the links below to change your status:
 
-In: {{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='in', _external=True) }}
-Out: {{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='out', _external=True) }}
-If Needed: {{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='ifn', _external=True) }}
+In: {{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='in', token=token, _external=True) }}
+Out: {{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='out', token=token, _external=True) }}
+If Needed: {{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='ifn', token=token, _external=True) }}
 
 Sincerely,
 
