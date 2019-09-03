@@ -68,7 +68,7 @@ class ClaimPlayerForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         unclaimed_players = Player.query.filter(Player.nickname!='Dummy').filter(Player.user==None).all()
-        players = [(p.nickname,p.nickname+' ('+p.first_name+' '+p.last_name+')') for p in unclaimed_players]
+        players = [(self.player.default,self.player.default)] + [(p.nickname,p.nickname+' ('+p.first_name+' '+p.last_name+')') for p in unclaimed_players]
         self.player.choices = players
 
 class EditTeamForm(FlaskForm):

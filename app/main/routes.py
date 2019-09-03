@@ -493,6 +493,11 @@ def profile():
 
     if request.method=='POST' and claim_form.submit_claim.data and claim_form.validate():
         claimed_player = Player.query.filter_by(nickname=claim_form.player.data).first()
+
+        if not claimed_player:
+            flash('Please select a player to claim.', 'danger')
+            return redirect(url_for('main.profile'))
+            
         current_user.player = claimed_player
         db.session.add(current_user)
         db.session.commit()
