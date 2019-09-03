@@ -27,6 +27,8 @@ def login():
         next_page = request.args.get('next')
         if not user.verified:
             return redirect(url_for('auth.unverified_email'))
+        if not user.player:
+            return render_template('auth/new_user.html')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('main.index')
         return redirect(next_page)

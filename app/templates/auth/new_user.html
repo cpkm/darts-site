@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<div class="jumbotron">
+  <h1 class="display-4">Welcome to the team!</h1>
+  <p class="lead">You still need to select or create a player profile. This will let you track your stats and recieve event notifications.</p>
+  <hr class="my-4">
+  <p><small class="text-muted">Go to your <a class="text-muted" href="{{ url_for('main.profile', _anchor='player') }}">Profile</a> page to claim an existing player, or create a new one.</small></p>
+
+  <a class="btn btn-primary btn-sm" role="button" href="{{ url_for('main.profile', _anchor='player') }}">Select a Player Profile</a>
+  
+</div>
+
+{% endblock %}
