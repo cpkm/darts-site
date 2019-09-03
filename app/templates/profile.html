@@ -30,6 +30,7 @@
           <h4>Account details</h4>
           <p>Email: {{ current_user.email }}</p>
           <p>Role: {{ current_user.role }}</p>
+          <p><small>Note: your avatar is set using your email address and the Gravatar service from Wordpress. To add or change your avatar please visit <a target="_blank" href="https://en.gravatar.com/">gravatar.com</a></small></p>
         </div>    
       </div>
       <div class="tab-pane" id="player" role="tabpanel" aria-labelledby="player-tab">
@@ -52,6 +53,7 @@
                     <p>Last name: {{ current_user.player.last_name }}</p>
                     <p>Active: {% if current_user.player.is_active %}Yes{% else %}No{% endif %}</p>
                     <p>Player page: <a href="{{ url_for('main.player', nickname=current_user.player.nickname) }}">link</a></p>
+                    <p>Change avatar: <a target="_blank" href="https://en.gravatar.com/">gravatar.com</a></small></p>
                 {% endif %}
                 </div>
                 <div class="col-6 mt-2 mx-auto">
