@@ -549,7 +549,7 @@ def profile():
 @check_role(['admin','captain'])
 def captain():
     roster_form = RosterForm()
-    if roster_form.validate_on_submit():
+    if request.method == 'POST' and roster_form.validate_on_submit():
         for player_form in roster_form.roster:
             if player_form.player.data is not None:
                 p = Player.query.filter_by(nickname=player_form.player.data).first()
@@ -559,11 +559,13 @@ def captain():
         flash('Updated active roster!')
         return redirect(url_for('main.captain'))
     elif request.method == 'GET':
-        roster_form.fill_roster()
+        players = current_roster(full=True)
+        roster_form.fill_roster(players)
 
     upcoming_matches = Match.query.filter(Match.date>=date.today()).order_by(Match.date).all()
 
-    return render_template('captain.html', roster_form=roster_form, upcoming_matches=upcoming_matches)
+    return render_template('captain.html', roster_form=roster_form, 
+        players=players, upcoming_matches=upcoming_matches)
 
 
 @bp.route('/send_reminder_email/<match_id>/<token>', methods=['GET','POST'])
@@ -587,8 +589,8 @@ def send_reminder_email(match_id, token):
     return redirect(url_for('main.captain', _anchor="email"))
 
 
-@bp.route('/checkin/<player_id>/<match_id>/<status>/<token>', methods=['GET','POST'])
-def checkin(player_id, match_id, status, token):
+@bp.route('/update_checkin/<player_id>/<match_id>/<status>/<token>', methods=['GET','POST'])
+def update_checkin(player_id, match_id, status, token):
     user = User.verify_user_token(token, task='checkin')
     if not user:
         flash('Invalid token', 'danger')
@@ -600,9 +602,23 @@ def checkin(player_id, match_id, status, token):
 
     flash('Thank you for checking in!', 'success')
     if current_user == user:
-        return redirect(url_for('main.profile', _anchor='checkin'))
+        return redirect(url_for('main.checkin'))
     else:
         return redirect(url_for('main.index'))
+
+
+@bp.route('/checkin', methods=['GET','POST'])
+@login_required
+def checkin():
+    if current_user.player:
+        player = Player.query.filter_by(nickname=current_user.player.nickname).first()
+        checked_matches = player.checked_matches_association.\
+            join(Match).filter(Match.date>=date.today()).order_by(Match.date).all()
+    else:
+        player = None
+        checked_matches = None
+
+    return render_template('checkin.html', checked_matches=checked_matches)
 
 
 @bp.route('/search')

@@ -19,9 +19,9 @@
 {% endif %}
 </b></p>
 <p>Click the links below to change your status:<br>
-<button type="button"><a role="button" href="{{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='in', token=token, _external=True) }}">In</a></button>
-<button type="button"><a role="button" href="{{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='out', token=token, _external=True) }}">Out</a></button>
-<button type="button"><a role="button" href="{{ url_for('main.checkin', player_id=user.player.id, match_id=match.id, status='ifn', token=token,  _external=True) }}">If Needed</a></button>
+<button type="button"><a role="button" href="{{ url_for('main.update_checkin', player_id=user.player.id, match_id=match.id, status='in', token=token, _external=True) }}">In</a></button>
+<button type="button"><a role="button" href="{{ url_for('main.update_checkin', player_id=user.player.id, match_id=match.id, status='out', token=token, _external=True) }}">Out</a></button>
+<button type="button"><a role="button" href="{{ url_for('main.update_checkin', player_id=user.player.id, match_id=match.id, status='ifn', token=token,  _external=True) }}">If Needed</a></button>
 </p>
 <p>Sincerely,</p>
 <p>The ICC4 pub darts team</p>

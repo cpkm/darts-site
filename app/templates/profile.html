@@ -16,9 +16,6 @@
         <a class="nav-link" id="player-tab" data-toggle="tab" href="#player" role="tab" aria-controls="player" aria-selected="false">Player</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="checkin-tab" data-toggle="tab" href="#checkin" role="tab" aria-controls="checkin" aria-selected="false">Checkin</a>
-      </li>
-      <li class="nav-item">
         <a class="nav-link" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false">Settings</a>
       </li>
     </ul>
@@ -33,6 +30,7 @@
           <p><small>Note: your avatar is set using your email address and the Gravatar service from Wordpress. To add or change your avatar please visit <a target="_blank" href="https://en.gravatar.com/">gravatar.com</a></small></p>
         </div>    
       </div>
+      
       <div class="tab-pane" id="player" role="tabpanel" aria-labelledby="player-tab">
         <div class="container">
             <div class="row">
@@ -76,52 +74,7 @@
             </div>
         </div>
       </div>
-      <div class="tab-pane" id="checkin" role="tabpanel" aria-labelledby="checkin-tab">
-        <div class="container m-2">
-          {% if checked_matches %}
-          <table class="table">
-            <thead>
-              <tr>
-                <th scope="col">Date</th>
-                <th scope="col">Team</th>
-                <th scope="col">Home/Away</th>
-                <th scope="col">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for cm in checked_matches %}
-              <tr>
-                <th scope="row">{{ cm.match.date.strftime('%b %d') }}</th> 
-                <td>{{ cm.match.opponent.name }}</td>
-                <td>{{ cm.match.home_away }}</td>
-                <td>
-                  {% if cm.status == 'in'%}
-                  <a role="button" class="btn btn-success btn-sm">In</a>
-                  {% else %}
-                  <a role="button" class="btn btn-outline-success btn-sm" href="{{ url_for('main.checkin', player_id=current_user.player.id, match_id=cm.match_id, status='in', token=current_user.get_user_token(task='checkin')) }}">In</a>
-                  {% endif %}
-
-                  {% if cm.status == 'out'%}
-                  <a role="button" class="btn btn-danger btn-sm">Out</a>
-                  {% else %}
-                  <a role="button" class="btn btn-outline-danger btn-sm" href="{{ url_for('main.checkin', player_id=current_user.player.id, match_id=cm.match_id, status='out', token=current_user.get_user_token(task='checkin')) }}">Out</a>
-                  {% endif %}
-
-                  {% if cm.status == 'ifn'%}
-                  <a role="button" class="btn btn-warning btn-sm">If Needed</a>
-                  {% else %}
-                  <a role="button" class="btn btn-outline-warning btn-sm" href="{{ url_for('main.checkin', player_id=current_user.player.id, match_id=cm.match_id, status='ifn', token=current_user.get_user_token(task='checkin')) }}">If Needed</a>
-                  {% endif %}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          {% else %}
-          <p>You have no upcoming matches</p>
-          {% endif %}
-        </div>
-      </div>
+      
       <div class="tab-pane" id="settings" role="tabpanel" aria-labelledby="settings-tab">
         <div class="container m-2">
           <p>To change your account email, please contact the site administrator.</p>

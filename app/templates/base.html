@@ -68,9 +68,11 @@
         <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
       </li>
     {% else %}
-
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('main.profile') }}">Profile</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.checkin') }}">Checkin</a>
       </li>
       {% if current_user.check_role(['admin', 'captain']) %}
       <div class="dropdown-divider"></div>
@@ -123,7 +125,9 @@
   {% block footer %}
   <div class="container-fluid">
     <nav class="navbar navbar-expand-md navbar-light bg-light">
-      <small><p>&copy; 2019 <a class="text-muted" href="http://icc4-darts.herokuapp.com">ICC4-darts</a></p></small>
+      <div class="mx-auto order-0">
+        <small><p class="text-center">&copy; 2019 <a class="text-muted" href="http://icc4-darts.herokuapp.com">ICC4-darts</a></p></small>
+      </div>
     </nav>
   </div>
   {% endblock %}
