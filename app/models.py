@@ -681,8 +681,11 @@ def update_all_team_stats(season='all'):
             stats = TeamSeasonStats(season=s)
         stats.update_team_stats()
 
-def current_roster():
-    return Player.query.filter_by(is_active=True).all()
+def current_roster(full=False):
+    if full:
+        return Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).order_by(Player.nickname).all()
+
+    return Player.query.filter_by(is_active=True).order_by(Player.nickname).all()
 
 @login.user_loader
 def load_user(id):

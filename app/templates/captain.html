@@ -52,12 +52,12 @@
                 {{ p.hidden_tag() }}
                 {{ wtf.form_errors(p, hiddens="only") }}
                 <tr>
-                    <td>{{ p.player.data.nickname }}</td>
-                    <td>{{ p.player.data.last_name }}</td>
-                    <td>{{ p.player.data.first_name }}</td>
+                    <td>{{ p.player }}{{ players[loop.index-1].nickname }}</td>
+                    <td>{{ players[loop.index-1].last_name }}</td>
+                    <td>{{ players[loop.index-1].first_name }}</td>
                     <td>{{ p.is_active }}</td>
-                    <td>{{ p.player.data.user.role }}</td>
-                    <td>{{ p.player.data.user.email }}</td>
+                    <td>{{ players[loop.index-1].user.role }}</td>
+                    <td>{{ players[loop.index-1].user.email }}</td>
                 </tr>
                 {% endfor %}
               </table>
