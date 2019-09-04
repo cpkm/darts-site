@@ -331,7 +331,8 @@ class Match(db.Model):
                 self.location = 'Italian Canadian Club'
 
     def create_checkins(self):
-        pwc = [PlayerMatchCheckin(match_id=self.id, player_id=p.id) for p in Player.query.all()]
+        pwc = [PlayerMatchCheckin(match_id=self.id, player_id=p.id)\
+                for p in Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).all()]
         try:
             db.session.add_all(pwc)
             db.session.commit()
