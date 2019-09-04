@@ -83,6 +83,14 @@ class Player(db.Model):
 
     checked_matches = association_proxy('checked_matches_association', 'match')
 
+    def avatar(self, size):
+        if self.user:
+            return self.user.avatar(size)
+        else:
+            digest = md5(self.nickname.lower().encode('utf-8')).hexdigest()
+        return 'https://www.gravatar.com/avatar/{}?d=robohash&s={}'.format(
+            digest, size)
+
     def tidbit(self):
 
         phrases = ['Bull\'s-eye hunter', 'Lean, mean, outing machine', 'All about the bulls, no triples',
@@ -126,14 +134,6 @@ class Player(db.Model):
         else:
             print('status not found')
         return False
-
-    def avatar(self, size):
-        if self.user:
-            return self.user.avatar(size)
-        else:
-            digest = md5(self.nickname.lower().encode('utf-8')).hexdigest()
-        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
-            digest, size)
 
     def game_stars(self, game=None, game_id=None):
         if game:
@@ -369,7 +369,7 @@ class Team(db.Model):
 
     def avatar(self, size):
         digest = md5(self.name.lower().encode('utf-8')).hexdigest()
-        return 'https://www.gravatar.com/avatar/{}?d=monsterid&s={}'.format(
+        return 'https://www.gravatar.com/avatar/{}?d=wavatar&s={}'.format(
             digest, size)
 
     def __repr__(self):
