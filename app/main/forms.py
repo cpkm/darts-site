@@ -54,8 +54,6 @@ class RosterForm(FlaskForm):
         super().__init__(*args,**kwargs)
 
     def fill_roster(self, players):
-        #all_players = Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).order_by(Player.nickname).all()
-
         for i,p in enumerate(players):
             self.roster.append_entry()
             self.roster[i].player.data = p.nickname
