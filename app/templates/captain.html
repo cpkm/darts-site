@@ -31,9 +31,9 @@
     </div>
 
     <div class="tab-pane" id="roster" role="tabpanel" aria-labelledby="roster-tab">
-      <div class="container">
+      <div class="container-fluid">
       <h3 class="card-header">Active roster</h3>
-        <div class="col-12 mt-2 mx-auto">
+        <div class="table-responsive col-12 mt-2 mx-auto">
           <form class="form" method="post" role="form">
             {{ roster_form.hidden_tag() }}
             {{ wtf.form_errors(roster_form, hiddens="only") }}
@@ -45,6 +45,8 @@
                   <th>Lastname</th>
                   <th>Firstname</th>
                   <th>Active</th>
+                  <th>Role</th>
+                  <th>Email</th>
                 </tr>
                 {% for p in roster_form.roster %}
                 {{ p.hidden_tag() }}
@@ -54,6 +56,8 @@
                     <td>{{ p.player.data.last_name }}</td>
                     <td>{{ p.player.data.first_name }}</td>
                     <td>{{ p.is_active }}</td>
+                    <td>{{ p.player.data.user.role }}</td>
+                    <td>{{ p.player.data.user.email }}</td>
                 </tr>
                 {% endfor %}
               </table>
