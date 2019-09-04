@@ -83,38 +83,42 @@
             {% for m in upcoming_matches %}
             {% set ins,out,ifn = m.get_checked_players() %}
             <div id="accordion">
-            <tr>
-              <th scope="row">{{ m.date.strftime('%b %d') }}</th> 
-              <td>{{ m.opponent.name }}</td>
-              <td>{{ m.home_away }}</td>
-              <td>{{ ins|length }} ({{ ifn|length }}) 
-                <a role="button" class="btn btn-outline-info btn-sm" data-toggle="collapse" data-target="#collapse{{loop.index}}" aria-expanded="true" aria-controls="collapseOne">Roster</a>
-                <div id="collapse{{loop.index}}" class="collapse hide" aria-labelledby="heading{{loop.index}}" data-parent="#accordion">
-                  <div class="card-body bg-light">
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th scope="col">In</th>
-                          <th scope="col">Out</th>
-                          <th scope="col">If Needed</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>{% for pmc in ins %}{{ pmc.player.nickname }}<br>{% endfor %}</td>
-                          <td>{% for pmc in out %}{{ pmc.player.nickname }}<br>{% endfor %}</td>
-                          <td>{% for pmc in ifn %}{{ pmc.player.nickname }}<br>{% endfor %}</td>                        
-                        </tr>
-                      </tbody>
-                    </table>
+              <tr>
+                <th scope="row">{{ m.date.strftime('%b %d') }}</th> 
+                <td>{{ m.opponent.name }}</td>
+                <td>{{ m.home_away }}</td>
+                <td>{{ ins|length }} ({{ ifn|length }})
+                  <a role="button" class="btn btn-outline-info btn-sm" data-toggle="collapse" data-target="#collapse{{loop.index}}" aria-expanded="true" aria-controls="collapseOne">Roster</a>
+                </td>
+                <td>
+                  <a role="button" class="btn btn-danger btn-sm" data-id="{{ m.__repr__()[1:-1] }}" href="#" data-href="{{ url_for('main.send_reminder_email', token=current_user.get_user_token(task='send_reminder_email'), match_id=m.id) }}" data-toggle="modal" data-target="#confirmModal">Send Reminder Email</a>
+                </td>
+                <td>{% if m.reminder_email_sent %}{{ m.reminder_email_sent.strftime('%Y-%m-%d')}}{% endif %}</td>
+              </tr>
+              <tr>
+                <td colspan="6">
+                  <div id="collapse{{loop.index}}" class="collapse hide" aria-labelledby="heading{{loop.index}}" data-parent="#accordion">
+                    <div class="card-body bg-light">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col">In</th>
+                            <th scope="col">Out</th>
+                            <th scope="col">If Needed</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>{% for pmc in ins %}{{ pmc.player.nickname }}<br>{% endfor %}</td>
+                            <td>{% for pmc in out %}{{ pmc.player.nickname }}<br>{% endfor %}</td>
+                            <td>{% for pmc in ifn %}{{ pmc.player.nickname }}<br>{% endfor %}</td>                        
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              </td>
-              <td>
-                <a role="button" class="btn btn-danger btn-sm" data-id="{{ m.__repr__()[1:-1] }}" href="#" data-href="{{ url_for('main.send_reminder_email', token=current_user.get_user_token(task='send_reminder_email'), match_id=m.id) }}" data-toggle="modal" data-target="#confirmModal">Send Reminder Email</a>
-              </td>
-              <td>{% if m.reminder_email_sent %}{{ m.reminder_email_sent.strftime('%Y-%m-%d')}}{% endif %}</td>
-            </tr>
+                </td>
+              </tr>
             {% endfor %}
             </div>
           </tbody>
