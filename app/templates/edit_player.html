@@ -18,9 +18,13 @@
 
         {% if player %}
         <h4 class="text-center text-muted">{{ player.nickname }}</h4>
-        {{ wtf.form_field(form.submit_edit, button_map={'submit_edit': 'info my-1 btn-block'}) }}
-        {{ wtf.form_field(form.submit_delete, hidden="true", button_map={'submit_delete': 'danger my-1 btn-block'}) }}
-        <button type="button" id="modal-click" class="btn btn-danger btn-block my-1" data-toggle="modal" data-target="#confirmModal">Delete Player</button>
+          {% if player.user and current_user.role=='captain'%}
+          <p class="text-center">This player has been claimed, you may not edit them.</p>
+          {% else %}
+          {{ wtf.form_field(form.submit_edit, button_map={'submit_edit': 'info my-1 btn-block'}) }}
+          {{ wtf.form_field(form.submit_delete, hidden="true", button_map={'submit_delete': 'danger my-1 btn-block'}) }}
+          <button type="button" id="modal-click" class="btn btn-danger btn-block my-1" data-toggle="modal" data-target="#confirmModal">Delete Player</button>
+          {% endif %}
         {% else %}
         {{ wtf.form_field(form.submit_new, button_map={'submit_new': 'primary my-1 btn-block'}) }}
         {% endif %}
