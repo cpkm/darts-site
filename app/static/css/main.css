@@ -48,3 +48,7 @@ html
     filter: alpha(opacity=0);
     /*workaround to make clickable in IE */
 }
+
+.no-decor:hover {
+  text-decoration: none !important
+}
