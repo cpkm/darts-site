@@ -22,7 +22,7 @@
   <!-- Tab panes -->
   <div class="tab-content">
     <div class="tab-pane active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-      <div class="col-12 mt-2 mx-auto">
+      <div class="container mx-2 my-4">
         <h4>Account details</h4>
         <p>Email: {{ current_user.email }}</p>
         <p>Role: {{ current_user.role }}</p>
@@ -31,11 +31,16 @@
     </div>
     
     <div class="tab-pane" id="player" role="tabpanel" aria-labelledby="player-tab">
-      <div class="container">
-          <div class="row">
-              <div class="col-6 mt-2 mx-auto">
+      <div class="container-fluid">
+          <div class="row py-4">
+              <div class="col-sm-6 px-4 mb-4 mb-sm-0">
               {% if not current_user.player %}
-                  <p>You have not selected a player. Either claim yourself from the dropdown menu, or complete the form to the right:</p>
+                <p>You do not have a player profile. Either claim yourself from the dropdown menu, or complete the form to the right:<p>
+                <ul>
+                  <li><strong>If you are listed in the dropdown menu</strong> - Congrats! A profile has already been created for you and your previous season stats have been uploaded. Welcome back to the team!</li>
+                  <li><strong>If you are not listed</strong> - Hello newcomer! Enter your details in the form to the right.</li>
+                </ul>
+                <p>You can always edit your details by returning to this page.</p>
                   <form class="form" method="post" role="form">
                       {{ claim_form.hidden_tag() }}
                       {{ wtf.form_errors(claim_form, hiddens="only") }}
@@ -45,15 +50,20 @@
                   </form>
               {% else %}
                   <p>You may edit your player details using the form on the right.</p>
+                  <div class="container m-2">
                   <h5>Playername: {{ current_user.player.nickname }}</h5>
-                  <p>First name: {{ current_user.player.first_name }}</p>
-                  <p>Last name: {{ current_user.player.last_name }}</p>
-                  <p>Active: {% if current_user.player.is_active %}Yes{% else %}No{% endif %}</p>
-                  <p>Player page: <a href="{{ url_for('main.player', nickname=current_user.player.nickname) }}">link</a></p>
-                  <p>Change avatar: <a target="_blank" href="https://en.gravatar.com/">gravatar.com</a></small></p>
+                  <ul class="list-unstyled">
+                    <li>First name: {{ current_user.player.first_name }}</li>
+                    <li>Last name: {{ current_user.player.last_name }}</li>
+                    <li>Active: {% if current_user.player.is_active %}Yes{% else %}No{% endif %}</li>
+                    <li>Player page: <a href="{{ url_for('main.player', nickname=current_user.player.nickname) }}">link</a></li>
+                    <li>Change avatar: <a target="_blank" href="https://en.gravatar.com/">gravatar.com</a></small></li>
+                  </ul>
+                  </div>
               {% endif %}
               </div>
-              <div class="col-6 mt-2 mx-auto">
+              <hr class="clearfix w-100 d-sm-none">
+              <div class="col-sm-6 px-4 mt-4 mt-sm-0">
                   <form class="form" method="post" role="form">
                       {{ player_form.hidden_tag() }}
                       {{ wtf.form_errors(player_form, hiddens="only") }}
@@ -75,8 +85,8 @@
     </div>
     
     <div class="tab-pane" id="settings" role="tabpanel" aria-labelledby="settings-tab">
-      <div class="container m-2">
-        <p>To change your account email, please contact the site administrator.</p>
+      <div class="container mx-2 my-4">
+        <p>To change your account email, please <a href="mailto:icc4-darts+admin@gmail.com">contact</a> the site administrator.</p>
         <p>To change your password, <a href="{{ url_for('auth.reset_password', token=current_user.get_user_token(task='reset_password', expires_in=10)) }}">Click Here</a>.</p>
       </div>
     </div>      

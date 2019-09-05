@@ -15,7 +15,7 @@
             </button>
           </h5>
         </div>
-        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
           <div class="card-body">
             <ul class="list-unstyled">
             {% for team in all_teams %}
@@ -33,21 +33,23 @@
 
   <div class="col-md-9">
     <div class="card h-100">
-      <div class="card-header">Opponent</div>
+      {% if opponent %}
+      <div class="card-header"><h4>{{ opponent.name }}</h4></div>
       <div class="card-body">
-        {% if opponent %}
-        <h4 class="card-title">{{ opponent.name }}</h4>
-        <h6 class="card-subtitle mb-2 text-muted">Playing out of {{ opponent.home_location }}</h6>
-        
-          <table class="table table-hover">
-          {% for match in matches %}
-            {% include '_match.html' %}
-          {% endfor %}
-          </table>
-        {% else %}
-        <h4 class="card-title">Select an opponent from the left</h4>
-        {% endif %}
+      <h6 class="card-subtitle mb-2 text-muted">Playing out of {{ opponent.home_location }}</h6>
+      
+        <table class="table table-hover">
+        {% for match in matches %}
+          {% include '_match.html' %}
+        {% endfor %}
+        </table>
       </div>
+      {% else %}
+      <div class="card-header"><h4>Opponent</h4></div>
+      <div class="card-body">
+      <h6 class="card-subtitle text-muted">Select an opponent from the left</h6>
+      </div>
+      {% endif %}
     </div>
   </div>
 

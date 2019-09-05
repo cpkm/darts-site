@@ -23,7 +23,7 @@
   <div class="tab-content">
 
     <div class="tab-pane active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-      <div class="col-12 mt-2 mx-auto">
+      <div class="container mx-2 my-4">
         <h4>Account details</h4>
         <p>Email: {{ current_user.email }}</p>
         <p>Role: {{ current_user.role }}</p>
@@ -31,7 +31,7 @@
     </div>
 
     <div class="tab-pane" id="roster" role="tabpanel" aria-labelledby="roster-tab">
-      <div class="container-fluid">
+      <div class="container-fluid m-2">
       <h3 class="card-header">Active roster</h3>
         <div class="table-responsive col-12 mt-2 mx-auto">
           <form class="form" method="post" role="form">
