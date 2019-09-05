@@ -31,14 +31,14 @@
             <th scope="col" data-toggle="tooltip" data-placement="top" title="Game wins">GW</th>
             <th scope="col" data-toggle="tooltip" data-placement="top" title="Game losses">GL</th>
             <th scope="col" data-toggle="tooltip" data-placement="top" title="Game Win Percentage">GW%</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Win:Loss">W:L</th>
             <th scope="col" data-toggle="tooltip" data-placement="top" title="Total Stars">TS</th>
             <th scope="col" data-toggle="tooltip" data-placement="top" title="Total High Scores">HS</th>
             <th scope="col" data-toggle="tooltip" data-placement="top" title="Total Low Score">LS</th>
-            <th scope="col" data-toggle="tooltip" data-placement="top" title="Win:Loss">W:L</th>
             <th scope="col" data-toggle="tooltip" data-placement="top" title="Stars per game">SpG</th>
-            <th scope="col" data-toggle="tooltip" data-placement="top" title="High:Low scores">Hi:Lo</th>
             <th scope="col" data-toggle="tooltip" data-placement="top" title="High scores per game">HpG</th>
             <th scope="col" data-toggle="tooltip" data-placement="top" title="Low scores per game">LpG</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="High:Low scores">Hi:Lo</th>
         </thead>
         <tbody>
           {% for s in stats %}
@@ -49,19 +49,18 @@
             <td>{{ s.games_won }}</td>
             <td>{{ s.games_lost }}</td>
             <td>{% if s.games_played > 0 %}{{ '%0.0f'| format(100*(s.games_won/s.games_played)|float) }}{% endif %}</td>
+            <td>{% if s.games_lost > 0 %}{{ (s.games_won/s.games_lost)|round(1, 'common') }}{% endif %}</td>
             <td>{{ s.total_stars }}</td>
             <td>{{ s.total_high_scores }}</td>
             <td>{{ s.total_low_scores }}</td>
-            <td>{% if s.games_lost > 0 %}{{ (s.games_won/s.games_lost)|round(1, 'common') }}{% endif %}</td>
             <td>{% if s.games_played > 0 %}{{ (s.total_stars/s.games_played)|round(1, 'common') }}{% endif %}</td>
-            <td>{% if s.total_low_scores  > 0 %}{{ (s.total_high_scores/s.total_low_scores)|round(1, 'common') }}{% endif %}</td>
             <td>{% if s.games_played > 0 %}{{ (s.total_high_scores/s.games_played)|round(1, 'common') }}{% endif %}</td>
             <td>{% if s.games_played > 0 %}{{ (s.total_low_scores/s.games_played)|round(1, 'common') }}{% endif %}</td>
+            <td>{% if s.total_low_scores  > 0 %}{{ (s.total_high_scores/s.total_low_scores)|round(1, 'common') }}{% endif %}</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
-
 
     </div>
   </div>
@@ -72,11 +71,11 @@
 {{ super() }}
 {% if board %}
   {% if board=='stars' %}
-    {% set lb = 6 %}
-  {% elif board=='high scores' %}
     {% set lb = 7 %}
-  {% elif board=='low scores' %}
+  {% elif board=='high scores' %}
     {% set lb = 8 %}
+  {% elif board=='low scores' %}
+    {% set lb = 9 %}
   {% else %}
     {% set lb = 3 %}
     {% endif %}
