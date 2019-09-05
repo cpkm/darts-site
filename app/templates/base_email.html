@@ -4,7 +4,6 @@
 {% block head %}
 {{super()}}
  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
- <link rel="stylesheet" media="all" href="{{ url_for('static', filename='css/bootstrap.css') }}" />
  {% endblock %}
 
 {% block title %}
@@ -13,28 +12,18 @@
 {% endblock %}
 
 {% block navbar %}
-<div class="container-fluid">
-<nav class="navbar navbar-expand-md navbar-light bg-light">
-  <a href="{{ url_for('main.index', _external=True) }}"><img src="{{ url_for('static',filename='icons/dart-logo-small.png', _external=True) }}" alt="ICC4" class="bg-light"></a>
-</nav>
-</div>
+<a href="{{ url_for('main.index', _external=True) }}"><img src="{{ url_for('static',filename='icons/dart-logo-small.png', _external=True) }}" alt="ICC4"></a>
 {% endblock %}
 
-<div class="container">
+<div>
 {% block content %}
 
   {% block app_content %}{% endblock %}
 
   {% block footer %}
-  <div class="container-fluid">
-    <nav class="navbar navbar-expand-md navbar-light bg-light">
+  <div>
       <small><p>&copy; 2019 <a class="text-muted" href="http://icc4-darts.herokuapp.com">ICC4-darts</a></p></small>
-    </nav>
   </div>
   {% endblock %}
 {% endblock %}
-  </div>
-
-{% block scripts %}
-  {{ super() }}
-{% endblock %}
+</div>
