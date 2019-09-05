@@ -86,7 +86,7 @@
     
     <div class="tab-pane" id="settings" role="tabpanel" aria-labelledby="settings-tab">
       <div class="container mx-2 my-4">
-        <p>To change your account email, please <a href="mailto:icc4-darts+admin@gmail.com">contact</a> the site administrator.</p>
+        <p>To change your account email, please <a href="mailto:icc4darts+admin@gmail.com">contact</a> the site administrator.</p>
         <p>To change your password, <a href="{{ url_for('auth.reset_password', token=current_user.get_user_token(task='reset_password', expires_in=10)) }}">Click Here</a>.</p>
       </div>
     </div>      
