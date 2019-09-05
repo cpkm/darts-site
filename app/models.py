@@ -670,10 +670,16 @@ def update_all_player_stats(season='all'):
         p.update_player_stats(season=season)
 
 def update_all_team_stats(season='all'):
-    if season.lower() == 'all':
+    if season=='current':
+        seasons = [current_season()]
+    elif season=='last':
+        seasons = [current_season(1)]
+    elif season=='all':
         seasons = Season.query.all()
+    elif not isinstance(season, list):
+        seasons = [season]
     else:
-        seasons=[season]
+        seasons = season
 
     for s in seasons:
         stats = TeamSeasonStats.query.filter_by(season=s).first()
