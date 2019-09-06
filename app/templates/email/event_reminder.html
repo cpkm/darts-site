@@ -1,9 +1,8 @@
-{% extends "base_email.html" %}
-{% import 'bootstrap/wtf.html' as wtf %}
+<div>
+    <a href="{{ url_for('main.index', _external=True) }}"><img src="{{ url_for('static',filename='icons/dart-logo-small.png', _external=True) }}" alt="ICC4"></a>
+</div>
 
-{% block app_content %}
-
-<div class="container">
+<div>
 <h1>ICC4 Event reminder</h1>
 <h3>{{ user.player.nickname }}</h3>
 <p>
@@ -27,4 +26,6 @@
 <p>The ICC4 pub darts team</p>
 </div>
 
-{% endblock %}
+<div>
+  <small><p>&copy; 2019 ICC4-darts</p></small>
+</div>
