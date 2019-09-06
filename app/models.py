@@ -32,7 +32,7 @@ class User(UserMixin, db.Model):
 
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
-        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+        return 'https://www.gravatar.com/avatar/{}?d=robohash&s={}'.format(
             digest, size)
 
     def get_user_token(self, task, expires_in=600):
