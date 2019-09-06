@@ -4,7 +4,7 @@ Thank you for registering with ICC4-darts. To finish setting up your account, pl
 
 {{ url_for('auth.verify_email', token=token, _external=True) }}
 
-This link will remain active for 24hrs.
+Please add this email address to your contacts list to ensure you continue to recieve emails from ICC4 darts!
 
 If you have recieved this email in error simply ignore this message.
 
