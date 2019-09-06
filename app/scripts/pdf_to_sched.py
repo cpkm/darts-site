@@ -73,6 +73,13 @@ class DartSchedulePDF:
         df_icc4.sort_values('Date', inplace=True)
         self.game_list_  = [convert_to_game(row) for index, row in df_icc4.iterrows()]
 
+    def __iter__(self):
+        ''' Returns the Iterator object '''
+        return GameIterator(self)
+
+    def __next__(self):
+        pass
+
     def get_game(self,idx):
         return self.game_list_[idx]
 
@@ -82,6 +89,25 @@ class DartMatch:
         self.home       = home
         self.date       = date
         self.week       = week
+
+
+''' Iterator class '''
+class GameIterator:
+    def __init__(self, sched):
+        # Game object reference
+        self._game_list = sched.game_list_
+        # member variable to keep track of current index
+        self._index = 0
+
+
+    def __next__(self):
+        ''''Returns the next value from team object's lists '''
+        if self._index < (len(self._game_list)):
+            result = (self._game_list[self._index])
+            self._index += 1
+            return result
+        # End of Iteration
+        raise StopIteration
 
 
 
