@@ -5,70 +5,87 @@ import pandas as pd
 # 01/02/2019, 'Real Deal 2', 'H', 'n'
 # 08/02/2019, 'Fat Duck 2', 'A', 'n'
 
+debug = 0
+
 #This allows playoffs to be set as y/n, p/r or 1/0
-DEBUG = 1
+class DartSchedule:
+    def __init__(self):
+        self.df_    = pd.DataFrame()
 
-def FormatColumnNames(df):
-    #Makes sure the title names are what is expected
-    df.columns = df.columns.str.title().str.strip(' ')
-    return df
+    def FormatColumnNames(self):
+        #Makes sure the title names are what is expected
+        self.df_.columns = self.df_.columns.str.title().str.strip(' ')
+        return self.df_
 
-def FormatDate(dates):
-    return dates
+    @staticmethod
+    def StripAndMap(column: pd.Series, mapping: dict) -> pd.Series:
+        column = column.str.lower()
+        column = column.str.strip(' ')
+        column = column.str.strip("'")
+        column = column.str.strip('"')
+        column = column.map(mapping)
+        return column
 
-def FormatTeam(teams):
-    teams = teams.str.title()
-    return teams
+    @staticmethod
+    def FormatDate(dates):
+        return dates
 
-def FormatLocation(locations):
-    return locations
+    @staticmethod
+    def FormatTeam(teams):
+        teams = teams.str.title()
+        return teams
 
-def FormatPlayoff(playoffs):
-    #Turns loose playoff formatting into a boolean column
-    mapping = { 'y': True, 'n': False, 'r' : False, 'p' : True }
-    if playoffs.dtype != 'bool':
-        playoffs = playoffs.str.lower()
-        playoffs = playoffs.str.strip(' ')
-        playoffs = playoffs.str.strip("'")
-        playoffs = playoffs.str.strip('"')
-        if DEBUG:
-            print('After FormatPlayoff...')
-            print(playoffs.head())
-        playoffs = playoffs.map(mapping)
-        playoffs = playoffs.astype('bool')
-        if DEBUG:
-            print('After mapping...')
-            print(playoffs.head())
-    return playoffs
+    @staticmethod
+    def FormatLocation(locations):
+        mapping = {'h': True, 'a': False, 'icc': True}
+        if locations.dtype != 'bool':
+            locations = DartSchedule.StripAndMap(locations,mapping)
+            if debug:
+                print('After FormatLocation...')
+                print(locations.head())
+            locations = locations.astype('bool')
+        return locations
 
-def FormatEntries(df):
-    df.Date = FormatDate(df.Date)
-    df.Team = FormatTeam(df.Team)
-    df.Location = FormatLocation(df.Location)
-    df.Playoff = FormatPlayoff(df.Playoff)
-    return df
+    @staticmethod
+    def FormatPlayoff(playoffs):
+        #Turns loose playoff formatting into a boolean column
+        mapping = { 'y': True, 'n': False, 'r' : False, 'p' : True }
+        if playoffs.dtype != 'bool':
+            playoffs = DartSchedule.StripAndMap(playoffs,mapping)
+            if debug:
+                print('After FormatPlayoff...')
+                print(playoffs.head())
+            playoffs = playoffs.astype('bool')
+        return playoffs
 
-def CheckColumns(df):
-    #Checks that all of the columns that are needed exist
-    needed_columns = ['Date', 'Team', 'Location', 'Playoff']
-    missing_lst = [ missing for missing in needed_columns if missing not in df.columns ]
-    if len(missing_lst) > 0:
-        raise ValueError('Missing columns: {}'.format(missing_lst))
+    def FormatEntries(self):
+        self.df_.Date = DartSchedule.FormatDate(self.df_.Date)
+        self.df_.Team = DartSchedule.FormatTeam(self.df_.Team)
+        self.df_.Location = DartSchedule.FormatLocation(self.df_.Location)
+        self.df_.Playoff = DartSchedule.FormatPlayoff(self.df_.Playoff)
+        return self.df_
 
-def read_csv(filename):
-    #Reads the schedule from a csv
-    df_sched = pd.read_csv(filename)
-    if DEBUG:
-        print('After Reading...')
-        print(df_sched.head())
-    df_sched = FormatColumnNames(df_sched)
-    if DEBUG:
-        print('After FormatColumnNames...')
-        print(df_sched.head())
-    CheckColumns(df_sched)
-    df_sched = FormatEntries(df_sched)
-    if DEBUG:
-        print('After FormatEntries...')
-        print(df_sched.head())
-    return df_sched
+    def CheckColumns(self):
+        #Checks that all of the columns that are needed exist
+        needed_columns = ['Date', 'Team', 'Location', 'Playoff']
+        missing_lst = [ missing for missing in needed_columns if missing not in self.df_.columns ]
+        if len(missing_lst) > 0:
+            raise ValueError('Missing columns: {}'.format(missing_lst))
+
+    def read_csv(self,filename):
+        #Reads the schedule from a csv
+        self.df_ = pd.read_csv(filename)
+        if debug:
+            print('After Reading...')
+            print(self.df_.head())
+        self.FormatColumnNames()
+        if debug:
+            print('After FormatColumnNames...')
+            print(self.df_.head())
+        self.CheckColumns()
+        self.FormatEntries()
+        if debug:
+            print('After FormatEntries...')
+            print(self.df_.head())
+        return self.df_
 
