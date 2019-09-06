@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+<div class="card h-100">
+  <h2 class="card-header">Administration</h2>
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs mt-2 mx-1" id="myTab" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">Profile</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="users-tab" data-toggle="tab" href="#users" role="tab" aria-controls="users" aria-selected="false">Users</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="roster-tab" data-toggle="tab" href="#roster" role="tab" aria-controls="roster" aria-selected="false">Roster</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false">Settings</a>
+    </li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+
+    <div class="tab-pane active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+      <div class="container mx-2 my-4">
+        <h4>Account details</h4>
+        <p>Email: {{ current_user.email }}</p>
+        <p>Role: {{ current_user.role }}</p>
+      </div>    
+    </div>
+
+    <div class="tab-pane" id="users" role="tabpanel" aria-labelledby="users-tab">
+      <div class="container-fluid m-2">
+      <h3 class="card-header">Users</h3>
+        <div class="table-responsive col-12 mt-2 mx-auto">
+          <div>
+            <table class="table">
+              <tr>
+                <th scope="col">id</th>
+                <th scope="col">Email</th>
+                <th scope="col">Registered</th>
+                <th scope="col">Verified</th>
+                <th scope="col">Role</th>
+                <th scope="col">Player</th>
+              </tr>
+              {% for u in all_users %}
+              <tr>
+                  <td scope="row">{{ u.id }}</td>
+                  <td>{{ u.email }}</td>
+                  <td>{{ u.registered_on.strftime('%d/%m/%Y') }}</td>
+                  <td><b>{{ u.verified }}</b> ({{ u.verified_on.strftime('%d/%m/%Y') }})</td>
+                  <td>{{ u.role }}</td>
+                  <td>{{ u.player.nickname }} ({{ u.player.first_name }} {{ u.player.last_name }})</td>
+              </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="roster" role="tabpanel" aria-labelledby="roster-tab">
+      <div class="container-fluid m-2">
+      <h3 class="card-header">Roster</h3>
+        <div class="table-responsive col-12 mt-2 mx-auto">
+            <div>
+              <table class="table">
+                <tr>
+                  <th>Player</th>
+                  <th>Lastname</th>
+                  <th>Firstname</th>
+                  <th>Active</th>
+                  <th>User</th>
+                </tr>
+                {% for p in all_players %}
+                <tr>
+                    <td>{{ p.nickname }}</td>
+                    <td>{{ p.last_name }}</td>
+                    <td>{{ p.first_name }}</td>
+                    <td>{{ p.is_active }}</td>
+                    <td>{{ p.user.email }}</td>
+                </tr>
+                {% endfor %}
+              </table>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+      <div class="container-fluid m-2">
+        <p>App settings.</p>
+      </div>
+    </div>
+  
+  </div>
+
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="confirmModalLabel">Confirm send email</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="debug-url"><p>
+        <p>This will send a reminder email to all active roster players.</p>
+        <p class="text-center">Are you sure you want to send this email?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-info mr-auto" data-dismiss="modal">Cancel</button>
+        <a class="btn btn-danger btn-ok">Confirm</a>
+      </div>
+    </div>
+  </div>
+</div> 
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+<script>
+$(function(){
+  var hash = window.location.hash;
+  hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+  $('.nav-tabs a').click(function (e) {
+    $(this).tab('show');
+    var scrollmem = $('body').scrollTop() || $('html').scrollTop();
+    window.location.hash = this.hash;
+    $('html,body').scrollTop(scrollmem);
+  });
+});
+</script>
+
+<script>
+$('#confirmModal').on('show.bs.modal', function(e) {
+    $(this).find('.btn-ok').attr('href', $(e.relatedTarget).data('href'));
+
+    $(this).find('.btn-ok').attr('id', $(e.relatedTarget).data('id'));
+    
+    $('.debug-url').html('Match: <strong>'+ $(this).find('.btn-ok').attr('id') + '</strong>');
+});
+</script>
+{% endblock %}

@@ -291,7 +291,7 @@ def season_edit(id):
 @bp.route('/enter_score/<id>',  methods=['GET', 'POST'])
 @login_required
 @check_verification
-@check_role(['admin','captain'])
+@check_role(['admin','captain','assistant'])
 def enter_score(id):
     match = Match.query.filter_by(id=id).first()
     form = EnterScoresForm(obj=match)
@@ -549,23 +549,44 @@ def profile():
 @check_role(['admin','captain'])
 def captain():
     roster_form = RosterForm()
+    players = current_roster(full=True)
+
     if request.method == 'POST' and roster_form.validate_on_submit():
         for player_form in roster_form.roster:
             if player_form.player.data is not None:
                 p = Player.query.filter_by(nickname=player_form.player.data).first()
                 p.is_active = player_form.is_active.data
+                if p.user:
+                    if p.user.role == 'admin':
+                        pass
+                    elif current_user == p.user:
+                        pass
+                    else:
+                        p.user.role=player_form.role.data
+                        db.session.add(p.user)
                 db.session.add(p)
                 db.session.commit()
         flash('Updated active roster!')
         return redirect(url_for('main.captain'))
+
     elif request.method == 'GET':
-        players = current_roster(full=True)
         roster_form.fill_roster(players)
 
     upcoming_matches = Match.query.filter(Match.date>=date.today()).order_by(Match.date).all()
 
     return render_template('captain.html', roster_form=roster_form, 
         players=players, upcoming_matches=upcoming_matches)
+
+@bp.route('/admin', methods=['GET', 'POST'])
+@login_required
+@check_verification
+@check_role(['admin'])
+def admin():
+    all_users = User.query.all()
+    all_players = Player.query.all()
+
+    return render_template('admin.html', all_users=all_users, all_players=all_players)
+
 
 
 @bp.route('/send_reminder_email/<match_id>/<token>', methods=['GET','POST'])
