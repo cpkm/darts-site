@@ -1,13 +1,13 @@
-{% extends "base_email.html" %}
-{% import 'bootstrap/wtf.html' as wtf %}
+<div>
+    <a href="{{ url_for('main.index', _external=True) }}"><img src="{{ url_for('static',filename='icons/dart-logo-small.png', _external=True) }}" alt="ICC4"></a>
+</div>
 
-{% block app_content %}
-
+<div>
 <h2>Welcome to the ICC4 darts team!</h2>
 <p>
-    Thank you for registering with ICC4-darts. To finish setting up your account, please verify your email by
+    Thank you for registering with ICC4-darts. To finish setting up your account, please 
     <a href="{{ url_for('auth.verify_email', token=token, _external=True) }}">
-        clicking here</a>.
+        verify your email</a>.
 </p>
 <p>Alternatively, you can paste the following link in your browser's address bar:</p>
 <p>{{ url_for('auth.verify_email', token=token, _external=True) }}</p>
@@ -15,5 +15,8 @@
 <p>If you have recieved this email in error simply ignore this message.</p>
 <p>Sincerely,</p>
 <p>The ICC4 pub darts team</p>
+</div>
 
-{% endblock %}
+<div>
+  <small><p>&copy; 2019 ICC4-darts</p></small>
+</div>
