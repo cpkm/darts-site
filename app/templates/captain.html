@@ -7,7 +7,7 @@
   <h2 class="card-header">Captain's Portal</h2>
 
   <!-- Nav tabs -->
-  <ul class="nav nav-tabs" id="myTab" role="tablist">
+  <ul class="nav nav-tabs mt-2 mx-1" id="myTab" role="tablist">
     <li class="nav-item">
       <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">Profile</a>
     </li>
@@ -56,7 +56,7 @@
                     <td>{{ players[loop.index-1].last_name }}</td>
                     <td>{{ players[loop.index-1].first_name }}</td>
                     <td>{{ p.is_active }}</td>
-                    <td>{{ players[loop.index-1].user.role }}</td>
+                    <td>{% if players[loop.index-1].user %}{% if players[loop.index-1].user.role=='admin' %}<b>admin</b>{% else %}{{ p.role }}{% endif %}{% else %}<i>no user</i>{% endif %}</td>
                     <td>{{ players[loop.index-1].user.email }}</td>
                 </tr>
                 {% endfor %}

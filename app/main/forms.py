@@ -45,6 +45,8 @@ class EditPlayerForm(FlaskForm):
 class ActivePlayerForm(FlaskForm):
     player = HiddenField('', validators=[DataRequired()])
     is_active = BooleanField('')
+    role = SelectField('', 
+        choices=[('player','player'),('assistant','assistant'),('captain','captain')], default='player')
 
 class RosterForm(FlaskForm):
     roster = FieldList(FormField(ActivePlayerForm))
@@ -58,6 +60,8 @@ class RosterForm(FlaskForm):
             self.roster.append_entry()
             self.roster[i].player.data = p.nickname
             self.roster[i].is_active.data = p.is_active
+            if p.user:
+                self.roster[i].role.data = p.user.role
 
 class ClaimPlayerForm(FlaskForm):
     player = SelectField('', choices=[], default='--Select Player--')

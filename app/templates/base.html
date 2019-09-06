@@ -74,7 +74,7 @@
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('main.checkin') }}">Checkin</a>
       </li>
-      {% if current_user.check_role(['admin', 'captain']) %}
+      {% if current_user.check_role(['admin', 'captain', 'assistant']) %}
       <div class="dropdown-divider"></div>
       <li class="nav-item dropdown">
           <a class="btn nav-link dropdown-toggle" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Editing Tools</a>
@@ -88,6 +88,11 @@
       </li>
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('main.captain') }}">Captain's Portal</a>
+      </li>
+      {% endif %}
+      {% if current_user.check_role(['admin']) %}
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.admin') }}">Admin</a>
       </li>
       {% endif %}
       <li class="nav-item active">
