@@ -5,7 +5,7 @@
 <div class="container">
   <table class="table">
     <tr>
-      <td width="256px"><img src="{{ player.avatar(256) }}"></td>
+      <td style="width: 200px"><img src="{{ player.avatar(256) }}" class="img-fluid"></td>
       <td>
         <h1>{{ player.nickname }}</h1>
         <h3>{{ player.first_name }} {{ player.last_name }}</h3>
@@ -71,9 +71,21 @@
           </tr>
           {% endfor %}
         </tbody>
+        <tfoot>
+          <tr class="font-weight-bold">
+            <td>Total:</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tfoot>
       </table>
-
-
     </div>
   </div>
 </div>
@@ -86,11 +98,24 @@
   $('[data-toggle="tooltip"]').tooltip()
 })
 </script>
+<script src="https://cdn.datatables.net/plug-ins/1.10.19/api/sum().js"></script>
 <script>
 $(document).ready( function () {
-    $('#pStats').DataTable({
-    "paging": false
+  $('#pStats').DataTable({
+    "order": [[ 0, "desc" ]],
+    "paging": false,
+    drawCallback: function () {
+      var api = this.api();
+      for (i = 1; i < 10; i++) {
+        $( api.column(i).footer() ).html(
+          api.column( i, {page:'current'} ).data().sum()
+        );
+      }
+    }
   });
 } );
 </script>
+
+
+
 {% endblock %}

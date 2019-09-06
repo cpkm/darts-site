@@ -15,17 +15,20 @@ def before_request():
 @bp.route('/login', methods=['GET','POST'])
 def login():
     if current_user.is_authenticated:
+        flash('You are already logged in!')
         return redirect(url_for('main.index'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        user = User.query.filter_by(email=form.email.data).first()
         if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password', 'danger')
+            flash('Invalid email or password', 'danger')
             return redirect(url_for('auth.login'))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not user.verified:
             return redirect(url_for('auth.unverified_email'))
+        if not user.player:
+            return render_template('auth/new_user.html')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('main.index')
         return redirect(next_page)
@@ -43,7 +46,7 @@ def register():
         return redirect(url_for('main.index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data)
+        user = User(email=form.email.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -70,11 +73,16 @@ def reset_password_request():
 
 @bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
-    if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
-    user = User.verify_reset_password_token(token)
+    user = User.verify_user_token(token, task='reset_password')
     if not user:
+        flash('Invalid token', 'danger')
         return redirect(url_for('main.index'))
+
+    print(user,current_user,(current_user is user), (current_user==user))
+    if current_user.is_authenticated and current_user != user:
+        flash('You do not have authorization to complete this task.', 'danger')
+        return redirect(url_for('main.index'))
+
     form = ResetPasswordForm()
     if form.validate_on_submit():
         user.set_password(form.password.data)

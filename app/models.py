@@ -1,4 +1,5 @@
 import jwt
+import random
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
@@ -14,13 +15,14 @@ from app import db, login
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     role = db.Column(db.String(32), index=True, default='player')
     registered_on = db.Column(db.Date, index=True, default=date.today())
     verified = db.Column(db.Boolean, index=True, default=False)
     verified_on = db.Column(db.Date, index=True, default=None)
+
+    player = db.relationship('Player', uselist=False, back_populates='user')
 
     def set_password(self,password):
         self.password_hash = generate_password_hash(password)
@@ -30,17 +32,15 @@ class User(UserMixin, db.Model):
 
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
-        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+        return 'https://www.gravatar.com/avatar/{}?d=robohash&s={}'.format(
             digest, size)
 
-    def get_reset_password_token(self, expires_in=600):
-        return jwt.encode(
-            {'reset_password': self.id, 'exp': time() + expires_in},
-            current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
-
     def get_user_token(self, task, expires_in=600):
-        return jwt.encode(
-            {task: self.id, 'exp': time() + expires_in},
+        params = {task: self.id}
+        if expires_in is not None:
+            params['exp'] = time() + expires_in
+
+        return jwt.encode(params,
             current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
     def check_role(self, roles):
@@ -48,16 +48,6 @@ class User(UserMixin, db.Model):
             return True
         else:
             return False
-
-
-    @staticmethod
-    def verify_reset_password_token(token):
-        try:
-            id = jwt.decode(token, current_app.config['SECRET_KEY'],
-                            algorithms=['HS256'])['reset_password']
-        except:
-            return
-        return User.query.get(id)
 
     @staticmethod
     def verify_user_token(token, task):
@@ -69,7 +59,7 @@ class User(UserMixin, db.Model):
         return User.query.get(id)
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return '<User {}>'.format(self.email)
 
 
 class Player(db.Model):
@@ -77,6 +67,7 @@ class Player(db.Model):
     nickname = db.Column(db.String(64), index=True, unique=True)
     first_name = db.Column(db.String(64), index=True)
     last_name = db.Column(db.String(64), index=True)
+    tagline = db.Column(db.String(64))
     is_active = db.Column(db.Boolean, index=True, default=True)
     games = association_proxy('games_association', 'game')
     last_match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
@@ -87,10 +78,62 @@ class Player(db.Model):
     high_scores = db.relationship('HighScore', back_populates='player', lazy='dynamic')
     low_scores = db.relationship('LowScore', back_populates='player', lazy='dynamic')
 
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', back_populates='player')
+
+    checked_matches = association_proxy('checked_matches_association', 'match')
+
     def avatar(self, size):
-        digest = md5(self.nickname.lower().encode('utf-8')).hexdigest()
-        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+        if self.user:
+            return self.user.avatar(size)
+        else:
+            digest = md5(self.nickname.lower().encode('utf-8')).hexdigest()
+        return 'https://www.gravatar.com/avatar/{}?d=robohash&s={}'.format(
             digest, size)
+
+    def tidbit(self):
+
+        phrases = ['Bull\'s-eye hunter', 'Lean, mean, outing machine', 'All about the bulls, no triples',
+            'Sprayin\' and prayin\'', 'Lover of ones', 'Only shoots 19\'s', 'Double 8 or bust', 'Triple 20 is my jam',
+            'Fish and chips are good', 'Always wants to diddle', 'Big outs are for suckers', '60 counts as a book, right?',
+            'One more Sleeman and I\'m good', 'Steady hands and a sharp eye', 'Will pay for triples', 'Shanghai for the win',
+            'Low scores are sexy', 'Always in the book', 'Seeing stars', 'Shooter McGavin', 'Robin Hood',
+            'Is this board regulation height?', 'I\'m only here for the snacks', 'Chalker\'s beer royalty']
+
+        return random.choice(phrases)
+
+
+    def create_checkins(self):
+        matches = Match.query.filter(Match.date>=date.today()).all()
+        pwc = [PlayerMatchCheckin(match_id=m.id, player_id=self.id) for m in matches]
+        try:
+            db.session.add_all(pwc)
+            db.session.commit()
+        except:
+            return False
+
+        return True
+
+    def destroy_checkins(self):
+        pwc = PlayerMatchCheckin.query.filter_by(player_id=self.id).all()
+        for p in pwc:
+            db.session.delete(p)
+
+        db.session.commit()
+        return
+
+    def checkin(self, match, status):
+        pmc = PlayerMatchCheckin.query.filter_by(player_id=self.id,match_id=match.id).first()
+
+        if status.lower() in ['in','out','ifn'] and pmc:
+            pmc.status = status
+            db.session.add(pmc)
+            db.session.commit()
+            print('checked in {}: status {}'.format(match,status))
+            return True
+        else:
+            print('status not found')
+        return False
 
     def game_stars(self, game=None, game_id=None):
         if game:
@@ -103,41 +146,46 @@ class Player(db.Model):
         db.session.commit()
         return
 
-    def update_player_stats(self, season_name='current'):
-        if season_name=='current':
-            season = season_from_date(date.today())
-        elif season_name=='last':
-            season = season_from_date(date.today()-timedelta(365))
+    def update_player_stats(self, season='all'):
+        if season=='current':
+            seasons = [current_season()]
+        elif season=='last':
+            seasons = [current_season(1)]
+        elif season=='all':
+            seasons = Season.query.all()
+        elif not isinstance(season, list):
+            seasons = [season]
         else:
-            season = Season.query.filter_by(season_name=season_name).first()
+            seasons = season
 
-        if season is None:
-            raise NameError('No season found')
+        for season in seasons:    
+            if season is None or not isinstance(season,Season):
+                raise NameError('No season found')
 
-        stats = PlayerSeasonStats.query.filter_by(player_id=self.id, season=season).first()
+            stats = PlayerSeasonStats.query.filter_by(player_id=self.id, season=season).first()
 
-        if stats is None:
-            stats = PlayerSeasonStats(season=season, player=self)
+            if stats is None:
+                stats = PlayerSeasonStats(season=season, player=self)
 
-        player_games = PlayerGame.query.filter_by(player=self).join(Game).join(Match).\
-                            filter(Match.season==season)
-        stats.matches_played = Match.query.filter(Match.season==season).\
-                                    join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
-        stats.matches_won = Match.query.filter_by(win=True).filter(Match.season==season).\
-                            join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
-        stats.matches_lost = Match.query.filter_by(win=False).filter(Match.season==season).\
-                            join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
-        stats.games_played = player_games.count()
-        stats.games_won = Game.query.filter_by(win=True).join(PlayerGame).filter_by(player_id=self.id).\
-                            join(Match).filter(Match.season==season).count()
-        stats.games_lost = Game.query.filter_by(win=False).join(PlayerGame).filter_by(player_id=self.id).\
-                            join(Match).filter(Match.season==season).count()
-        stats.total_stars = sum([pg.stars for pg in player_games.all()])
-        stats.total_high_scores = HighScore.query.filter_by(player=self).join(Match).filter(Match.season==season).count()
-        stats.total_low_scores = LowScore.query.filter_by(player=self).join(Match).filter(Match.season==season).count()
+            player_games = PlayerGame.query.filter_by(player=self).join(Game).join(Match).\
+                                filter(Match.season==season)
+            stats.matches_played = Match.query.filter(Match.season==season).\
+                                        join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
+            stats.matches_won = Match.query.filter_by(win=True).filter(Match.season==season).\
+                                join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
+            stats.matches_lost = Match.query.filter_by(win=False).filter(Match.season==season).\
+                                join(Game).join(PlayerGame).filter_by(player_id=self.id).distinct().count()
+            stats.games_played = player_games.count()
+            stats.games_won = Game.query.filter_by(win=True).join(PlayerGame).filter_by(player_id=self.id).\
+                                join(Match).filter(Match.season==season).count()
+            stats.games_lost = Game.query.filter_by(win=False).join(PlayerGame).filter_by(player_id=self.id).\
+                                join(Match).filter(Match.season==season).count()
+            stats.total_stars = sum([pg.stars for pg in player_games.all()])
+            stats.total_high_scores = HighScore.query.filter_by(player=self).join(Match).filter(Match.season==season).count()
+            stats.total_low_scores = LowScore.query.filter_by(player=self).join(Match).filter(Match.season==season).count()
 
-        db.session.add(stats)
-        db.session.commit()
+            db.session.add(stats)
+            db.session.commit()
         return
 
     def __repr__(self):
@@ -156,6 +204,18 @@ class Game(db.Model):
     def __repr__(self):
         return '<Game {:02d}, {}>'.format(self.game_num, self.match.date) if self.match \
             else '<Game_id {}>'.format(self.id)
+
+
+class PlayerMatchCheckin(db.Model):
+    player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
+    match_id = db.Column(db.Integer, db.ForeignKey('match.id'), primary_key=True)
+    status = db.Column(db.String(4), index=True, default='out')
+
+    player = db.relationship('Player', backref=db.backref('checked_matches_association', lazy='dynamic'))
+    match = db.relationship('Match', backref=db.backref('checked_players_association', lazy='dynamic'))
+
+    def __repr__(self):
+        return '<Checkin Player {}, Match {}>'.format(self.player_id,self.match_id)
 
 
 class PlayerGame(db.Model):
@@ -192,13 +252,9 @@ class Match(db.Model):
     high_scores = db.relationship('HighScore', back_populates='match', lazy='dynamic')
     low_scores = db.relationship('LowScore', back_populates='match', lazy='dynamic')
 
-    # @hybrid_property
-    # def season(self):
-    #     return season_from_date(self.date)
+    checked_players = association_proxy('checked_players_association', 'player')
 
-    # @season.expression
-    # def season(cls):
-    #     return season_from_date(cls.date)
+    reminder_email_sent = db.Column(db.Date)
 
     def add_game(self, game):
         if not self.is_game(game):
@@ -274,8 +330,32 @@ class Match(db.Model):
             else:
                 self.location = 'Italian Canadian Club'
 
+    def create_checkins(self):
+        pwc = [PlayerMatchCheckin(match_id=self.id, player_id=p.id)\
+                for p in Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).all()]
+        try:
+            db.session.add_all(pwc)
+            db.session.commit()
+        except:
+            return False
+        return True
+
+    def destroy_checkins(self):
+        pwc = PlayerMatchCheckin.query.filter_by(match_id=self.id).all()
+        for p in pwc:
+            db.session.delete(p)
+        db.session.commit()
+        return
+
     def get_roster(self):
         return Player.query.join(PlayerGame).join(Game).filter_by(match=self).order_by(Player.nickname).all()
+
+    def get_checked_players(self):
+        ins = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='in').all()
+        out = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='out').all()
+        ifn = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='ifn').all()
+
+        return ins, out, ifn
 
     def __repr__(self):
         return '<Match {}>'.format(self.date.strftime('%Y-%m-%d'))
@@ -290,7 +370,7 @@ class Team(db.Model):
 
     def avatar(self, size):
         digest = md5(self.name.lower().encode('utf-8')).hexdigest()
-        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+        return 'https://www.gravatar.com/avatar/{}?d=wavatar&s={}'.format(
             digest, size)
 
     def __repr__(self):
@@ -313,48 +393,88 @@ class PlayerSeasonStats(db.Model):
     total_high_scores = db.Column(db.Integer)
     total_low_scores = db.Column(db.Integer)
 
-    '''
-    filters = [filter1,filter2,...]
-    query....filter(*filters).count()
-    '''
+    def __add__(self, other):
+        if not other:
+            return self
 
-    @hybrid_property
-    def gp(self):
-        return PlayerGame.query.filter_by(player_id=self.player_id).join(Game).join(Match).\
-                filter_by(season=self.season).distinct().count()
-    
-    @gp.expression
-    def gp(cls):
-        j = join(PlayerGame,Game).join(Match)
-        return select([func.count(PlayerGame.player_id)]).where(PlayerGame.player_id==cls.player_id).\
-        select_from(j).where(Match.season.id==cls.season_id).label('gp')
+        if other.player == self.player:
+            new_player = self.player
+        else:
+            new_player = None
 
-    @hybrid_property
-    def gw(self):
-        return PlayerGame.query.filter_by(player_id=self.player_id).join(Game).filter_by(win=True).join(Match).\
-                filter_by(season=self.season).distinct().count()
-    
-    @gw.expression
-    def gw(cls):
-        j = join(PlayerGame,Game).join(Match)
-        return select([func.count(PlayerGame.player_id)]).where(PlayerGame.player_id==cls.player_id).\
-        select_from(j).where(Game.win==True & Match.season.id==cls.season_id).label('gw')
+        return PlayerSeasonStats(
+                id = None,
+                player_id = None,
+                player = new_player,
+                season_id = None,
+                season = None,
+                matches_played = self.matches_played + other.matches_played,
+                matches_won = self.matches_won + other.matches_won,
+                matches_lost = self.matches_lost + other.matches_lost,
+                games_played = self.games_played + other.games_played,
+                games_won = self.games_won + other.games_won,
+                games_lost = self.games_lost + other.games_lost,
+                total_stars = self.total_stars + other.total_stars,
+                total_high_scores = self.total_high_scores + other.total_high_scores,
+                total_low_scores = self.total_low_scores + other.total_low_scores,
+                )
 
-    @hybrid_property
-    def gl(self):
-        return PlayerGame.query.filter_by(player_id=self.player_id).join(Game).filter_by(win=False).join(Match).\
-                filter_by(season=self.season).distinct().count()
-    
-    @gl.expression
-    def gl(cls):
-        j = join(PlayerGame,Game).join(Match)
-        return select([func.count(PlayerGame.player_id)]).where(PlayerGame.player_id==cls.player_id).\
-        select_from(j).where(Game.win==False & Match.season.id==cls.season_id).label('gw')
+    def __radd__(self, other):
+        if not other:
+            return self
 
+        if other.player == self.player:
+            new_player = self.player
+        else:
+            new_player = None
 
+        return PlayerSeasonStats(
+                id = None,
+                player_id = None,
+                player = new_player,
+                season_id = None,
+                season = None,
+                matches_played = other.matches_played + self.matches_played,
+                matches_won = other.matches_won + self.matches_won,
+                matches_lost = other.matches_lost + self.matches_lost,
+                games_played = other.games_played + self.games_played,
+                games_won = other.games_won + self.games_won,
+                games_lost = other.games_lost + self.games_lost,
+                total_stars = other.total_stars + self.total_stars,
+                total_high_scores = other.total_high_scores + self.total_high_scores,
+                total_low_scores = other.total_low_scores + self.total_low_scores,
+                )
+
+    def __sub__(self, other):
+        if self.player == other.player:
+            new_player = self.player
+        else:
+            new_player = None
+
+        return PlayerSeasonStats(
+                id = None,
+                player_id = None,
+                player = new_player,
+                season_id = None,
+                season = None,
+                matches_played = self.matches_played - other.matches_played,
+                matches_won = self.matches_won - other.matches_won,
+                matches_lost = self.matches_lost - other.matches_lost,
+                games_played = self.games_played - other.games_played,
+                games_won = self.games_won - other.games_won,
+                games_lost = self.games_lost - other.games_lost,
+                total_stars = self.total_stars - other.total_stars,
+                total_high_scores = self.total_high_scores - other.total_high_scores,
+                total_low_scores = self.total_low_scores - other.total_low_scores,
+                )
 
     def __repr__(self):
-        return '<{} {}>'.format(self.player.nickname,self.season.season_name)
+        if self.player and self.season:
+            return '<{} {}>'.format(self.player.nickname,self.season.season_name)
+        else:
+            return '{}'.format(type(self))
+        
+
 
 class TeamSeasonStats(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -369,6 +489,65 @@ class TeamSeasonStats(db.Model):
     total_stars = db.Column(db.Integer)
     total_high_scores = db.Column(db.Integer)
     total_low_scores = db.Column(db.Integer)
+
+    def __add__(self, other):
+        if not other:
+            return self
+
+        return TeamSeasonStats(
+                id = None,
+                season = None,
+                season_id = None,
+                matches_played = self.matches_played + other.matches_played,
+                matches_won = self.matches_won + other.matches_won,
+                matches_lost = self.matches_lost + other.matches_lost,
+                games_played = self.games_played + other.games_played,
+                games_won = self.games_won + other.games_won,
+                games_lost = self.games_lost + other.games_lost,
+                total_stars = self.total_stars + other.total_stars,
+                total_high_scores = self.total_high_scores + other.total_high_scores,
+                total_low_scores = self.total_low_scores + other.total_low_scores,
+                )
+
+    def __radd__(self, other):
+        if not other:
+            return self
+
+        return TeamSeasonStats(
+                id = None,
+                season = None,
+                season_id = None,
+                matches_played = self.matches_played + other.matches_played,
+                matches_won = self.matches_won + other.matches_won,
+                matches_lost = self.matches_lost + other.matches_lost,
+                games_played = self.games_played + other.games_played,
+                games_won = self.games_won + other.games_won,
+                games_lost = self.games_lost + other.games_lost,
+                total_stars = self.total_stars + other.total_stars,
+                total_high_scores = self.total_high_scores + other.total_high_scores,
+                total_low_scores = self.total_low_scores + other.total_low_scores,
+                )
+
+    def __sub__(self, other):
+        if self.season == other.season:
+            new_season = self.season
+        else:
+            new_season = None
+
+        return TeamSeasonStats(
+                id = None,
+                season = new_season,
+                season_id = None,
+                matches_played = self.matches_played - other.matches_played,
+                matches_won = self.matches_won - other.matches_won,
+                matches_lost = self.matches_lost - other.matches_lost,
+                games_played = self.games_played - other.games_played,
+                games_won = self.games_won - other.games_won,
+                games_lost = self.games_lost - other.games_lost,
+                total_stars = self.total_stars - other.total_stars,
+                total_high_scores = self.total_high_scores - other.total_high_scores,
+                total_low_scores = self.total_low_scores - other.total_low_scores,
+                )
 
     def update_team_stats(self):
         self.matches_played = Match.query.filter_by(season=self.season).count()
@@ -396,9 +575,11 @@ class Season(db.Model):
     def __repr__(self):
         return '<Season {}>'.format(self.season_name)
 
+
 class HighScore(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     score = db.Column(db.Integer)
+    out = db.Column(db.Boolean, index=True, default=False)
     player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
     player = db.relationship('Player', back_populates='high_scores')
@@ -426,6 +607,55 @@ class MatchStats(db.Model):
     stars_d5 = db.Column(db.Integer)
     stars_d7 = db.Column(db.Integer)
 
+    def __radd__(self, other):
+        if not other:
+            return self
+
+        return MatchStats(
+                id = None,
+                match_id = None,
+                match = None,
+                wins_s5 = self.wins_s5 + other.wins_s5,
+                wins_d5 = self.wins_d5 + other.wins_d5,
+                wins_d7 = self.wins_d7 + other.wins_d7,
+                stars_s5 = self.stars_s5 + other.stars_s5,
+                stars_d5 = self.stars_d5 + other.stars_d5,
+                stars_d7 = self.stars_d7 + other.stars_d7
+                )
+
+    def __add__(self, other):
+        if not other:
+            return self
+            
+        return MatchStats(
+                id = None,
+                match_id = None,
+                match = None,
+                wins_s5 = self.wins_s5 + other.wins_s5,
+                wins_d5 = self.wins_d5 + other.wins_d5,
+                wins_d7 = self.wins_d7 + other.wins_d7,
+                stars_s5 = self.stars_s5 + other.stars_s5,
+                stars_d5 = self.stars_d5 + other.stars_d5,
+                stars_d7 = self.stars_d7 + other.stars_d7
+                )
+
+    def __sub__(self, other):
+        return MatchStats(
+                id = None,
+                match_id = None,
+                match = None,
+                wins_s5 = self.wins_s5 - other.wins_s5,
+                wins_d5 = self.wins_d5 - other.wins_d5,
+                wins_d7 = self.wins_d7 - other.wins_d7,
+                stars_s5 = self.stars_s5 - other.stars_s5,
+                stars_d5 = self.stars_d5 - other.stars_d5,
+                stars_d7 = self.stars_d7 - other.stars_d7
+                )
+
+
+def current_season(last=0):
+    '''use last=1 for previous season, last=2 for 2 seasons ago...'''
+    return season_from_date(date.today()-last*timedelta(365))
 
 def season_from_date(date):
     season = Season.query.filter(Season.start_date <= date).filter(Season.end_date >= date).first()
@@ -434,19 +664,34 @@ def season_from_date(date):
         season = Season.query.order_by(Season.end_date.desc()).first()
     return season
 
-def update_all_player_stats():
+def update_all_player_stats(season='all'):
     players = Player.query.all()
     for p in players:
-        p.update_player_stats()
+        p.update_player_stats(season=season)
 
-def update_all_team_stats():
-    seasons = Season.query.all()
-    for season in seasons:
-        stats = TeamSeasonStats.query.filter_by(season=season).first()
+def update_all_team_stats(season='all'):
+    if season=='current':
+        seasons = [current_season()]
+    elif season=='last':
+        seasons = [current_season(1)]
+    elif season=='all':
+        seasons = Season.query.all()
+    elif not isinstance(season, list):
+        seasons = [season]
+    else:
+        seasons = season
+
+    for s in seasons:
+        stats = TeamSeasonStats.query.filter_by(season=s).first()
         if stats is None:
-            stats = TeamSeasonStats(season=season)
+            stats = TeamSeasonStats(season=s)
         stats.update_team_stats()
 
+def current_roster(full=False):
+    if full:
+        return Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).order_by(Player.nickname).all()
+
+    return Player.query.filter_by(is_active=True).order_by(Player.nickname).all()
 
 @login.user_loader
 def load_user(id):

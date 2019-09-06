@@ -3,179 +3,227 @@
 
 {% block app_content %}
 
-<div class="col-12 mt-2 mx-auto">
-  <div class="card h-100">
-    <h2 class="card-header">{{ match.opponent.name }}</h2>
-    
-    <div class="card-body col-xs-12">
-      {% if match.win==None %}
-      <h4 class="card-title">{{ match.date.strftime('%d-%b %Y') }}</h4>
-      <h6 class="card-subtitle mb-2 text-muted">Against <a class="font-weight-bold text-uppercase">{{ match.opponent.name }}</a> at {{ match.opponent.home_location }} ({{ match.home_away }})</h6>
-      <p>Scores have not been entered for this match.</p>
-      {% else %}
+<div class="row">
 
-      <div class="col-xs-12 col-md-6">
-        <h4 class="card-title">{{ match.date.strftime('%d-%b %Y') }}</h4>
-        <h5 class="card-subtitle mb-2">
-          {% if match.match_type == "p" %}
-          Playoff game
-          {% elif match.match_type == "r" %}
-          Regular season game
-          {% endif %}
-        </h5>
-        <h6 class="card-subtitle mb-2 text-muted">Against <a class="font-weight-bold text-uppercase">{{ match.opponent.name }}</a> at {{ match.location }} ({{ match.home_away }})</h6>
-        <p class="h5 font-weight-bold text-uppercase">{{ match.team_score }} - {{ match.opponent_score }} &emsp;
-        {% if match.win %}Win
-        {% else %}Loss{% endif %}</p>
-        <p>We ate {{ match.food }}</p>
-        <p>{{ match.match_summary }}</p>
-      </div>
+  <div class="col-md-3">
+    <p>
+      <a class="btn btn-primary btn-block" data-toggle="collapse" href="#allSeasonCollapse" role="button" aria-expanded="false" aria-controls="allSeasonCollapse">Show Seasons</a>
+    </p>
+    <div class="collapse multi-collapse" id="allSeasonCollapse">
+      <div id="accordion">
 
-      <div class="card-group col-xs-12 col-md-6">
-        <div class="card text-center">
-          <div class="card-header">
-            Doubles
+        {% for season in g.all_seasons %}
+
+        <div class="card bg-light">
+          <div class="card-header" id="heading{{season.id}}">
+            <h5 class="mb-0">
+              <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{season.id}}" aria-expanded="true" aria-controls="collapse{{season.id}}">
+                {{ season.season_name }} Matches
+              </button>
+            </h5>
           </div>
-          <div class="card-body">
-            <a class="h2 card-title">{{ match.match_stats.wins_d7 + match.match_stats.wins_d5 }}</a><a class="card-text">/8</a><br>
-            <p class="h4 card-title">{{ match.match_stats.stars_d7 + match.match_stats.stars_d5 }}<i class="fa fa-star text-warning"></i></p>
+          <div id="collapse{{season.id}}" class="collapse" aria-labelledby="heading{{season.id}}" data-parent="#accordion">
+            <div class="card-body">
+              <ul class="list-unstyled">
+                {% for m in season.matches %}
+                <li>
+                  <a href="{{ url_for('main.match', id=m.id) }}">{{ m.date.strftime('%b-%d') }} {{ m.opponent.name }}</a>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
           </div>
         </div>
-        <div class="card text-center">
-          <div class="card-header">
-            Singles
-          </div>
-          <div class="card-body">
-            <a class="h2 card-title">{{ match.match_stats.wins_s5 }}</a><a class="card-text">/8</a><br>
-            <p class="h4 card-title">{{ match.match_stats.stars_s5 }}<i class="fa fa-star text-warning"></i></p>
-          </div>
-        </div>
-      </div>
-      {% endif %}
-    </div>
-
-    <h2 class="card-header">Games</h2>
-    <div class="card-body">
-
-      <div class="col-xs-12 col-md-6">
-      <div class="container">
-        <h5 class="card-subtitle">Doubles 701</h5>
-        <table class="table">
-          <tbody>
-            {% for game in match.games.filter_by(game_type='doubles 701').all() %}
-            <tr>
-              <th scope="row" class="text-center">{% if game.win %}W{% else %}L{% endif %}</th>
-              {% for pg in game.players_association %}
-                <td>
-                  <span>{{ pg.player.nickname }} {% for s in range(pg.stars) %}<i class="fa fa-star text-warning"></i>{% endfor %}</span><br>
-                </td>
-              {% endfor %}
-            </tr>  
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      <div class="container">
-        <h5 class="card-subtitle">Doubles 501</h5>
-        <table class="table">
-          <tbody>
-            {% for game in match.games.filter_by(game_type='doubles 501').all() %}
-            <tr>
-              <th scope="row" class="text-center">{% if game.win %}W{% else %}L{% endif %}</th>
-              {% for pg in game.players_association %}
-                <td style="width:40%">
-                  <span>{{ pg.player.nickname }} {% for s in range(pg.stars) %}<i class="fa fa-star text-warning"></i>{% endfor %}</span><br>
-                </td>
-              {% endfor %}
-            </tr>  
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div class="col-xs-12 col-md-6">
-      <div class="container">
-        <h5 class="card-subtitle">Singles 501</h5>
-        <table class="table">
-          <tbody>
-            {% for game in match.games.filter_by(game_type='singles 501').all() %}
-            <tr>
-              <th scope="row" class="text-center">{% if game.win %}W{% else %}L{% endif %}</th>
-              {% for pg in game.players_association %}
-                <td>
-                  <span>{{ pg.player.nickname }} {% for s in range(pg.stars) %}<i class="fa fa-star text-warning"></i>{% endfor %}</span><br>
-                </td>
-              {% endfor %}
-            </tr>  
-            {% endfor %}
-          </tbody>
-        </table>
+        {% endfor %}
       </div>
     </div>
   </div>
 
-    <h2 class="card-header">Scores</h2>
-    <div class="card-body">
-      <div class="col-xs-12 col-md-6">
-        <div class="container">
-          <h5 class="card-subtitle">High Scores</h5>
-          <div class="table-responsive">
-            <table id="pHS" class="">
-              <thead>
-                <tr>
-                  <th scope="col"></th>
-                  <th scope="col"></th>
-                  <th scope="col"></th>
-                </tr>
-              </thead>
+  <div class="col-md-9">
+    <div class="card">
+      <h2 class="card-header">{{ match.opponent.name }} <small class="text-muted">{{ match.date.strftime('%d-%b %Y') }}</small></h2>
+      
+      <div class="card-body col-xs-12">
+
+        {% if match.win==None %}
+        <div class="col-xs-12 col-md-6">
+          <h5 class="card-subtitle mb-2">
+            {% if match.match_type == "p" %}
+            Playoff game
+            {% elif match.match_type == "r" %}
+            Regular season game
+            {% endif %}
+          </h5>
+          <h6 class="card-subtitle mb-2 text-muted">Against <a class="font-weight-bold text-uppercase">{{ match.opponent.name }}</a> at {{ match.opponent.home_location }} ({{ match.home_away }})</h6>
+          <p>Scores have not been entered for this match.</p>
+        </div>
+
+        {% else %}
+
+        <div class="col-xs-12 col-md-6">
+          <h5 class="card-subtitle mb-2">
+            {% if match.match_type == "p" %}
+            Playoff game
+            {% elif match.match_type == "r" %}
+            Regular season game
+            {% endif %}
+          </h5>
+          <h6 class="card-subtitle mb-2 text-muted">Against <a class="font-weight-bold text-uppercase">{{ match.opponent.name }}</a> at {{ match.location }} ({{ match.home_away }})</h6>
+          <p class="h5 font-weight-bold text-uppercase">{{ match.team_score }} - {{ match.opponent_score }} &emsp;
+          {% if match.win %}Win
+          {% else %}Loss{% endif %}</p>
+          <p>We ate {{ match.food }}</p>
+          <p>{{ match.match_summary }}</p>
+        </div>
+
+        <div class="card-group col-xs-12 col-md-6">
+          <div class="card text-center">
+            <div class="card-header">
+              Doubles
+            </div>
+            <div class="card-body">
+              <a class="h2 card-title">{{ match.match_stats.wins_d7 + match.match_stats.wins_d5 }}</a><a class="card-text">/8</a><br>
+              <p class="h4 card-title">{{ match.match_stats.stars_d7 + match.match_stats.stars_d5 }}<i class="fa fa-star text-warning"></i></p>
+            </div>
+          </div>
+          <div class="card text-center">
+            <div class="card-header">
+              Singles
+            </div>
+            <div class="card-body">
+              <a class="h2 card-title">{{ match.match_stats.wins_s5 }}</a><a class="card-text">/8</a><br>
+              <p class="h4 card-title">{{ match.match_stats.stars_s5 }}<i class="fa fa-star text-warning"></i></p>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <h2 class="card-header">Games</h2>
+      <div class="card-body">
+
+        <div class="col-xs-12 col-md-6">
+          <div class="container">
+            <h5 class="card-subtitle">Doubles 701</h5>
+            <table class="table">
               <tbody>
-            {% for p in roster %}
-            <tr>
-              <th scope="row">{{ p.nickname }}</th>
-              {% with ss = match.high_scores.filter_by(player=p).all() %}
-              <td>{{ ss|count }}</td>
-              <td>{% for s in ss %}{{ s.score }}, {% endfor %}</td>
-              {% endwith %}
-        </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+                {% for game in match.games.filter_by(game_type='doubles 701').all() %}
+                <tr>
+                  <th scope="row" class="text-center">{% if game.win %}W{% else %}L{% endif %}</th>
+                  {% for pg in game.players_association %}
+                    <td>
+                      <span>{{ pg.player.nickname }} {% for s in range(pg.stars) %}<i class="fa fa-star text-warning"></i>{% endfor %}</span><br>
+                    </td>
+                  {% endfor %}
+                </tr>  
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="container">
+            <h5 class="card-subtitle">Doubles 501</h5>
+            <table class="table">
+              <tbody>
+                {% for game in match.games.filter_by(game_type='doubles 501').all() %}
+                <tr>
+                  <th scope="row" class="text-center">{% if game.win %}W{% else %}L{% endif %}</th>
+                  {% for pg in game.players_association %}
+                    <td style="width:40%">
+                      <span>{{ pg.player.nickname }} {% for s in range(pg.stars) %}<i class="fa fa-star text-warning"></i>{% endfor %}</span><br>
+                    </td>
+                  {% endfor %}
+                </tr>  
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="col-xs-12 col-md-6">
+          <div class="container">
+            <h5 class="card-subtitle">Singles 501</h5>
+            <table class="table">
+              <tbody>
+                {% for game in match.games.filter_by(game_type='singles 501').all() %}
+                <tr>
+                  <th scope="row" class="text-center">{% if game.win %}W{% else %}L{% endif %}</th>
+                  {% for pg in game.players_association %}
+                    <td>
+                      <span>{{ pg.player.nickname }} {% for s in range(pg.stars) %}<i class="fa fa-star text-warning"></i>{% endfor %}</span><br>
+                    </td>
+                  {% endfor %}
+                </tr>  
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
 
-          <div class="col-xs-12 col-md-6">
-        <div class="container">
-          <h5 class="card-subtitle">Low Scores</h5>
-          <div class="table-responsive">
-            <table id="pLS" class="">
-              <thead>
+      <h2 class="card-header">Scores</h2>
+      <div class="card-body">
+
+        <div class="col-xs-12 col-md-6">
+          <div class="container">
+            <h5 class="card-subtitle">High Scores</h5>
+            <div class="table-responsive">
+              <table id="pHS" class="">
+                <thead>
+                  <tr>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                {% for p in roster %}
                 <tr>
-                  <th scope="col"></th>
-                  <th scope="col"></th>
-                  <th scope="col"></th>
+                  <th scope="row">{{ p.nickname }}</th>
+                  {% with ss = match.high_scores.filter_by(player=p).all() %}
+                  <td>{{ ss|count }}</td>
+                  <td>{% for s in ss %}{{ s.score }}, {% endfor %}</td>
+                  {% endwith %}
                 </tr>
-              </thead>
-              <tbody>
-            {% for p in roster %}
-            <tr>
-              <th scope="row">{{ p.nickname }}</th>
-              {% with ss = match.low_scores.filter_by(player=p).all() %}
-              <td>{{ ss|count }}</td>
-              <td>{% for s in ss %}{{ s.score }}, {% endfor %}</td>
-              {% endwith %}
-        </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
+
+        <div class="col-xs-12 col-md-6">
+          <div class="container">
+            <h5 class="card-subtitle">Low Scores</h5>
+            <div class="table-responsive">
+              <table id="pLS" class="">
+                <thead>
+                  <tr>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                  </tr>
+                </thead>
+                <tbody>
+              {% for p in roster %}
+              <tr>
+                <th scope="row">{{ p.nickname }}</th>
+                {% with ss = match.low_scores.filter_by(player=p).all() %}
+                <td>{{ ss|count }}</td>
+                <td>{% for s in ss %}{{ s.score }}, {% endfor %}</td>
+                {% endwith %}
+              </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+              </div>
+            </div>
+          </div>
+
+      </div>    
     </div>
-    
   </div>
 </div>
+
 
 {% endblock %}
 {% block scripts %}
@@ -206,5 +254,18 @@ $(document).ready( function () {
     $('#pLS').DataTable({
   });
 } );
+</script>
+
+<script>
+  $(window).on("load resize",function(e){
+  if(window.outerWidth < 767){
+    $('#collapse{{match.season.id}}').collapse('hide');
+    $('#allSeasonCollapse').collapse('hide');
+    
+  } else {
+  $('#collapse{{match.season.id}}').collapse('show');
+  $('#allSeasonCollapse').collapse('show');    
+  }
+});
 </script>
 {% endblock %}

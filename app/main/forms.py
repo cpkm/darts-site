@@ -6,26 +6,41 @@ from wtforms.validators import ValidationError, DataRequired, InputRequired, Len
 from app import db
 from app.models import Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, season_from_date
 from app.validators import Unique
-from datetime import datetime
+from datetime import datetime, timedelta
+import string
+
+
+def hl_score(allowed='0123456789*oO'):
+    message = 'Please enter a valid number.'
+
+    def _hl_score(self, score):
+        if not all([c in allowed for c in score.data]):
+            raise ValidationError(message)
+    return _hl_score
+
+def strip_score(score,allowed='0123456789*oO'):
+    not_allowed = string.printable.translate({ord(c): None for c in allowed})
+    return score.translate({ord(c): None for c in not_allowed})
+
 
 class EditPlayerForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
     last_name = StringField('Last Name', validators=[DataRequired()])
-    nickname = StringField('Nickname')
+    nickname = StringField('Nickname', validators=[DataRequired()])
+    tagline = StringField('Tagline', validators=[Length(max=64)])
     submit_new = SubmitField('Submit')
     submit_edit = SubmitField('Edit Player')
     submit_delete = SubmitField('Delete Player')
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, original_nickname, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.original_nickname = self.nickname
+        self.original_nickname = original_nickname
 
     def validate_nickname(self, nickname):
-        if nickname.data is '':
-           nickname.data = '{} {}'.format(self.first_name.data, self.last_name.data)
-        new_player_test = Player.query.filter_by(nickname=nickname.data).first()
-        if new_player_test is not None and self.original_nickname.data is not nickname.data:
-            raise ValidationError('Player nickname must be unique.')
+        if self.original_nickname != nickname.data:
+            new_player_test = Player.query.filter_by(nickname=nickname.data).first()
+            if new_player_test is not None and self.original_nickname is not nickname.data:
+                raise ValidationError('Player nickname must be unique.')
 
 class ActivePlayerForm(FlaskForm):
     player = HiddenField('', validators=[DataRequired()])
@@ -38,13 +53,21 @@ class RosterForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
 
-    def fill_roster(self):
-        all_players = Player.query.order_by(Player.nickname).all()
-
-        for i,p in enumerate(all_players):
+    def fill_roster(self, players):
+        for i,p in enumerate(players):
             self.roster.append_entry()
             self.roster[i].player.data = p.nickname
             self.roster[i].is_active.data = p.is_active
+
+class ClaimPlayerForm(FlaskForm):
+    player = SelectField('', choices=[], default='--Select Player--')
+    submit_claim = SubmitField('Claim Player')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        unclaimed_players = Player.query.filter(Player.nickname!='Dummy').filter(Player.user==None).all()
+        players = [(self.player.default,self.player.default)] + [(p.nickname,p.nickname+' ('+p.first_name+' '+p.last_name+')') for p in unclaimed_players]
+        self.player.choices = players
 
 class EditTeamForm(FlaskForm):
     name = StringField('Team Name', validators=[DataRequired()])
@@ -105,6 +128,32 @@ class EditMatchForm(FlaskForm):
                 opponent_id=opp_id, match_type=self.match_type.data).first() is not None:
             flash('Match must be unique! Match not added', 'danger')
             raise ValidationError('Match details are not unique.')
+
+
+class EditSeasonForm(FlaskForm):
+    season_name = StringField('Season Name', validators=[DataRequired()])
+    start_date = DateField('Start Date', format='%Y-%m-%d', default=datetime.today().date, validators=[DataRequired()])
+    end_date = DateField('End Date', format='%Y-%m-%d', default=(datetime.today()+timedelta(364)).date, validators=[DataRequired()])
+
+    submit_new = SubmitField('Submit')
+    submit_edit = SubmitField('Edit Season')
+    submit_delete = SubmitField('Delete Season')
+
+    def __init__(self, season=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if season is not None:
+            self.original_season_name = season.season_name
+            self.original_start_date = season.start_date
+            self.original_end_date = season.end_date
+        else:
+            self.original_season_name = None
+            self.original_start_date = None
+            self.original_end_date = None
+
+    def load_season(self, season):
+        self.season_name.data = season.season_name
+        self.start_date.data = season.start_date
+        self.end_date.data = season.end_date
 
 
 class DoublesGameForm(FlaskForm):
@@ -210,8 +259,8 @@ class EnterScoresForm(FlaskForm):
 
 class HLPlayerScoreForm(FlaskForm):
     player = SelectField('', choices=[], default='Dummy')
-    high_scores = FieldList(IntegerField('Score'), min_entries=12, max_entries=12)
-    low_scores = FieldList(IntegerField('Score'), min_entries=12, max_entries=12)
+    high_scores = FieldList(StringField('Score'), min_entries=12, max_entries=12)
+    low_scores = FieldList(StringField('Score'), min_entries=12, max_entries=12)
 
 
     def __init__(self, *args, **kwargs):
@@ -233,13 +282,25 @@ class HLScoreForm(FlaskForm):
             if row.player.data != 'Dummy':
                 player = Player.query.filter_by(nickname=row.player.data).first()
                 for hs in row.high_scores:
-                    if hs.data is not None:
-                        entry = HighScore(player=player, score=hs.data, match_id=match.id)
+                    markers = '*o'
+                    if all([hs.data is not bad for bad in ['',None]]):
+                        score = strip_score(hs.data.lower(), allowed=string.digits+markers)
+                        if any([m in score for m in markers]):
+                            out = True
+                            score = int(score.translate({ord(c): None for c in markers}))
+                        else:
+                            out = False
+                            score = int(score)
+
+                        entry = HighScore(player=player, score=score, out=out, match_id=match.id)
                         db.session.add(entry)
                         db.session.commit()
+
                 for ls in row.low_scores:
-                    if ls.data is not None:
-                        entry = LowScore(player=player, score=ls.data, match_id=match.id)
+                    score = strip_score(ls.data.lower(), allowed=string.digits)
+                    if all([score is not bad for bad in ['',None]]):
+                        score = int(score)
+                        entry = LowScore(player=player, score=score, match_id=match.id)
                         db.session.add(entry)
                         db.session.commit()
         return
@@ -259,11 +320,15 @@ class HLScoreForm(FlaskForm):
             self.hl_scores[i].player.data = p.nickname
             for j,s in enumerate(match.high_scores.filter_by(player=p).all()):
                 if j < self.hl_scores[i].high_scores.max_entries:
-                    self.hl_scores[i].high_scores[j].data = s.score
+                    if s.out:
+                        score = str(s.score) + '*'
+                    else:
+                        score = str(s.score)
+                    self.hl_scores[i].high_scores[j].data = score
 
             for j,s in enumerate(match.low_scores.filter_by(player=p).all()):
                 if j < self.hl_scores[i].low_scores.max_entries - 1:
-                    self.hl_scores[i].low_scores[j].data = s.score
+                    self.hl_scores[i].low_scores[j].data = str(s.score)
         return
 
             

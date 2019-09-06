@@ -1,0 +1,19 @@
+ICC4 Event reminder
+
+{{ user.player.nickname }},
+
+
+    You have an event coming up: 8p.m. on {{ match.date.strftime('%d-%b') }} against {{ match.opponent.name }} at {{ match.location }}.
+
+
+Currently you have checked-in as: {{ status }}
+
+Click the links below to change your status:
+
+In: {{ url_for('main.update_checkin', player_id=user.player.id, match_id=match.id, status='in', token=token, _external=True) }}
+Out: {{ url_for('main.update_checkin', player_id=user.player.id, match_id=match.id, status='out', token=token, _external=True) }}
+If Needed: {{ url_for('main.update_checkin', player_id=user.player.id, match_id=match.id, status='ifn', token=token, _external=True) }}
+
+Sincerely,
+
+The ICC4 pub darts team

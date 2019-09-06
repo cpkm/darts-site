@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
@@ -17,9 +18,10 @@
 {% endblock %}
 
 {% block navbar %}
-<div class="container">
+<div class="container-fluid">
 <nav class="navbar navbar-expand-md navbar-light bg-light">
-  <a class="navbar-brand mt-2 mr-auto" href="{{ url_for('main.index') }}">ICC4</a>
+  <a href="{{ url_for('main.index') }}"><img src="/static/icons/dart-logo-small.png" alt="ICC4" class="bg-light"></a>
+  <!--<a class="navbar-brand mt-2 mr-auto" href="{{ url_for('main.index') }}">ICC4</a>-->
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -28,12 +30,13 @@
       <li class="nav-item active">
         <a class="nav-link" href="{{ url_for('main.index') }}">Home<span class="sr-only">(current)</span></a>
       </li>
+
       <li class="nav-item dropdown">
           <a class="btn nav-link dropdown-toggle" href="{{ url_for('main.schedule') }}" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Schedule
           </a>
           
-          <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+          <div id="scheduleDrop" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
             <a class="dropdown-item" href="{{ url_for('main.schedule') }}">Current</a>
             {% if g.all_seasons %}
             {% for s in g.all_seasons %}
@@ -42,6 +45,7 @@
             {% endif %}
           </div>
       </li>
+
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('main.leaderboard') }}">Leaderboards</a>
       </li>
@@ -64,19 +68,22 @@
         <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
       </li>
     {% else %}
-
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('main.profile') }}">Profile</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.checkin') }}">Checkin</a>
       </li>
       {% if current_user.check_role(['admin', 'captain']) %}
       <div class="dropdown-divider"></div>
       <li class="nav-item dropdown">
           <a class="btn nav-link dropdown-toggle" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Editing Tools</a>
           <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+            <a class="dropdown-item" href="{{ url_for('main.enter_score') }}">Enter scores</a>
             <a class="dropdown-item" href="{{ url_for('main.match_edit') }}">Match editor</a>
             <a class="dropdown-item" href="{{ url_for('main.player_edit') }}">Player editor</a>
             <a class="dropdown-item" href="{{ url_for('main.team_edit') }}">Team editor</a>
-            <a class="dropdown-item" href="{{ url_for('main.enter_score') }}">Enter scores</a>
+            <a class="dropdown-item" href="{{ url_for('main.season_edit') }}">Season editor</a>
           </div>
       </li>
       <li class="nav-item">
@@ -94,22 +101,73 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid">
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       {% for category, message in messages %}
         {% if category not in ['primary','secondary','light','dark','danger','warning','info','success'] %}
         {% set category = 'info' %}
         {% endif %}
-        <div class="alert alert-{{ category }} alert-dismissible" role="alert">{{ message }}</div>  
+        <div class="alert alert-{{ category }} alert-dismissible" role="alert">{{ message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+          </button>
+        </div>  
       {% endfor %}
-    {% else %}<div class="my-5"></div>
+    {% else %}
     {% endif %}
   {% endwith %}
     
-    {# application content needs to be provided in the app_content block #}
-    {% block app_content %}{% endblock %}
+  {# application content needs to be provided in the app_content block #}
+  {% block app_content %}{% endblock %}
   </div>
+  
+  {% block footer %}
+
+  <div class="container-fluid pt-4">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+
+      <div class="col-md-5 order-1 order-md-0 text-center">
+        <ul class="navbar-nav float-md-left">
+          <li class="nav-item">
+            <small><a class="nav-link text-muted" href="http://icc4-darts.herokuapp.com">&copy; 2019 ICC4-darts</a></small>
+          </li>
+          <hr class="clearfix w-100 d-md-none">
+          <li class="nav-item">
+            <small><a class="nav-link text-dark" href="{{ url_for('main.schedule') }}">Schedule</a></small>
+          </li>
+          <li class="nav-item">
+            <small><a class="nav-link text-dark" href="{{ url_for('main.leaderboard') }}">Leaderboard</a></small>
+          </li>
+          <li class="nav-item">
+            <small><a class="nav-link text-dark" href="{{ url_for('main.opponent') }}">Opponents</a></small>
+          </li>
+        </ul>
+      </div>
+
+      <div class="mx-auto text-center col-md-2 order-0">
+        <a class="mx-auto" href="{{ url_for('main.index') }}"><img src="/static/icons/dart-logo-small.png" alt="ICC4" class="bg-light"></a>
+      </div>
+
+      <hr class="clearfix w-100 d-md-none order-1">
+  
+      <div class="col-md-5 order-3 text-center">
+        <ul class="navbar-nav float-md-right">
+          <li class="nav-item">
+            <small><a class="nav-link text-dark" href="http://www.sentex.net/~pmartin/">GPD League</a></small>
+          </li>
+          <li class="nav-item">
+            <small><a class="nav-link text-dark" href="https://github.com/cpkm/darts-site">Contribute</a></small>
+          </li>
+          <li class="nav-item">
+            <small><a class="nav-link text-dark" href="mailto:icc4darts+contact@gmail.com">Contact</a></small>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+
+  {% endblock %}
 {% endblock %}
 
 {% block scripts %}

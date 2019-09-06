@@ -2,93 +2,111 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-<div class="container">
-  <h1>Enter game score</h1>
-  <br>
-  {% set c=3 %}
-  <div class="col-12 mt-2 mx-auto">
-    <div class="card h-100">
-      <h2 class="card-header">Current season</h2>
-      <div class="card-body">
-        <ul class="row list-unstyled">
-        {% for m in all_matches %}
-        <li class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-          <a href="{{ url_for('main.enter_score', id=m.id) }}">{{ m.date.strftime('%Y-%m-%d') }} {{ m.opponent.name }}</a>
-        </li>
+<h1>Enter game scores</h1>
+<br> 
+<div class="row">
+
+  <div class="col-md-3">
+    <p>
+      <a class="btn btn-primary" data-toggle="collapse" href="#allSeasonCollapse" role="button" aria-expanded="false" aria-controls="allSeasonCollapse">Show Seasons</a>
+    </p>
+    <div class="collapse multi-collapse" id="allSeasonCollapse">
+      <div id="accordion">
+
+        {% for season in g.all_seasons %}
+
+        <div class="card bg-light">
+          <div class="card-header" id="heading{{season.id}}">
+            <h5 class="mb-0">
+              <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{season.id}}" aria-expanded="true" aria-controls="collapse{{season.id}}">
+                {{ season.season_name }}
+              </button>
+            </h5>
+          </div>
+          <div id="collapse{{season.id}}" class="collapse" aria-labelledby="heading{{season.id}}" data-parent="#accordion">
+            <div class="card-body">
+              <ul class="list-unstyled">
+                {% for m in season.matches %}
+                <li>
+                  <a href="{{ url_for('main.enter_score', id=m.id) }}">{{ m.date.strftime('%b-%d') }} {{ m.opponent.name }}</a>
+                </li>
+                {% endfor %}
+              </ul>
+              <hr>
+              <a href="{{ url_for('main.match_edit') }}">Add new match</a>
+            </div>
+          </div>
+        </div>
         {% endfor %}
-        </ul>
-        <hr>
-        <a href="{{ url_for('main.match_edit') }}">Add new match</a>
       </div>
     </div>
   </div>
 
+  <div class="col-md-9">
   {% if match %}
-
-  <div class="col-12 mt-2 mx-auto">
-    <div class="card h-100">
+    <div class="card">
       <h2 class="card-header">Details and game scores</h2>
       <div class="card-body">
       <h3 class="text-center text-muted">{{ match.opponent.name }} {{ match.home_away }} game on {{ match.date.strftime('%Y-%m-%d') }}</h3>
-      <form class="form" method="post" role="form">
-        {{ form.hidden_tag() }}
-        {{ wtf.form_errors(form, hiddens="only") }}
+        <form class="form" method="post" role="form">
+          {{ form.hidden_tag() }}
+          {{ wtf.form_errors(form, hiddens="only") }}
 
-        <div class="col-md-6 col-xs-12 my-1">
-          <div class="form-row my-0">
-            <div class="col-md-3">
-            {{ wtf.form_field(form.team_score,class="form-control form-control-sm") }}
+          <div class="col-md-6 col-xs-12 my-1">
+            <div class="form-row my-0">
+              <div class="col-md-3">
+              {{ wtf.form_field(form.team_score,class="form-control form-control-sm") }}
+              </div>
+              <div class="col-md-3">
+              {{ wtf.form_field(form.opponent_score,class="form-control form-control-sm") }}
+              </div>
+              <div class="col-md-6 pt-2 text-center mb-3">
+              {{ form.win() }} {{ form.win.label(class="form-check-label") }} 
+                <div class="w-100"></div>
+              {{ form.overtime() }} {{ form.overtime.label(class="form-check-label") }} 
+              </div>
             </div>
-            <div class="col-md-3">
-            {{ wtf.form_field(form.opponent_score,class="form-control form-control-sm") }}
-            </div>
-            <div class="col-md-6 pt-2 text-center mb-3">
-            {{ form.win() }} {{ form.win.label(class="form-check-label") }} 
-              <div class="w-100"></div>
-            {{ form.overtime() }} {{ form.overtime.label(class="form-check-label") }} 
+            <div class="form-row my-0">
+              <div class="col-md-12">
+            {{ wtf.form_field(form.food,class="form-control form-control-sm") }}
+              </div>
             </div>
           </div>
-          <div class="form-row my-0">
-            <div class="col-md-12">
-          {{ wtf.form_field(form.food,class="form-control form-control-sm") }}
-            </div>
+          <div class="col-md-6 col-xs-12 my-1">
+            {{ wtf.form_field(form.match_summary, rows='5',class="form-control form-control-sm") }}
           </div>
+          {{ wtf.form_field(form.submit_details, button_map={'submit_details': 'primary my-1 btn-block'}) }}
+          <br>
+          <div class="col-xs-12 my-1">
+          <h4>701 doubles</h4>
+          {% for game in form.d701 %}
+          {% include '_doubles_game.html' %}
+          {% endfor %}
+          </div>
+          <div class="col-xs-12 my-1">
+          <h4>501 doubles</h4>
+          {% for game in form.d501 %}
+          {% include '_doubles_game.html' %}
+          {% endfor %}
+          </div>
+          <div class="col-xs-12 my-1">
+          <h4>501 singles</h4>
+          {% for game in form.s501 %}
+          {% include '_singles_game.html' %}
+          {% endfor %}
         </div>
-        <div class="col-md-6 col-xs-12 my-1">
-          {{ wtf.form_field(form.match_summary, rows='5',class="form-control form-control-sm") }}
-        </div>
-        {{ wtf.form_field(form.submit_details, button_map={'submit_details': 'primary my-1 btn-block'}) }}
-        <br>
-        <div class="col-xs-12 my-1">
-        <h4>701 doubles</h4>
-        {% for game in form.d701 %}
-        {% include '_doubles_game.html' %}
-        {% endfor %}
-        </div>
-        <div class="col-xs-12 my-1">
-        <h4>501 doubles</h4>
-        {% for game in form.d501 %}
-        {% include '_doubles_game.html' %}
-        {% endfor %}
-        </div>
-        <div class="col-xs-12 my-1">
-        <h4>501 singles</h4>
-        {% for game in form.s501 %}
-        {% include '_singles_game.html' %}
-        {% endfor %}
-      </div>
 
-        {{ wtf.form_field(form.submit_scores, button_map={'submit_scores': 'primary my-1 btn-block'}) }}
+          {{ wtf.form_field(form.submit_scores, button_map={'submit_scores': 'primary my-1 btn-block'}) }}
 
-      </form>
+        </form>
       </div>
     </div>
-  </div>
 
-  <div id="hl_scores" class="col-12 mt-2 mx-auto">
-    <div class="card h-100">
+    <div id="hl_scores" class="card">
       <h2 class="card-header">High and low scores</h2>
+      <small class="p-2">Use a <i>*</i> or <i>o</i> to indicate a high score as a big out, e.g. <i>96*</i> or <i>104o</i>.</small>
       <div class="card-body">
+
         <form class="form" method="post" role="form">
         {{ hl_form.hidden_tag() }}
         {{ wtf.form_errors(hl_form, hiddens="only") }}
@@ -101,7 +119,7 @@
           <div class="form-group col-sm-5 mx-auto text-center border border-danger">Low scores
           </div>
         </div>
-        {% for score in hl_form.hl_scores %}
+        {% for score in hl_form.hl_scores %}        
         {% include '_hl_score.html' %}
         {% endfor %}
 
@@ -112,10 +130,46 @@
         </form>
       </div>
     </div>
+  {% else %}
+    <div class="card h-100">
+      <h2 class="card-header">Details and game scores</h2>
+      <div class="card-body">
+      <h3 class="text-center text-muted">Select a match to enter scores</h3>
+      </div>
+    </div>
+    {% endif %}
   </div>
 
-
-  {% endif %}
-
 </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+{% if match %}
+<script>
+  $(window).on("load resize",function(e){
+  if(window.outerWidth < 767){
+    $('#allSeasonCollapse').collapse('hide');
+    $('#collapse{{match.season.id}}').collapse('hide');    
+  } else {
+    $('#allSeasonCollapse').collapse('show');
+    $('#collapse{{match.season.id}}').collapse('show');  
+  }
+});
+</script>
+
+{% else %}
+<script>
+  $(window).on("load resize",function(e){
+  if(window.outerWidth < 767){
+    $('#allSeasonCollapse').collapse('hide');
+    $('#collapse{{g.all_seasons[0].id}}').collapse('hide');    
+  } else {
+    $('#allSeasonCollapse').collapse('show');
+    $('#collapse{{g.all_seasons[0].id}}').collapse('show');  
+  }
+});
+</script>
+{% endif %}
 {% endblock %}

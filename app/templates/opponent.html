@@ -6,39 +6,50 @@
 <div class="row">
 
   <div class="col-md-3">
-    <div class="card h-100 bg-light">
-      <div class="card-header">All opponents</div>
-      <div class="card-body">
-        <ul class="list-unstyled">
-        {% for team in all_teams %}
-          <li>
-            <a href="{{ url_for('main.opponent', id=team.id) }}">{{ team.name }}</a>
-          </li>
-        {% endfor %}
-        </ul>
-        <hr>
-        <a href="{{ url_for('main.team_edit') }}">Add new team</a>
+    <div id="accordion">
+      <div class="card bg-light">
+        <div class="card-header" id="headingOne">
+          <h5 class="mb-0">
+            <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+              All opponents
+            </button>
+          </h5>
+        </div>
+        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+          <div class="card-body">
+            <ul class="list-unstyled">
+            {% for team in all_teams %}
+              <li>
+                <a href="{{ url_for('main.opponent', id=team.id) }}">{{ team.name }}</a>
+              </li>
+            {% endfor %}
+            </ul>
+            <hr>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="col-md-9">
     <div class="card h-100">
-      <div class="card-header">Opponent</div>
+      {% if opponent %}
+      <div class="card-header"><h4>{{ opponent.name }}</h4></div>
       <div class="card-body">
-        {% if opponent %}
-        <h4 class="card-title">{{ opponent.name }}</h4>
-        <h6 class="card-subtitle mb-2 text-muted">Playing out of {{ opponent.home_location }}</h6>
-        
-          <table class="table table-hover">
-          {% for match in matches %}
-            {% include '_match.html' %}
-          {% endfor %}
-          </table>
-        {% else %}
-        <h4 class="card-title">Select an opponent from the left</h4>
-        {% endif %}
+      <h6 class="card-subtitle mb-2 text-muted">Playing out of {{ opponent.home_location }}</h6>
+      
+        <table class="table table-hover">
+        {% for match in matches %}
+          {% include '_match.html' %}
+        {% endfor %}
+        </table>
       </div>
+      {% else %}
+      <div class="card-header"><h4>Opponent</h4></div>
+      <div class="card-body">
+      <h6 class="card-subtitle text-muted">Select an opponent from the left</h6>
+      </div>
+      {% endif %}
     </div>
   </div>
 
@@ -54,5 +65,16 @@
   $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
+</script>
+
+<script>
+  $(window).on("load resize",function(e){
+  if(window.outerWidth < 767){
+    $('#collapseOne').collapse('hide');
+    
+  } else {
+  $('#collapseOne').collapse('show');    
+  }
+});
 </script>
 {% endblock %}

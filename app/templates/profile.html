@@ -3,15 +3,112 @@
 
 {% block app_content %}
 
-<div class="col-12 mt-2 mx-auto">
-  <div class="card h-100">
-    <h2 class="card-header">Player Profile</h2>
-    <div class="col-12 mt-2 mx-auto">
-      <p>Username: {{ current_user.username }}</p>
-      <p>Email: {{ current_user.email }}</p>
-      <p>Role: {{ current_user.role }}</p>
+<div class="card h-100">
+  <h2 class="card-header">Player Profile</h2>
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">Profile</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="player-tab" data-toggle="tab" href="#player" role="tab" aria-controls="player" aria-selected="false">Player</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false">Settings</a>
+    </li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div class="tab-pane active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+      <div class="container mx-2 my-4">
+        <h4>Account details</h4>
+        <p>Email: {{ current_user.email }}</p>
+        <p>Role: {{ current_user.role }}</p>
+        <p><small>Note: your avatar is set using your email address and the Gravatar service from Wordpress. To add or change your avatar please visit <a target="_blank" href="https://en.gravatar.com/">gravatar.com</a></small></p>
+      </div>    
     </div>
+    
+    <div class="tab-pane" id="player" role="tabpanel" aria-labelledby="player-tab">
+      <div class="container-fluid">
+          <div class="row py-4">
+              <div class="col-sm-6 px-4 mb-4 mb-sm-0">
+              {% if not current_user.player %}
+                <p>You do not have a player profile. Either claim yourself from the dropdown menu, or complete the form to the right:<p>
+                <ul>
+                  <li><strong>If you are listed in the dropdown menu</strong> - Congrats! A profile has already been created for you and your previous season stats have been uploaded. Welcome back to the team!</li>
+                  <li><strong>If you are not listed</strong> - Hello newcomer! Enter your details in the form to the right.</li>
+                </ul>
+                <p>You can always edit your details by returning to this page.</p>
+                  <form class="form" method="post" role="form">
+                      {{ claim_form.hidden_tag() }}
+                      {{ wtf.form_errors(claim_form, hiddens="only") }}
+
+                      {{ wtf.form_field(claim_form.player) }}
+                      {{ wtf.form_field(claim_form.submit_claim, button_map={'submit_claim': 'info my-1'}) }}
+                  </form>
+              {% else %}
+                  <p>You may edit your player details using the form on the right.</p>
+                  <div class="container m-2">
+                  <h5>Playername: {{ current_user.player.nickname }}</h5>
+                  <ul class="list-unstyled">
+                    <li>First name: {{ current_user.player.first_name }}</li>
+                    <li>Last name: {{ current_user.player.last_name }}</li>
+                    <li>Active: {% if current_user.player.is_active %}Yes{% else %}No{% endif %}</li>
+                    <li>Player page: <a href="{{ url_for('main.player', nickname=current_user.player.nickname) }}">link</a></li>
+                    <li>Change avatar: <a target="_blank" href="https://en.gravatar.com/">gravatar.com</a></small></li>
+                  </ul>
+                  </div>
+              {% endif %}
+              </div>
+              <hr class="clearfix w-100 d-sm-none">
+              <div class="col-sm-6 px-4 mt-4 mt-sm-0">
+                  <form class="form" method="post" role="form">
+                      {{ player_form.hidden_tag() }}
+                      {{ wtf.form_errors(player_form, hiddens="only") }}
+
+                      {{ wtf.form_field(player_form.nickname) }}
+                      {{ wtf.form_field(player_form.first_name) }}
+                      {{ wtf.form_field(player_form.last_name) }}
+                      {{ wtf.form_field(player_form.tagline) }}
+
+                      {% if current_user.player %}
+                      {{ wtf.form_field(player_form.submit_edit, button_map={'submit_edit': 'info my-1 btn-block'}) }}
+                      {% else %}
+                      {{ wtf.form_field(player_form.submit_new, button_map={'submit_new': 'primary my-1 btn-block'}) }}
+                      {% endif %}
+                    </form>
+              </div>
+          </div>
+      </div>
+    </div>
+    
+    <div class="tab-pane" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+      <div class="container mx-2 my-4">
+        <p>To change your account email, please <a href="mailto:icc4darts+admin@gmail.com">contact</a> the site administrator.</p>
+        <p>To change your password, <a href="{{ url_for('auth.reset_password', token=current_user.get_user_token(task='reset_password', expires_in=10)) }}">Click Here</a>.</p>
+      </div>
+    </div>      
   </div>
+  
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+$(function(){
+  var hash = window.location.hash;
+  hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+  $('.nav-tabs a').click(function (e) {
+    $(this).tab('show');
+    var scrollmem = $('body').scrollTop() || $('html').scrollTop();
+    window.location.hash = this.hash;
+    $('html,body').scrollTop(scrollmem);
+  });
+});
+</script>
 {% endblock %}
