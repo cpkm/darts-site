@@ -10,7 +10,10 @@
     </small>
   </div>
   <div class="card-footer">
-    <small class="text-muted">{% if player.last_match %}Last played on {{ player.last_match.date.strftime('%B %d, %Y') }}{% else %}
-    New player!</small>{% endif %}
+    <small class="text-muted">
+      {% if player.last_match %}Last played on {{ player.last_match.date.strftime('%B %d, %Y') }}
+      {% else %}New player!
+      {% endif %}
+    </small>
   </div>
 </div>
