@@ -65,6 +65,7 @@
               <hr class="clearfix w-100 d-sm-none">
               <div class="col-sm-6 px-4 mt-4 mt-sm-0">
                   <form class="form" method="post" role="form">
+                    {% if not current_user.player %}<fieldset disabled>{% endif %}<!--Remove to enable new players-->
                       {{ player_form.hidden_tag() }}
                       {{ wtf.form_errors(player_form, hiddens="only") }}
 
@@ -78,7 +79,8 @@
                       {% else %}
                       {{ wtf.form_field(player_form.submit_new, button_map={'submit_new': 'primary my-1 btn-block'}) }}
                       {% endif %}
-                    </form>
+                    {% if not current_user.player %}</fieldset>{% endif %}<!--Remove to enable new players-->
+                  </form>
               </div>
           </div>
       </div>
