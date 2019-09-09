@@ -56,11 +56,12 @@
   <div class="row">
     <div class="col mt-4"><h2>Import schedule</h2>
       <p>Either enter the URL of the schedule pdf, or select a file from your computer</p>
-      <form name="import_form" method="post" enctype=multipart/form-data>
+      <form name="import_form" id="import_form" action="{{ url_for('main.upload_schedule') }}" method="post" enctype=multipart/form-data>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="form-row align-items-center">
         <div class="form-group col-md-6">
           <label class="sr-only" for="schedule_url">URL of schedule</label>
-          <input type="text" class="form-control" id="schedule_url" placeholder="URL of Schedule">
+          <input type="text" class="form-control" name="schedule_url" placeholder="URL of Schedule">
         </div>
         <div class="form-group col-md-6">
           <input type="submit" value="Import" class="btn btn-primary my-2">
@@ -68,6 +69,7 @@
         </div>
       </form>
       <form name="upload_form" action="{{ url_for('main.upload_schedule') }}" method="post" enctype=multipart/form-data>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="form-group">
           <input type="file" name="schedule_file" class="form-control-file">
           <input type="submit" value="Upload" class="btn btn-primary my-2">

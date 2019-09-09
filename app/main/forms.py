@@ -134,6 +134,31 @@ class EditMatchForm(FlaskForm):
             raise ValidationError('Match details are not unique.')
 
 
+class ImportMatchForm(FlaskForm):
+    date = DateField('Date', format='%Y-%m-%d', default=datetime.today().date, validators=[DataRequired()])
+    opponent = HiddenField('Opponent', validators=[DataRequired()])
+    home_away = RadioField('Location', choices=[('home','Home'),('away','Away')], default='home', validators=[DataRequired()])
+    match_type = RadioField('Match Type', choices=[('r','Regular'),('p','Playoffs')], default='r', validators=[DataRequired()])
+    import_check = BooleanField('', default=True)
+
+
+class ScheduleForm(FlaskForm):
+    schedule = FieldList(FormField(ImportMatchForm))
+    submit = SubmitField('Submit')
+
+    def load_schedule(self, schedule):
+        '''Requires Schedule object'''
+        for i,match in enumerate(schedule.game_list_):
+            self.schedule.append_entry()
+            self.schedule[i].opponent.data = match.opponent
+            self.schedule[i].date.data = match.date.date()
+            self.schedule[i].match_type.data = 'r'
+            if match.home:
+                self.schedule[i].home_away.data = 'home'
+            else:
+                self.schedule[i].home_away.data = 'away'
+
+
 class EditSeasonForm(FlaskForm):
     season_name = StringField('Season Name', validators=[DataRequired()])
     start_date = DateField('Start Date', format='%Y-%m-%d', default=datetime.today().date, validators=[DataRequired()])

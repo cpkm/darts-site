@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+<div class="container-fluid m-2">
+<div class="table-responsive pt-0">
+  <form class="form" method="post" role="form">
+    {{ schedule_form.csrf_token }}
+    {{ schedule_form.hidden_tag() }}
+    {{ wtf.form_errors(schedule_form, hiddens="only") }}
+    <div>
+    <table id="schedule" class="table table-hover text-left">
+      <thead>
+        <tr>
+          <th scope="col">Import</th>
+          <th scope="col">Date</th>
+          <th scope="col">Opponent</th>
+          <th scope="col">Home/Away</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for game in schedule_form.schedule %}
+        {{ game.csrf_token }}
+        {{ game.hidden_tag() }}
+        {{ wtf.form_errors(game, hiddens="only") }}
+        <tr>
+          <td>{{ game.import_check }}</td>
+          <td>{% if game.date %}{{ game.date.data.strftime('%B %d, %Y') }}{% endif %}</td>
+          <td>{{ game.opponent.data }}</td>
+          <td>{{ game.home_away.data }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+    {{ wtf.form_field(schedule_form.submit, button_map={'submit': 'info my-1 btn-block'}) }}
+  </form>
+</div>
+</div>
+
+
+{% endblock %}
