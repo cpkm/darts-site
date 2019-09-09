@@ -655,7 +655,8 @@ def upload_schedule():
 
     if request.method=='POST' and schedule_form.validate() and schedule_form.submit.data:
         for match in schedule_form['schedule']:
-            print(match.date.data,match.opponent.data,match.home_away.data,match.match_type.data,match.import_check.data)
+            print(match.date.data.strftime('%B %d, %Y'),match.opponent.data,match.home_away.data,match.match_type.data,match.import_check.data)
+        flash('You submitted matches')
         return redirect(url_for('main.match_edit'))
 
     if schedule_form.errors:

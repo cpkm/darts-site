@@ -30,6 +30,7 @@
           <td>{{ game.opponent.data }}</td>
           <td>{{ game.home_away.data }}</td>
         </tr>
+        <tr><td hidden colspan="4">{{ game.date }}{{ game.opponent }}{{ game.home_away }}</td></tr>
         {% endfor %}
       </tbody>
     </table>
