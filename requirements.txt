@@ -21,6 +21,7 @@ Mako==1.0.7
 MarkupSafe==1.0
 newrelic==5.0.2.126
 numpy==1.17.2
+pandas==0.25.1
 psycopg2==2.8.2
 PyJWT==1.6.4
 python-dateutil==2.7.5

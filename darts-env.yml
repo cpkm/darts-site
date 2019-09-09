@@ -47,6 +47,7 @@ dependencies:
     - mako==1.0.7
     - newrelic==5.0.2.126
     - numpy==1.17.2
+    - pandas==0.25.1
     - psycopg2==2.8.2
     - pyjwt==1.6.4
     - python-dateutil==2.7.5
