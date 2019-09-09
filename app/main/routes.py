@@ -2,8 +2,9 @@ from flask import render_template, flash, redirect, url_for, request, current_ap
 from flask_login import current_user, login_required
 from wtforms.validators import ValidationError
 from werkzeug.urls import url_parse
+from werkzeug.utils import secure_filename
 from datetime import datetime, date
-from app import db
+from app import db, schedules
 from app.main import bp
 from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
     ClaimPlayerForm, EditSeasonForm)
@@ -640,6 +641,21 @@ def checkin():
         checked_matches = None
 
     return render_template('checkin.html', checked_matches=checked_matches)
+
+
+@bp.route('/upload_schedule', methods=['GET','POST'])
+def upload_schedule():
+    if request.method=='POST' and 'schedule_file' in request.files:
+        try:
+            filename = schedules.save(request.files['schedule_file'])
+        except:
+            flash('Not allowed')
+            return redirect(url_for('main.match_edit'))
+
+        flash('Schedule saved. {}'.format(filename))
+        return redirect(url_for('main.match_edit'))
+    flash('Did nada')
+    return redirect('main.match_edit')
 
 
 @bp.route('/search')
