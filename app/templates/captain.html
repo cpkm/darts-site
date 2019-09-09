@@ -35,6 +35,7 @@
       <h3 class="card-header">Active roster</h3>
         <div class="table-responsive col-12 mt-2 mx-auto">
           <form class="form" method="post" role="form">
+            {{ roster_form.csrf_token }}
             {{ roster_form.hidden_tag() }}
             {{ wtf.form_errors(roster_form, hiddens="only") }}
 
@@ -49,6 +50,7 @@
                   <th>Email</th>
                 </tr>
                 {% for p in roster_form.roster %}
+                {{ p.csrf_token }}
                 {{ p.hidden_tag() }}
                 {{ wtf.form_errors(p, hiddens="only") }}
                 <tr>
