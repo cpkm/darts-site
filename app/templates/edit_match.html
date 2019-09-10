@@ -2,83 +2,110 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-<div class="container">
+
+<div class="container-fluid">
   <h1>Match Edit</h1>
   <br>
   <div class="row">
-    <div class="col-md-6 mt-4"><h2>Add/Edit match</h2>
-      <form class="form" method="post" role="form">
-        {{ form.csrf_token }}
-        {{ form.hidden_tag() }}
-        {{ wtf.form_errors(form, hiddens="only") }}
+  <div class="col-md-8 mt-4 order-1">
 
-        {{ wtf.form_field(form.opponent) }}
-        {{ wtf.form_field(form.date, type="date") }}
+    <div class="row">
+      <div class="col mt-4"><h2>Add/Edit match</h2>
+        <form class="form" method="post" role="form">
+          {{ form.csrf_token }}
+          {{ form.hidden_tag() }}
+          {{ wtf.form_errors(form, hiddens="only") }}
 
-        <div class="form-row">
-          <div class="col-xs-4 px-4">
-            {{ wtf.form_field(form.home_away) }}
-           </div>
-          <div class="col-xs-4">
+          {{ wtf.form_field(form.opponent) }}
+          {{ wtf.form_field(form.date, type="date") }}
+
+          <div class="form-row">
+            <div class="col-xs-4 px-4">
+              {{ wtf.form_field(form.home_away) }}
+             </div>
+            <div class="col-xs-4">
+            </div>
+            <div class="col-xs-4 px-4">
+              {{ wtf.form_field(form.match_type) }}
+            </div>
           </div>
-          <div class="col-xs-4 px-4">
-            {{ wtf.form_field(form.match_type) }}
-          </div>
-        </div>
-        <hr>
-        {% if match %}
-        <h4 class="text-center text-muted">{{ match.date.strftime('%Y-%m-%d') }} {{ match.opponent.name }} {{ match.home_away }}</h4>
-        {{ wtf.form_field(form.submit_edit, button_map={'submit_edit': 'info my-1 btn-block'}) }}
-        {{ wtf.form_field(form.submit_delete, hidden="true", button_map={'submit_delete': 'danger my-1 btn-block'}) }}
-        <button type="button" id="modal-click" class="btn btn-danger btn-block my-1" data-toggle="modal" data-target="#confirmModal">Delete Match</button>
-        {% else %}
-        {{ wtf.form_field(form.submit_new, button_map={'submit_new': 'primary my-1 btn-block'}) }}
-        {% endif %}
-      </form>
-    </div>
-    
-    <div class="col-md-6 mt-2">
-      <div class="card h-100">
-        <h2 class="card-header">All matches</h2>
-        <div class="card-body">
-          <ul class="row list-unstyled">
-          {% for m in all_matches %}
-          <li class="col-xs-6">
-            <a href="{{ url_for('main.match_edit', id=m.id) }}">{{ m.date.strftime('%Y-%m-%d') }} {{ m.opponent.name }} {{ m.home_away }} </a>
-          </li>
-          {% endfor %}
-          </ul>
           <hr>
-          <a href="{{ url_for('main.match_edit') }}">Add new match</a>
+          {% if match %}
+          <h4 class="text-center text-muted">{{ match.date.strftime('%Y-%m-%d') }} {{ match.opponent.name }} {{ match.home_away }}</h4>
+          {{ wtf.form_field(form.submit_edit, button_map={'submit_edit': 'info my-1 btn-block'}) }}
+          {{ wtf.form_field(form.submit_delete, hidden="true", button_map={'submit_delete': 'danger my-1 btn-block'}) }}
+          <button type="button" id="modal-click" class="btn btn-danger btn-block my-1" data-toggle="modal" data-target="#confirmModal">Delete Match</button>
+          {% else %}
+          {{ wtf.form_field(form.submit_new, button_map={'submit_new': 'primary my-1 btn-block'}) }}
+          {% endif %}
+        </form>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col mt-4"><h2>Import schedule</h2>
+        <p>Either enter the URL of the schedule pdf, or select a file from your computer</p>
+        <form name="import_form" id="import_form" action="{{ url_for('main.upload_schedule') }}" method="post" enctype=multipart/form-data>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <div class="form-row align-items-center">
+          <div class="form-group col-md-6">
+            <label class="sr-only" for="schedule_url">URL of schedule</label>
+            <input type="text" class="form-control" name="schedule_url" placeholder="URL of Schedule">
+          </div>
+          <div class="form-group col-md-6">
+            <input type="submit" value="Import" class="btn btn-primary my-2">
+          </div>
+          </div>
+        </form>
+        <form name="upload_form" action="{{ url_for('main.upload_schedule') }}" method="post" enctype=multipart/form-data>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <div class="form-group">
+            <input type="file" name="schedule_file" class="form-control-file">
+            <input type="submit" value="Upload" class="btn btn-primary my-2">
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-md-4 order-0 order-md-1">
+    <p>
+      <a class="btn btn-primary btn-block" data-toggle="collapse" href="#allSeasonCollapse" role="button" aria-expanded="false" aria-controls="allSeasonCollapse">All Seasons</a>
+    </p>
+    <div class="collapse multi-collapse" id="allSeasonCollapse">
+      <div id="accordion">
+
+        {% for season in g.all_seasons %}
+
+        <div class="card bg-light">
+          <div class="card-header" id="heading{{season.id}}">
+            <h5 class="mb-0">
+              <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{season.id}}" aria-expanded="false" aria-controls="collapse{{season.id}}">
+                {{ season.season_name }} Matches
+              </button>
+            </h5>
+          </div>
+          <div id="collapse{{season.id}}" class="collapse" aria-labelledby="heading{{season.id}}" data-parent="#accordion">
+            <div class="card-body">
+              <ul class="list-unstyled">
+                {% for m in season.matches %}
+                <li>
+                  <a href="{{ url_for('main.match_edit', id=m.id) }}">{{ m.date.strftime('%b-%d') }} {{ m.opponent.name }}</a>
+                </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
         </div>
+        {% endfor %}
+        <hr>
+          <a href="{{ url_for('main.match_edit') }}">Add new match</a>
       </div>
     </div>
   </div>
-  <div class="row">
-    <div class="col mt-4"><h2>Import schedule</h2>
-      <p>Either enter the URL of the schedule pdf, or select a file from your computer</p>
-      <form name="import_form" id="import_form" action="{{ url_for('main.upload_schedule') }}" method="post" enctype=multipart/form-data>
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        <div class="form-row align-items-center">
-        <div class="form-group col-md-6">
-          <label class="sr-only" for="schedule_url">URL of schedule</label>
-          <input type="text" class="form-control" name="schedule_url" placeholder="URL of Schedule">
-        </div>
-        <div class="form-group col-md-6">
-          <input type="submit" value="Import" class="btn btn-primary my-2">
-        </div>
-        </div>
-      </form>
-      <form name="upload_form" action="{{ url_for('main.upload_schedule') }}" method="post" enctype=multipart/form-data>
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        <div class="form-group">
-          <input type="file" name="schedule_file" class="form-control-file">
-          <input type="submit" value="Upload" class="btn btn-primary my-2">
-        </div>
-      </form>
-    </div>
-
   </div>
+
 </div>
 
 <!-- Modal -->
@@ -106,11 +133,35 @@
 
 {% block scripts %}
 {{ super() }}
+{% if match %}{% set is_match, cid = 1, match.season.id %}
+{% else %}{% set is_match, cid = 0, 0 %}
+{% endif %}
+<!--Proxy Tag for match-->
+<meta id="match_boolean" data-ismatch="{{ is_match }}">
+
 <script>
 $('#modal-confirm').click(function(){
     // Perform the action after modal confirm button is clicked.
 
     $('#submit_delete').click(); // submitting the delete
+});
+</script>
+
+<script>
+  var is_match = $('#match_boolean').data("ismatch");
+  $(window).on("load resize",function(e){
+  if(window.outerWidth < 767){
+    $('#allSeasonCollapse').collapse('hide');
+    if(is_match){
+      $('#collapse{{cid}}').collapse('hide');
+    }
+    
+  } else {
+  $('#allSeasonCollapse').collapse('show');
+  if(is_match){
+      $('#collapse{{cid}}').collapse('show');
+    }    
+  }
 });
 </script>
 {% endblock %}
