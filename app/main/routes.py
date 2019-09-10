@@ -654,9 +654,41 @@ def upload_schedule():
     saved_file=False
 
     if request.method=='POST' and schedule_form.validate() and schedule_form.submit.data:
+        count_pass = 0
+        count_fail = 0
+        count_nopp = 0
+        nopp = []
         for match in schedule_form['schedule']:
-            print(match.date.data.strftime('%B %d, %Y'),match.opponent.data,match.home_away.data,match.match_type.data,match.import_check.data)
-        flash('You submitted matches')
+            opponent = Team.query.filter_by(name=match.opponent.data).first()
+            if opponent:
+                if Match.query.filter_by(date=match.date.data, home_away=match.home_away.data, 
+                        opponent_id=opponent.id, match_type=match.match_type.data).first() is not None:
+                    count_fail += 1
+                else:
+                    newmatch = Match(date=match.date.data,
+                        opponent=opponent,
+                        home_away=match.home_away.data,
+                        match_type=match.match_type.data)
+                    newmatch.set_location()
+                    newmatch.set_season()
+                    db.session.add(newmatch)
+                    db.session.flush()
+                    match_id = newmatch.id
+                    db.session.commit()
+                    match = Match.query.filter_by(id=match_id).first()
+                    match.create_checkins()
+                    count_pass += 1
+            else:
+                count_nopp += 1
+                nopp.append(match.opponent.data)
+
+        if count_pass > 0:
+            flash('{} matches were successfully added!'.format(count_pass), 'success')
+        if count_fail > 0:
+            flash('{} matches were rejected as duplicates. Check details and enter manually if needed.'.format(count_fail), 'danger')
+        if count_nopp > 0:
+            flash('{} matches were rejected as the opponent does not exist. Check opponents {}.'.format(count_nopp, ', '.join(nopp)), 'danger')
+
         return redirect(url_for('main.match_edit'))
 
     if schedule_form.errors:
