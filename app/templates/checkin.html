@@ -20,9 +20,9 @@
           </tr>
         </thead>
         <tbody>
+          <div id="accordion">
           {% for cm in checked_matches %}
           {% set ins,out,ifn = cm.match.get_checked_players() %}
-          <div id="accordion">
           <tr>
             <th scope="row">{{ cm.match.date.strftime('%b %d') }}</th> 
             <td>{{ cm.match.opponent.name }}</td>
@@ -74,8 +74,8 @@
               </div>
             </td>
           </tr>
-          </div>
           {% endfor %}
+          </div>
 
         </tbody>
       </table>
