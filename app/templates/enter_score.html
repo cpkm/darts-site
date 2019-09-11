@@ -26,7 +26,7 @@
           <div id="collapse{{season.id}}" class="collapse" aria-labelledby="heading{{season.id}}" data-parent="#accordion">
             <div class="card-body">
               <ul class="list-unstyled">
-                {% for m in season.matches %}
+                {% for m in season.matches|sort(attribute='date') %}
                 <li>
                   <a href="{{ url_for('main.enter_score', id=m.id) }}">{{ m.date.strftime('%b-%d') }} {{ m.opponent.name }}</a>
                 </li>
