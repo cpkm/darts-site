@@ -45,6 +45,8 @@ class EditPlayerForm(FlaskForm):
 class ActivePlayerForm(FlaskForm):
     player = HiddenField('', validators=[DataRequired()])
     is_active = BooleanField('')
+    role = SelectField('', 
+        choices=[('player','player'),('assistant','assistant'),('captain','captain')], default='player')
 
 class RosterForm(FlaskForm):
     roster = FieldList(FormField(ActivePlayerForm))
@@ -58,6 +60,8 @@ class RosterForm(FlaskForm):
             self.roster.append_entry()
             self.roster[i].player.data = p.nickname
             self.roster[i].is_active.data = p.is_active
+            if p.user:
+                self.roster[i].role.data = p.user.role
 
 class ClaimPlayerForm(FlaskForm):
     player = SelectField('', choices=[], default='--Select Player--')
@@ -65,7 +69,7 @@ class ClaimPlayerForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        unclaimed_players = Player.query.filter(Player.nickname!='Dummy').filter(Player.user==None).all()
+        unclaimed_players = Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).filter(Player.user==None).all()
         players = [(self.player.default,self.player.default)] + [(p.nickname,p.nickname+' ('+p.first_name+' '+p.last_name+')') for p in unclaimed_players]
         self.player.choices = players
 
@@ -128,6 +132,31 @@ class EditMatchForm(FlaskForm):
                 opponent_id=opp_id, match_type=self.match_type.data).first() is not None:
             flash('Match must be unique! Match not added', 'danger')
             raise ValidationError('Match details are not unique.')
+
+
+class ImportMatchForm(FlaskForm):
+    date = DateField('Date', format='%Y-%m-%d', default=datetime.today().date, validators=[DataRequired()])
+    opponent = HiddenField('Opponent', validators=[DataRequired()])
+    home_away = RadioField('Location', choices=[('home','Home'),('away','Away')], default='home', validators=[DataRequired()])
+    match_type = RadioField('Match Type', choices=[('r','Regular'),('p','Playoffs')], default='r', validators=[DataRequired()])
+    import_check = BooleanField('', default=True)
+
+
+class ScheduleForm(FlaskForm):
+    schedule = FieldList(FormField(ImportMatchForm))
+    submit = SubmitField('Submit')
+
+    def load_schedule(self, schedule):
+        '''Requires Schedule object'''
+        for i,match in enumerate(schedule.game_list_):
+            self.schedule.append_entry()
+            self.schedule[i].opponent.data = match.opponent
+            self.schedule[i].date.data = match.date.date()
+            self.schedule[i].match_type.data = 'r'
+            if match.home:
+                self.schedule[i].home_away.data = 'home'
+            else:
+                self.schedule[i].home_away.data = 'away'
 
 
 class EditSeasonForm(FlaskForm):

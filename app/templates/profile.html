@@ -7,7 +7,7 @@
   <h2 class="card-header">Player Profile</h2>
 
   <!-- Nav tabs -->
-  <ul class="nav nav-tabs" id="myTab" role="tablist">
+  <ul class="nav nav-tabs mt-2 mx-1" id="myTab" role="tablist">
     <li class="nav-item">
       <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">Profile</a>
     </li>
@@ -42,11 +42,12 @@
                 </ul>
                 <p>You can always edit your details by returning to this page.</p>
                   <form class="form" method="post" role="form">
-                      {{ claim_form.hidden_tag() }}
-                      {{ wtf.form_errors(claim_form, hiddens="only") }}
+                    {{ claim_form.csrf_token }}
+                    {{ claim_form.hidden_tag() }}
+                    {{ wtf.form_errors(claim_form, hiddens="only") }}
 
-                      {{ wtf.form_field(claim_form.player) }}
-                      {{ wtf.form_field(claim_form.submit_claim, button_map={'submit_claim': 'info my-1'}) }}
+                    {{ wtf.form_field(claim_form.player) }}
+                    {{ wtf.form_field(claim_form.submit_claim, button_map={'submit_claim': 'info my-1'}) }}
                   </form>
               {% else %}
                   <p>You may edit your player details using the form on the right.</p>
@@ -66,6 +67,7 @@
               <div class="col-sm-6 px-4 mt-4 mt-sm-0">
                   <form class="form" method="post" role="form">
                     {% if not current_user.player %}<fieldset disabled>{% endif %}<!--Remove to enable new players-->
+                      {{ player_form.csrf_token }}
                       {{ player_form.hidden_tag() }}
                       {{ wtf.form_errors(player_form, hiddens="only") }}
 

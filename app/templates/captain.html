@@ -7,7 +7,7 @@
   <h2 class="card-header">Captain's Portal</h2>
 
   <!-- Nav tabs -->
-  <ul class="nav nav-tabs" id="myTab" role="tablist">
+  <ul class="nav nav-tabs mt-2 mx-1" id="myTab" role="tablist">
     <li class="nav-item">
       <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">Profile</a>
     </li>
@@ -35,6 +35,7 @@
       <h3 class="card-header">Active roster</h3>
         <div class="table-responsive col-12 mt-2 mx-auto">
           <form class="form" method="post" role="form">
+            {{ roster_form.csrf_token }}
             {{ roster_form.hidden_tag() }}
             {{ wtf.form_errors(roster_form, hiddens="only") }}
 
@@ -49,6 +50,7 @@
                   <th>Email</th>
                 </tr>
                 {% for p in roster_form.roster %}
+                {{ p.csrf_token }}
                 {{ p.hidden_tag() }}
                 {{ wtf.form_errors(p, hiddens="only") }}
                 <tr>
@@ -56,7 +58,7 @@
                     <td>{{ players[loop.index-1].last_name }}</td>
                     <td>{{ players[loop.index-1].first_name }}</td>
                     <td>{{ p.is_active }}</td>
-                    <td>{{ players[loop.index-1].user.role }}</td>
+                    <td>{% if players[loop.index-1].user %}{% if players[loop.index-1].user.role=='admin' %}<b>admin</b>{% else %}{{ p.role }}{% endif %}{% else %}<i>no user</i>{% endif %}</td>
                     <td>{{ players[loop.index-1].user.email }}</td>
                 </tr>
                 {% endfor %}
@@ -96,6 +98,7 @@
                 </td>
                 <td>
                   <a role="button" class="btn btn-danger btn-sm" data-id="{{ m.__repr__()[1:-1] }}" href="#" data-href="{{ url_for('main.send_reminder_email', token=current_user.get_user_token(task='send_reminder_email'), match_id=m.id) }}" data-toggle="modal" data-target="#confirmModal">Send Reminder Email</a>
+                  <a role="button" class="btn btn-warning btn-sm" id="ifn_{{ m.__repr__()[1:-1] }}" href="mailto:{{ ifn|join(', ', attribute='player.user.email') }}?bcc={{ current_user.email }}&subject=You are needed for darts this week">Email IfN's</a>
                 </td>
                 <td>{% if m.reminder_email_sent %}{{ m.reminder_email_sent.strftime('%Y-%m-%d')}}{% endif %}</td>
               </tr>

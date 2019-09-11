@@ -1,17 +1,20 @@
+import os
 from flask import render_template, flash, redirect, url_for, request, current_app, g
 from flask_login import current_user, login_required
 from wtforms.validators import ValidationError
 from werkzeug.urls import url_parse
+from werkzeug.utils import secure_filename
 from datetime import datetime, date
-from app import db
+from app import db, schedules
 from app.main import bp
 from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
-    ClaimPlayerForm, EditSeasonForm)
+    ClaimPlayerForm, EditSeasonForm, ScheduleForm)
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
     season_from_date, update_all_team_stats, current_roster, current_season)
 from app.decorators import check_verification, check_role
 from app.main.leaderboard_card import LeaderBoardCard
 from app.main.email import send_reminder_email as reminder_email
+from app.scripts.pdf_to_sched import DartSchedulePDF
 
 @bp.before_request
 def before_request():
@@ -291,7 +294,7 @@ def season_edit(id):
 @bp.route('/enter_score/<id>',  methods=['GET', 'POST'])
 @login_required
 @check_verification
-@check_role(['admin','captain'])
+@check_role(['admin','captain','assistant'])
 def enter_score(id):
     match = Match.query.filter_by(id=id).first()
     form = EnterScoresForm(obj=match)
@@ -549,23 +552,44 @@ def profile():
 @check_role(['admin','captain'])
 def captain():
     roster_form = RosterForm()
+    players = current_roster(full=True)
+
     if request.method == 'POST' and roster_form.validate_on_submit():
         for player_form in roster_form.roster:
             if player_form.player.data is not None:
                 p = Player.query.filter_by(nickname=player_form.player.data).first()
                 p.is_active = player_form.is_active.data
+                if p.user:
+                    if p.user.role == 'admin':
+                        pass
+                    elif current_user == p.user:
+                        pass
+                    else:
+                        p.user.role=player_form.role.data
+                        db.session.add(p.user)
                 db.session.add(p)
                 db.session.commit()
         flash('Updated active roster!')
         return redirect(url_for('main.captain'))
+
     elif request.method == 'GET':
-        players = current_roster(full=True)
         roster_form.fill_roster(players)
 
     upcoming_matches = Match.query.filter(Match.date>=date.today()).order_by(Match.date).all()
 
     return render_template('captain.html', roster_form=roster_form, 
         players=players, upcoming_matches=upcoming_matches)
+
+@bp.route('/admin', methods=['GET', 'POST'])
+@login_required
+@check_verification
+@check_role(['admin'])
+def admin():
+    all_users = User.query.all()
+    all_players = Player.query.all()
+
+    return render_template('admin.html', all_users=all_users, all_players=all_players)
+
 
 
 @bp.route('/send_reminder_email/<match_id>/<token>', methods=['GET','POST'])
@@ -619,6 +643,87 @@ def checkin():
         checked_matches = None
 
     return render_template('checkin.html', checked_matches=checked_matches)
+
+
+@bp.route('/upload_schedule', methods=['POST'])
+@login_required
+@check_verification
+@check_role(['admin','captain'])
+def upload_schedule():
+    schedule_form = ScheduleForm()
+    saved_file=False
+
+    if request.method=='POST' and schedule_form.validate() and schedule_form.submit.data:
+        count_pass = 0
+        count_fail = 0
+        count_nopp = 0
+        nopp = []
+        for match in schedule_form['schedule']:
+            opponent = Team.query.filter_by(name=match.opponent.data).first()
+            if opponent:
+                if Match.query.filter_by(date=match.date.data, home_away=match.home_away.data, 
+                        opponent_id=opponent.id, match_type=match.match_type.data).first() is not None:
+                    count_fail += 1
+                else:
+                    newmatch = Match(date=match.date.data,
+                        opponent=opponent,
+                        home_away=match.home_away.data,
+                        match_type=match.match_type.data)
+                    newmatch.set_location()
+                    newmatch.set_season()
+                    db.session.add(newmatch)
+                    db.session.flush()
+                    match_id = newmatch.id
+                    db.session.commit()
+                    match = Match.query.filter_by(id=match_id).first()
+                    match.create_checkins()
+                    count_pass += 1
+            else:
+                count_nopp += 1
+                nopp.append(match.opponent.data)
+
+        if count_pass > 0:
+            flash('{} matches were successfully added!'.format(count_pass), 'success')
+        if count_fail > 0:
+            flash('{} matches were rejected as duplicates. Check details and enter manually if needed.'.format(count_fail), 'danger')
+        if count_nopp > 0:
+            flash('{} matches were rejected as the opponent does not exist. Check opponents {}.'.format(count_nopp, ', '.join(nopp)), 'danger')
+
+        return redirect(url_for('main.match_edit'))
+
+    if schedule_form.errors:
+        for k,v in schedule_form.errors.items():
+            print(k,v)
+
+    if request.method=='POST' and 'schedule_file' in request.files:
+        try:
+            filename = schedules.save(request.files['schedule_file'])
+            file_location = schedules.path(filename)
+            saved_file = True
+        except:
+            flash('Missing or invalid file', 'danger')
+            return redirect(url_for('main.match_edit'))
+
+    elif request.method=='POST' and 'schedule_url' in request.form:
+        file_location = request.form['schedule_url']
+
+    else:
+        flash('Missing file', 'danger')
+        return redirect(url_for('main.match_edit'))
+
+    try:
+        schedule = DartSchedulePDF(file_location)
+        if saved_file:
+            os.remove(file_location)
+    except Exception as e:
+        print(e)
+        if saved_file:
+            os.remove(file_location)
+        flash('Error in processing file', 'danger')
+        return redirect(url_for('main.match_edit'))
+
+    schedule_form.load_schedule(schedule)
+    return render_template('import_schedule.html', schedule_form=schedule_form)
 
 
 @bp.route('/search')

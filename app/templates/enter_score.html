@@ -26,7 +26,7 @@
           <div id="collapse{{season.id}}" class="collapse" aria-labelledby="heading{{season.id}}" data-parent="#accordion">
             <div class="card-body">
               <ul class="list-unstyled">
-                {% for m in season.matches %}
+                {% for m in season.matches|sort(attribute='date') %}
                 <li>
                   <a href="{{ url_for('main.enter_score', id=m.id) }}">{{ m.date.strftime('%b-%d') }} {{ m.opponent.name }}</a>
                 </li>
@@ -49,6 +49,7 @@
       <div class="card-body">
       <h3 class="text-center text-muted">{{ match.opponent.name }} {{ match.home_away }} game on {{ match.date.strftime('%Y-%m-%d') }}</h3>
         <form class="form" method="post" role="form">
+          {{ form.csrf_token }}
           {{ form.hidden_tag() }}
           {{ wtf.form_errors(form, hiddens="only") }}
 
@@ -108,6 +109,7 @@
       <div class="card-body">
 
         <form class="form" method="post" role="form">
+        {{ hl_form.csrf_token }}
         {{ hl_form.hidden_tag() }}
         {{ wtf.form_errors(hl_form, hiddens="only") }}
 
