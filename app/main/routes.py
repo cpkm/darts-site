@@ -715,7 +715,8 @@ def upload_schedule():
         schedule = DartSchedulePDF(file_location)
         if saved_file:
             os.remove(file_location)
-    except:
+    except Exception as e:
+        print(e):
         if saved_file:
             os.remove(file_location)
         flash('Error in processing file', 'danger')
