@@ -4,12 +4,13 @@
 {% block app_content %}
 
 <div class="card h-100">
-  <h2 class="card-header">Match Checkin</h2>
-
+  <div class="card-header">
+  <h2>Match Checkin</h2>
+  </div>
   <div class="card-body" id="checkin">
     <div class="container-fluid table-responsive">
       {% if checked_matches %}
-      <table class="table">
+      <table class="table table-borderless">
         <thead>
           <tr>
             <th scope="col">Date</th>
@@ -20,9 +21,9 @@
           </tr>
         </thead>
         <tbody>
+          <div id="accordion">
           {% for cm in checked_matches %}
           {% set ins,out,ifn = cm.match.get_checked_players() %}
-          <div id="accordion">
           <tr>
             <th scope="row">{{ cm.match.date.strftime('%b %d') }}</th> 
             <td>{{ cm.match.opponent.name }}</td>
@@ -74,8 +75,8 @@
               </div>
             </td>
           </tr>
-          </div>
           {% endfor %}
+          </div>
 
         </tbody>
       </table>

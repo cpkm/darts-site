@@ -17,3 +17,4 @@ class Config(object):
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = [('ICC4 darts','icc4darts@gmail.com')]
+    UPLOADS_DEFAULT_DEST = os.environ.get('UPLOAD_FOLDER')

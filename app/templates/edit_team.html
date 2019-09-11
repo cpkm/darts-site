@@ -8,6 +8,7 @@
   <div class="row">
     <div class="col-md-6 mt-4"><h2>Add/Edit team</h2>
       <form class="form" method="post" role="form">
+        {{ form.csrf_token }}
         {{ form.hidden_tag() }}
         {{ wtf.form_errors(form, hiddens="only") }}
 
