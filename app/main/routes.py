@@ -716,14 +716,13 @@ def upload_schedule():
         if saved_file:
             os.remove(file_location)
     except Exception as e:
-        print(e):
+        print(e)
         if saved_file:
             os.remove(file_location)
         flash('Error in processing file', 'danger')
         return redirect(url_for('main.match_edit'))
 
     schedule_form.load_schedule(schedule)
-    print(schedule_form.csrf_token)
     return render_template('import_schedule.html', schedule_form=schedule_form)
 
 
