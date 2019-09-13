@@ -1,7 +1,7 @@
 from flask import request, flash
 from flask_wtf import FlaskForm
 from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, RadioField, 
-    FieldList, FormField, DateField, SelectField, IntegerField, HiddenField)
+    FieldList, FormField, DateField, SelectField, IntegerField, HiddenField, FileField)
 from wtforms.validators import ValidationError, DataRequired, InputRequired, Length, Email
 from app import db
 from app.models import Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, season_from_date
@@ -219,6 +219,7 @@ class EnterScoresForm(FlaskForm):
     opponent_score = IntegerField('Them', validators=[InputRequired()])
     food = StringField('Food')
     match_summary = TextAreaField('Game summary', validators=[Length(min=0, max=320)])
+    scoresheet = FileField('Score sheet')
 
     d701 = FieldList(FormField(DoublesGameForm), min_entries=4, max_entries=4)
     d501 = FieldList(FormField(DoublesGameForm), min_entries=4, max_entries=4)
