@@ -82,10 +82,13 @@
                 {% if match.scoresheet %}<img src="{{ match.scoresheet }}" class="img-thumbnail" alt="No image">{% else %}No image uploaded{% endif %}
               </div>
               <div class="col-xs-2" align="center">
-                {{ form.remove_scoresheet.label(class="form-check-label") }}<br>{{ form.remove_scoresheet() }} 
+                <small>{{ form.remove_scoresheet.label(class="form-check-label") }}</small><br>{{ form.remove_scoresheet() }} 
               </div>
               <div class="col-xs-8">
-              {{ wtf.form_field(form.scoresheet) }}
+                <div class="custom-file">
+                  {{ form.scoresheet(class="custom-file-input", id="customFile") }}
+                  {{ form.scoresheet.label(class="custom-file-label", for="customFile") }}
+                </div>
               </div>
             </div>
           </div>
@@ -160,6 +163,14 @@
 
 {% block scripts %}
 {{ super() }}
+<script>
+  $('#customFile').on('change',function(){
+    //get the file name
+    var fileName = $(this).val().replace('C:\\fakepath\\', "");
+    //replace the "Choose a file" label
+    $(this).next('.custom-file-label').html(fileName);
+  })
+</script>
 
 {% if match %}
 <script>
