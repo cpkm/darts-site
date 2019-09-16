@@ -5,7 +5,7 @@ from wtforms.validators import ValidationError
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from datetime import datetime, date
-from app import db, schedules
+from app import db, schedules, scoresheets
 from app.main import bp
 from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
     ClaimPlayerForm, EditSeasonForm, ScheduleForm)
@@ -15,6 +15,7 @@ from app.decorators import check_verification, check_role
 from app.main.leaderboard_card import LeaderBoardCard
 from app.main.email import send_reminder_email as reminder_email
 from app.scripts.pdf_to_sched import DartSchedulePDF
+from app.helpers import upload_file_s3, delete_file_s3, url_parse_s3
 
 @bp.before_request
 def before_request():
@@ -308,6 +309,35 @@ def enter_score(id):
         match.opponent_score = form.opponent_score.data
         match.food = form.food.data
         match.match_summary = form.match_summary.data
+
+        if form.scoresheet.data:
+            
+            file = form.scoresheet.data
+
+            if file and scoresheets.file_allowed(file, file.filename):
+
+                if match.scoresheet:
+                    b, k = url_parse_s3(match.scoresheet)
+                    response = delete_file_s3(b, k)
+
+                file.filename = secure_filename(file.filename)
+                output = upload_file_s3(file, current_app.config["S3_BUCKET"], folder='scoresheets')
+
+                if output:
+                    match.scoresheet = output
+                else:
+                    flash('Error uploading file', 'warning')
+
+            else:
+                flash('File not allowed', 'warning')
+        else:
+            if form.remove_scoresheet.data:
+                if match.scoresheet:
+                    b, k = url_parse_s3(match.scoresheet)
+                    response = delete_file_s3(b, k)
+
+                match.scoresheet = None
+
         db.session.add(match)
         db.session.commit()
 

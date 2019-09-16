@@ -1,14 +1,14 @@
 from flask import request, flash
 from flask_wtf import FlaskForm
+#from flask_wtf.file import FileField
 from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, RadioField, 
-    FieldList, FormField, DateField, SelectField, IntegerField, HiddenField)
+    FieldList, FormField, DateField, SelectField, IntegerField, HiddenField, FileField)
 from wtforms.validators import ValidationError, DataRequired, InputRequired, Length, Email
 from app import db
 from app.models import Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, season_from_date
 from app.validators import Unique
 from datetime import datetime, timedelta
 import string
-
 
 def hl_score(allowed='0123456789*oO'):
     message = 'Please enter a valid number.'
@@ -69,7 +69,7 @@ class ClaimPlayerForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        unclaimed_players = Player.query.filter(Player.nickname!='Dummy').filter(Player.user==None).all()
+        unclaimed_players = Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).filter(Player.user==None).all()
         players = [(self.player.default,self.player.default)] + [(p.nickname,p.nickname+' ('+p.first_name+' '+p.last_name+')') for p in unclaimed_players]
         self.player.choices = players
 
@@ -219,6 +219,8 @@ class EnterScoresForm(FlaskForm):
     opponent_score = IntegerField('Them', validators=[InputRequired()])
     food = StringField('Food')
     match_summary = TextAreaField('Game summary', validators=[Length(min=0, max=320)])
+    scoresheet = FileField('Score sheet')
+    remove_scoresheet = BooleanField('Remove?')
 
     d701 = FieldList(FormField(DoublesGameForm), min_entries=4, max_entries=4)
     d501 = FieldList(FormField(DoublesGameForm), min_entries=4, max_entries=4)
@@ -359,8 +361,6 @@ class HLScoreForm(FlaskForm):
                 if j < self.hl_scores[i].low_scores.max_entries - 1:
                     self.hl_scores[i].low_scores[j].data = str(s.score)
         return
-
-            
 
 
 

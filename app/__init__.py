@@ -6,7 +6,7 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_login import LoginManager
 from flask_mail import Mail
-from flask_uploads import UploadSet, configure_uploads
+from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_wtf.csrf import CSRFProtect
 from config import Config
 from sqlalchemy import MetaData
@@ -18,6 +18,7 @@ naming_convention = {
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
     "pk": "pk_%(table_name)s"
 }
+
 db = SQLAlchemy(metadata=MetaData(naming_convention=naming_convention))
 
 migrate = Migrate()
@@ -30,6 +31,7 @@ login.login_view = 'auth.login'
 login.login_message = 'Please log in to access this page.'
 
 schedules = UploadSet('schedules', ['pdf'])
+scoresheets = UploadSet('scoresheets', IMAGES)
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -44,7 +46,7 @@ def create_app(config_class=Config):
     login.init_app(app)
     csrf.init_app(app)
 
-    configure_uploads(app, schedules)
+    configure_uploads(app, (schedules, scoresheets))
 
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')

@@ -26,7 +26,7 @@
           <div id="collapse{{season.id}}" class="collapse" aria-labelledby="heading{{season.id}}" data-parent="#accordion">
             <div class="card-body">
               <ul class="list-unstyled">
-                {% for m in season.matches %}
+                {% for m in season.matches|sort(attribute='date') %}
                 <li>
                   <a href="{{ url_for('main.enter_score', id=m.id) }}">{{ m.date.strftime('%b-%d') }} {{ m.opponent.name }}</a>
                 </li>
@@ -48,7 +48,7 @@
       <h2 class="card-header">Details and game scores</h2>
       <div class="card-body">
       <h3 class="text-center text-muted">{{ match.opponent.name }} {{ match.home_away }} game on {{ match.date.strftime('%Y-%m-%d') }}</h3>
-        <form class="form" method="post" role="form">
+        <form class="form" method="post" role="form" enctype=multipart/form-data>
           {{ form.csrf_token }}
           {{ form.hidden_tag() }}
           {{ wtf.form_errors(form, hiddens="only") }}
@@ -69,12 +69,25 @@
             </div>
             <div class="form-row my-0">
               <div class="col-md-12">
-            {{ wtf.form_field(form.food,class="form-control form-control-sm") }}
+              {{ wtf.form_field(form.food,class="form-control form-control-sm") }}
               </div>
             </div>
           </div>
           <div class="col-md-6 col-xs-12 my-1">
             {{ wtf.form_field(form.match_summary, rows='5',class="form-control form-control-sm") }}
+          </div>
+          <div class="col-xs-12 my-1">
+            <div class="form-row my-0">
+              <div class="col-xs-2">
+                {% if match.scoresheet %}<img src="{{ match.scoresheet }}" class="img-thumbnail" alt="No image">{% else %}No image uploaded{% endif %}
+              </div>
+              <div class="col-xs-2" align="center">
+                {{ form.remove_scoresheet.label(class="form-check-label") }}<br>{{ form.remove_scoresheet() }} 
+              </div>
+              <div class="col-xs-8">
+              {{ wtf.form_field(form.scoresheet) }}
+              </div>
+            </div>
           </div>
           {{ wtf.form_field(form.submit_details, button_map={'submit_details': 'primary my-1 btn-block'}) }}
           <br>
