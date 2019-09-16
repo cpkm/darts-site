@@ -13,6 +13,7 @@ from time import time
 from hashlib import md5
 from app import db, login
 
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), index=True, unique=True)
@@ -255,6 +256,8 @@ class Match(db.Model):
     checked_players = association_proxy('checked_players_association', 'player')
 
     reminder_email_sent = db.Column(db.Date)
+
+    scoresheet = db.Column(db.String())
 
     def add_game(self, game):
         if not self.is_game(game):

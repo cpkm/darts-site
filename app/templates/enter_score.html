@@ -48,7 +48,7 @@
       <h2 class="card-header">Details and game scores</h2>
       <div class="card-body">
       <h3 class="text-center text-muted">{{ match.opponent.name }} {{ match.home_away }} game on {{ match.date.strftime('%Y-%m-%d') }}</h3>
-        <form class="form" method="post" role="form">
+        <form class="form" method="post" role="form" enctype=multipart/form-data>
           {{ form.csrf_token }}
           {{ form.hidden_tag() }}
           {{ wtf.form_errors(form, hiddens="only") }}

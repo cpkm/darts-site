@@ -20,7 +20,8 @@ class Config(object):
     UPLOADS_DEFAULT_DEST = os.environ.get('UPLOAD_FOLDER')
     IMAGE_DEST = os.environ.get('IMAGE_FOLDER')
 
-    S3_BUCKET                 = os.environ.get("S3_BUCKET_NAME")
-    S3_KEY                    = os.environ.get("S3_ACCESS_KEY")
-    S3_SECRET                 = os.environ.get("S3_SECRET_ACCESS_KEY")
-    S3_LOCATION               = 'http://{}.s3.amazonaws.com/'.format(S3_BUCKET)
+    S3_BUCKET = os.environ.get('S3_BUCKET_NAME')
+    S3_KEY = os.environ.get('S3_ACCESS_KEY')
+    S3_SECRET = os.environ.get('S3_SECRET_ACCESS_KEY')
+    S3_LOCATION = 'http://{}.s3.amazonaws.com/'.format(S3_BUCKET)
+    AWS_DEFAULT_REGION = os.environ.get('AWS_REGION')

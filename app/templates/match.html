@@ -244,7 +244,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <img src="{% if match.scoresheet %}{{ match.scoresheet }}{% else %}/static/images/scoresheet_placeholder.png{% endif %}" class="img-fluid" alt="No scoresheet available">
+        <img src="{% if match.scoresheet %}{{ match.scoresheet }}{% else %}/static/images/scoresheet_placeholder.png{% endif %}" class="img-fluid" alt="{{ match.scoresheet }}">
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>

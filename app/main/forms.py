@@ -1,5 +1,6 @@
 from flask import request, flash
 from flask_wtf import FlaskForm
+#from flask_wtf.file import FileField
 from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, RadioField, 
     FieldList, FormField, DateField, SelectField, IntegerField, HiddenField, FileField)
 from wtforms.validators import ValidationError, DataRequired, InputRequired, Length, Email
@@ -8,7 +9,6 @@ from app.models import Player, Game, Match, Team, PlayerGame, Season, HighScore,
 from app.validators import Unique
 from datetime import datetime, timedelta
 import string
-
 
 def hl_score(allowed='0123456789*oO'):
     message = 'Please enter a valid number.'
@@ -360,8 +360,6 @@ class HLScoreForm(FlaskForm):
                 if j < self.hl_scores[i].low_scores.max_entries - 1:
                     self.hl_scores[i].low_scores[j].data = str(s.score)
         return
-
-            
 
 
 
