@@ -15,7 +15,7 @@ from app.decorators import check_verification, check_role
 from app.main.leaderboard_card import LeaderBoardCard
 from app.main.email import send_reminder_email as reminder_email
 from app.scripts.pdf_to_sched import DartSchedulePDF
-from app.helpers import upload_file_to_s3
+from app.helpers import upload_file_s3, delete_file_s3, url_parse_s3
 
 @bp.before_request
 def before_request():
@@ -311,13 +311,18 @@ def enter_score(id):
         match.match_summary = form.match_summary.data
 
         if form.scoresheet.data:
+            
             file = form.scoresheet.data
 
-            print(current_app.config['S3_BUCKET'],current_app.config['S3_KEY'],current_app.config['S3_SECRET'])
-
             if file and scoresheets.file_allowed(file, file.filename):
+
+                if match.scoresheet:
+                    b, k = url_parse_s3(match.scoresheet)
+                    response = delete_file_s3(b, k)
+
                 file.filename = secure_filename(file.filename)
-                output = upload_file_to_s3(file, current_app.config["S3_BUCKET"], folder='scoresheets')
+                output = upload_file_s3(file, current_app.config["S3_BUCKET"], folder='scoresheets')
+
                 if output:
                     match.scoresheet = output
                 else:
@@ -326,7 +331,12 @@ def enter_score(id):
             else:
                 flash('File not allowed', 'warning')
         else:
-            flash('No file submitted', 'warning')
+            if form.remove_scoresheet.data:
+                if match.scoresheet:
+                    b, k = url_parse_s3(match.scoresheet)
+                    response = delete_file_s3(b, k)
+
+                match.scoresheet = None
 
         db.session.add(match)
         db.session.commit()

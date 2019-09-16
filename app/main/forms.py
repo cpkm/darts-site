@@ -220,6 +220,7 @@ class EnterScoresForm(FlaskForm):
     food = StringField('Food')
     match_summary = TextAreaField('Game summary', validators=[Length(min=0, max=320)])
     scoresheet = FileField('Score sheet')
+    remove_scoresheet = BooleanField('Remove?')
 
     d701 = FieldList(FormField(DoublesGameForm), min_entries=4, max_entries=4)
     d501 = FieldList(FormField(DoublesGameForm), min_entries=4, max_entries=4)
