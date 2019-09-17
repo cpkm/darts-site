@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for, request, g
+from flask import render_template, flash, redirect, url_for, request, current_app, g
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from datetime import date
@@ -45,6 +45,8 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
     form = RegistrationForm()
+    status = current_app.config['REGISTRATION_OPEN']
+    
     if form.validate_on_submit():
         user = User(email=form.email.data)
         user.set_password(form.password.data)
@@ -54,7 +56,7 @@ def register():
         #return redirect(url_for('auth.login'))
         send_verification_email(user)
         return redirect(url_for('auth.unverified_email'))
-    return render_template('auth/register.html', title='Register', form=form)
+    return render_template('auth/register.html', title='Register', form=form, status=status)
 
 
 @bp.route('/reset_password_request', methods=['GET', 'POST'])

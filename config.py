@@ -10,6 +10,7 @@ class Config(object):
         'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MATCH_PER_PAGE = 3
+    REGISTRATION_OPEN = os.environ.get('REGISTRATION_OPEN') or False
 
     MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'localhost'
     MAIL_PORT = int(os.environ.get('MAIL_PORT') or 8025)
