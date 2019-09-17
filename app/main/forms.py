@@ -194,7 +194,7 @@ class DoublesGameForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        roster = Player.query.all()
+        roster = Player.query.order_by(Player.is_active.desc(),Player.nickname).all()
         player_choices = [(p.nickname,p.nickname) for p in roster]
         self.p1.choices=player_choices
         self.p2.choices=player_choices
@@ -207,7 +207,7 @@ class SinglesGameForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        roster = Player.query.all()
+        roster = Player.query.order_by(Player.is_active.desc(),Player.nickname).all()
         player_choices = [(p.nickname,p.nickname) for p in roster]
         self.p1.choices=player_choices
 
@@ -219,7 +219,7 @@ class EnterScoresForm(FlaskForm):
     opponent_score = IntegerField('Them', validators=[InputRequired()])
     food = StringField('Food')
     match_summary = TextAreaField('Game summary', validators=[Length(min=0, max=320)])
-    scoresheet = FileField('Score sheet')
+    scoresheet = FileField('Scoresheet')
     remove_scoresheet = BooleanField('Remove?')
 
     d701 = FieldList(FormField(DoublesGameForm), min_entries=4, max_entries=4)
@@ -296,7 +296,7 @@ class HLPlayerScoreForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        roster = Player.query.all()
+        roster = Player.query.order_by(Player.is_active.desc(),Player.nickname).all()
         player_choices = [(p.nickname,p.nickname) for p in roster]
         self.player.choices = player_choices
 

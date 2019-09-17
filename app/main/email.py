@@ -3,7 +3,7 @@ from app.email import send_bulk_email
 
 def send_reminder_email(users, match, status):
     print('sending email to {} for {} match.'.format(users,match))
-    token = [u.get_user_token(task='checkin') for u in users]
+    token = [u.get_user_token(task='checkin', expires_in=None) for u in users]
     send_bulk_email('ICC4 Event reminder: {} vs {}'.format(match.date.strftime('%d-%b'), match.opponent.name),
               sender=current_app.config['ADMINS'][0],
               recipients=[u.email for u in users],
