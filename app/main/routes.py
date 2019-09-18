@@ -15,7 +15,7 @@ from app.decorators import check_verification, check_role
 from app.main.leaderboard_card import LeaderBoardCard
 from app.main.email import send_reminder_email as reminder_email
 from app.scripts.pdf_to_sched import DartSchedulePDF
-from app.helpers import upload_file_s3, delete_file_s3, url_parse_s3
+from app.helpers import upload_file_s3, delete_file_s3, url_parse_s3, scrape_standings_table
 
 @bp.before_request
 def before_request():
@@ -754,6 +754,17 @@ def upload_schedule():
 
     schedule_form.load_schedule(schedule)
     return render_template('import_schedule.html', schedule_form=schedule_form)
+
+@bp.route('/standings')
+def standings():
+    temas=None
+    try:
+        teams = scrape_standings_table()
+    except Exception as e:
+        print(e)
+
+    return render_template('standings.html', teams=teams)
+
 
 
 @bp.route('/search')

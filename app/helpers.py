@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from collections import namedtuple
 
-Team = namedtuple('Team', ['played', 'name', 'win', 'loss', 'For', 'against', 'pm', 'points'])
+Team = namedtuple('Team', ['name', 'played', 'win', 'loss', 'g_for', 'g_against', 'pm', 'points'])
 
 def upload_file_s3(file, bucket_name, acl='public-read', folder=None):
 
@@ -64,8 +64,8 @@ def url_parse_s3(url):
 
 def scrape_standings_table():
     url = 'http://www.sentex.net/~pmartin/2019-2020/results.htm#Standings'
-    pr = requests.get(url)
-    soup = BeautifulSoup( pr.content, 'lxml')
+    pr = requests.get(url, timeout=10)
+    soup = BeautifulSoup(pr.content, 'lxml')
     start = soup.find_all('a', {'name':'Standings'})[0]
     table = start.find_next('table')
 
