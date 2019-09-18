@@ -54,6 +54,9 @@
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('main.opponent') }}">Opponents</a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.standings') }}">Standings</a>
+      </li>
     </ul>
 
     {% if g.search_form %}
@@ -148,6 +151,9 @@
           </li>
           <li class="nav-item">
             <small><a class="nav-link text-dark" href="{{ url_for('main.opponent') }}">Opponents</a></small>
+          </li>
+          <li class="nav-item">
+            <small><a class="nav-link text-dark" href="{{ url_for('main.standings') }}">Standings</a></small>
           </li>
         </ul>
       </div>
