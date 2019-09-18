@@ -1,8 +1,12 @@
 from flask import current_app
 from threading import Thread
 import boto3
+import requests
 from urllib.parse import urlparse
+from bs4 import BeautifulSoup
+from collections import namedtuple
 
+Team = namedtuple('Team', ['played', 'name', 'win', 'loss', 'For', 'against', 'pm', 'points'])
 
 def upload_file_s3(file, bucket_name, acl='public-read', folder=None):
 
@@ -56,3 +60,19 @@ def url_parse_s3(url):
     bucket = o.netloc.split('.',1)[0]
 
     return bucket, key
+
+
+def scrape_standings_table():
+    url = 'http://www.sentex.net/~pmartin/2019-2020/results.htm#Standings'
+    pr = requests.get(url)
+    soup = BeautifulSoup( pr.content, 'lxml')
+    start = soup.find_all('a', {'name':'Standings'})[0]
+    table = start.find_next('table')
+
+    teams = []
+    for row in table.find_all('tr')[1:]:
+        data = row.find_all('td')
+        team = Team(*[d.string for d in data])
+        teams.append(team)
+
+    return teams
