@@ -656,6 +656,13 @@ class MatchStats(db.Model):
                 )
 
 
+class ReminderSettings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(64), index=True)
+    days_in_advance = db.Column(db.Integer)
+    time_of_day = db.Column(db.Time)
+
+
 def current_season(last=0):
     '''use last=1 for previous season, last=2 for 2 seasons ago...'''
     return season_from_date(date.today()-last*timedelta(365))
