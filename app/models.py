@@ -658,9 +658,12 @@ class MatchStats(db.Model):
 
 class ReminderSettings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    category = db.Column(db.String(64), index=True)
-    days_in_advance = db.Column(db.Integer)
+    category = db.Column(db.String(64), index=True, nullable=False)
+    days_in_advance = db.Column(db.Integer, nullable=False)
     time_of_day = db.Column(db.Time)
+
+    def __repr__(self):
+        return('<{} {} days>'.format(self.category.title(), self.days_in_advance))
 
 
 def current_season(last=0):
