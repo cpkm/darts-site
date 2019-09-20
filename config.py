@@ -18,8 +18,8 @@ class Config(object):
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = [('ICC4 darts','icc4darts@gmail.com')]
-    UPLOADS_DEFAULT_DEST = os.environ.get('UPLOAD_FOLDER')
-    IMAGE_DEST = os.environ.get('IMAGE_FOLDER')
+    UPLOADS_DEFAULT_DEST = os.environ.get('UPLOAD_FOLDER') or 'app/var/tmp/uploads'
+    IMAGE_DEST = os.environ.get('IMAGE_FOLDER') or 'app/var/images'
 
     S3_BUCKET = os.environ.get('S3_BUCKET_NAME')
     S3_KEY = os.environ.get('S3_ACCESS_KEY')
