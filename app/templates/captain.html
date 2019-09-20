@@ -15,7 +15,10 @@
       <a class="nav-link" id="roster-tab" data-toggle="tab" href="#roster" role="tab" aria-controls="roster" aria-selected="false">Roster</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" id="email-tab" data-toggle="tab" href="#email" role="tab" aria-controls="email" aria-selected="false">Email</a>
+      <a class="nav-link" id="checkin-tab" data-toggle="tab" href="#checkin" role="tab" aria-controls="checkin" aria-selected="false">Checkin</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="reminder-tab" data-toggle="tab" href="#reminder" role="tab" aria-controls="reminder" aria-selected="false">Reminders</a>
     </li>
   </ul>
 
@@ -70,7 +73,7 @@
       </div>
     </div>
 
-    <div class="tab-pane" id="email" role="tabpanel" aria-labelledby="email-tab">
+    <div class="tab-pane" id="checkin" role="tabpanel" aria-labelledby="checkin-tab">
       <div class="container-fluid table-responsive">
         {% if upcoming_matches %}
         <table class="table">
@@ -135,7 +138,45 @@
         {% endif %}
       </div>
     </div>
-  
+
+    <div class="tab-pane" id="reminder" role="tabpanel" aria-labelledby="reminder-tab">
+      <div class="container mx-2 my-4">
+        <h4>Email reminder settings</h4>
+        <form class="form" method="post" role="form">
+          {{ reminder_form.csrf_token }}
+          {{ reminder_form.hidden_tag() }}
+          {{ wtf.form_errors(reminder_form, hiddens="only") }}        
+        <div class="container-fluid table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col" style="width: 55%">Reminder type</th>
+                <th class="text-center" scope="col" style="width: 20%">Days before</th>
+                <th class="text-center" scope="col" style="width: 20%">TOD</th>
+                <th class="text-center" scope="col" style="width: 5%">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in reminder_form.reminders %}
+              <tr>
+                <td>{{ r.rem_id }}{{ r.category(class='form-control') }}</td>
+                <td class="text-center">{{ r.dia(class='form-control text-center') }}</td>
+                <td class="text-center">10 a.m.</td>  
+                <td class="text-center">{{ r.delete_reminder }}</td>
+              </tr>
+              {% endfor %}
+              <tr>
+                <td>{{ wtf.form_field(reminder_form.add_btn, button_map={'add_btn': 'primary my-1 add-btn'}) }}</td>
+                <td></td>
+                <td class="text-right">{{ wtf.form_field(reminder_form.submit_reminder, button_map={'submit_reminder': 'info my-1 btn-sm'}) }}</td>
+                <td class="text-center">{{ wtf.form_field(reminder_form.rem_btn, button_map={'rem_btn': 'danger my-1 btn-sm'}) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        </form>
+      </div>    
+    </div>
   </div>
 
 </div>

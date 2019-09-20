@@ -5,7 +5,8 @@ from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, Radi
     FieldList, FormField, DateField, SelectField, IntegerField, HiddenField, FileField)
 from wtforms.validators import ValidationError, DataRequired, InputRequired, Length, Email
 from app import db
-from app.models import Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, season_from_date
+from app.models import (Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, 
+    ReminderSettings, season_from_date)
 from app.validators import Unique
 from datetime import datetime, timedelta
 import string
@@ -362,7 +363,29 @@ class HLScoreForm(FlaskForm):
                     self.hl_scores[i].low_scores[j].data = str(s.score)
         return
 
+class ReminderForm(FlaskForm):
+    category = SelectField('Category', 
+        choices=[('match reminder','Match Reminder'),('captain report', "Captain's Report")])
+    dia = IntegerField('Days in advance', validators=[InputRequired()])
+    rem_id = HiddenField('')
+    delete_reminder = BooleanField('Delete')
 
+class ReminderSetForm(FlaskForm):
+    reminders = FieldList(FormField(ReminderForm))
+
+    add_btn = SubmitField('+')
+    rem_btn = SubmitField('Delete')
+    submit_reminder = SubmitField('Submit')
+
+    def load_reminders(self):
+        rems = ReminderSettings.query.order_by(ReminderSettings.category).all()
+
+        for i,r in enumerate(rems):
+            self.reminders.append_entry()
+            self.reminders[i].category.data = r.category
+            self.reminders[i].dia.data = r.days_in_advance
+            self.reminders[i].rem_id.data = r.id
+        return
 
 
 

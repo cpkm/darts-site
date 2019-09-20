@@ -52,3 +52,11 @@ html
 .no-decor:hover {
   text-decoration: none !important
 }
+
+.add-btn {
+    width: 25px !important;
+    height: 25px !important;
+    text-align: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
