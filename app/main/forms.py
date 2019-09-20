@@ -365,15 +365,16 @@ class HLScoreForm(FlaskForm):
 
 class ReminderForm(FlaskForm):
     category = SelectField('Category', 
-        choices=[('match reminder','Match Reminder'),('captain report', "Captain's Report"), ('None','None')],
-        default='None')
+        choices=[('match reminder','Match Reminder'),('captain report', "Captain's Report")])
     dia = IntegerField('Days in advance', validators=[InputRequired()])
+    rem_id = HiddenField('')
+    delete_reminder = BooleanField('Delete')
 
 class ReminderSetForm(FlaskForm):
     reminders = FieldList(FormField(ReminderForm))
 
     add_btn = SubmitField('+')
-    rem_btn = SubmitField('-')
+    rem_btn = SubmitField('Delete')
     submit_reminder = SubmitField('Submit')
 
     def load_reminders(self):
@@ -383,6 +384,7 @@ class ReminderSetForm(FlaskForm):
             self.reminders.append_entry()
             self.reminders[i].category.data = r.category
             self.reminders[i].dia.data = r.days_in_advance
+            self.reminders[i].rem_id.data = r.id
         return
 
 

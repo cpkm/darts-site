@@ -150,25 +150,30 @@
           <table class="table">
             <thead>
               <tr>
-                <th scope="col">Reminder type</th>
-                <th scope="col">Days in advance</th>
-                <th scope="col">TOD</th>
+                <th scope="col" style="width: 55%">Reminder type</th>
+                <th class="text-center" scope="col" style="width: 20%">Days before</th>
+                <th class="text-center" scope="col" style="width: 20%">TOD</th>
+                <th class="text-center" scope="col" style="width: 5%">Delete</th>
               </tr>
             </thead>
             <tbody>
               {% for r in reminder_form.reminders %}
               <tr>
-                <td>{{ r.category }}</td>
-                <td>{{ r.dia }}</td>
-                <td>tbd</td>                        
+                <td>{{ r.rem_id }}{{ r.category(class='form-control') }}</td>
+                <td class="text-center">{{ r.dia(class='form-control text-center') }}</td>
+                <td class="text-center">10 a.m.</td>  
+                <td class="text-center">{{ r.delete_reminder }}</td>
               </tr>
               {% endfor %}
+              <tr>
+                <td>{{ wtf.form_field(reminder_form.add_btn, button_map={'add_btn': 'primary my-1 add-btn'}) }}</td>
+                <td></td>
+                <td class="text-right">{{ wtf.form_field(reminder_form.submit_reminder, button_map={'submit_reminder': 'info my-1 btn-sm'}) }}</td>
+                <td class="text-center">{{ wtf.form_field(reminder_form.rem_btn, button_map={'rem_btn': 'danger my-1 btn-sm'}) }}</td>
+              </tr>
             </tbody>
           </table>
         </div>
-        {{ wtf.form_field(reminder_form.add_btn, button_map={'add_btn': 'primary my-1 btn-sm'}) }}
-        {{ wtf.form_field(reminder_form.rem_btn, button_map={'rem_btn': 'secondary my-1 btn-sm'}) }}
-        {{ wtf.form_field(reminder_form.submit_reminder, button_map={'submit_reminder': 'info my-1'}) }}
         </form>
       </div>    
     </div>

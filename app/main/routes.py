@@ -10,7 +10,7 @@ from app.main import bp
 from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
     ClaimPlayerForm, EditSeasonForm, ScheduleForm, ReminderSetForm)
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
-    season_from_date, update_all_team_stats, current_roster, current_season)
+    ReminderSettings, season_from_date, update_all_team_stats, current_roster, current_season)
 from app.decorators import check_verification, check_role
 from app.main.leaderboard_card import LeaderBoardCard
 from app.main.email import send_reminder_email as reminder_email
@@ -601,6 +601,34 @@ def captain():
                 db.session.add(p)
                 db.session.commit()
         flash('Updated active roster!')
+        return redirect(url_for('main.captain'))
+
+    if request.method == 'POST' and reminder_form.add_btn.data:
+        reminder_form.reminders.append_entry()
+
+    if request.method == 'POST' and reminder_form.validate() and reminder_form.submit_reminder.data:
+        for rem in reminder_form.reminders:
+            r = ReminderSettings.query.filter_by(id=rem.rem_id.data).first()
+            if r:
+                r.category = rem.category.data
+                r.days_in_advance = rem.dia.data
+            else:
+                r = ReminderSettings(category=rem.category.data, days_in_advance=rem.dia.data)
+            db.session.add(r)
+            db.session.commit()
+
+        flash('Updated email reminders')
+        return redirect(url_for('main.captain'))
+
+    if request.method == 'POST' and reminder_form.rem_btn.data:
+        for rem in reminder_form.reminders:
+            if rem.delete_reminder.data:
+                r = ReminderSettings.query.filter_by(id=rem.rem_id.data).first()
+                if r:
+                    db.session.delete(r)
+                    db.session.commit()
+
+        flash('Updated email reminders')
         return redirect(url_for('main.captain'))
 
     elif request.method == 'GET':
