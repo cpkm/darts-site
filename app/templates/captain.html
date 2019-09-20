@@ -160,7 +160,13 @@
               {% for r in reminder_form.reminders %}
               <tr>
                 <td>{{ r.rem_id }}{{ r.category(class='form-control') }}</td>
-                <td class="text-center">{{ r.dia(class='form-control text-center') }}</td>
+                <td class="text-center">{{ r.dia(class='form-control text-center') }}  
+                  {% if r.dia.errors %}
+                  {% for error in r.dia.errors %}
+                    <span style="color:red" class="flash"><small>{{ error }}</small><br></span>
+                  {% endfor %}
+                  {% endif %}
+                </td>
                 <td class="text-center">10 a.m.</td>  
                 <td class="text-center">{{ r.delete_reminder }}</td>
               </tr>

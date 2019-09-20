@@ -607,11 +607,15 @@ def captain():
         reminder_form.reminders.append_entry()
 
     if request.method == 'POST' and reminder_form.validate() and reminder_form.submit_reminder.data:
+        print('here')
         for rem in reminder_form.reminders:
-            r = ReminderSettings.query.filter_by(id=rem.rem_id.data).first()
-            if r:
-                r.category = rem.category.data
-                r.days_in_advance = rem.dia.data
+            if rem.rem_id.data:
+                r = ReminderSettings.query.filter_by(id=rem.rem_id.data).first()
+                if r:
+                    r.category = rem.category.data
+                    r.days_in_advance = rem.dia.data
+                else:
+                    r = ReminderSettings(category=rem.category.data, days_in_advance=rem.dia.data)
             else:
                 r = ReminderSettings(category=rem.category.data, days_in_advance=rem.dia.data)
             db.session.add(r)
@@ -622,7 +626,7 @@ def captain():
 
     if request.method == 'POST' and reminder_form.rem_btn.data:
         for rem in reminder_form.reminders:
-            if rem.delete_reminder.data:
+            if rem.delete_reminder.data and rem.rem_id.data:
                 r = ReminderSettings.query.filter_by(id=rem.rem_id.data).first()
                 if r:
                     db.session.delete(r)
