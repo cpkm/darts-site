@@ -8,7 +8,7 @@ from datetime import datetime, date
 from app import db, schedules, scoresheets
 from app.main import bp
 from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
-    ClaimPlayerForm, EditSeasonForm, ScheduleForm)
+    ClaimPlayerForm, EditSeasonForm, ScheduleForm, ReminderSetForm)
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
     season_from_date, update_all_team_stats, current_roster, current_season)
 from app.decorators import check_verification, check_role
@@ -581,10 +581,11 @@ def profile():
 @check_verification
 @check_role(['admin','captain'])
 def captain():
+    reminder_form = ReminderSetForm()
     roster_form = RosterForm()
     players = current_roster(full=True)
 
-    if request.method == 'POST' and roster_form.validate_on_submit():
+    if request.method == 'POST' and roster_form.validate() and roster_form.submit.data:
         for player_form in roster_form.roster:
             if player_form.player.data is not None:
                 p = Player.query.filter_by(nickname=player_form.player.data).first()
@@ -604,11 +605,14 @@ def captain():
 
     elif request.method == 'GET':
         roster_form.fill_roster(players)
+        reminder_form.load_reminders()
 
     upcoming_matches = Match.query.filter(Match.date>=date.today()).order_by(Match.date).all()
 
-    return render_template('captain.html', roster_form=roster_form, 
+    return render_template('captain.html', 
+        roster_form=roster_form, reminder_form=reminder_form,
         players=players, upcoming_matches=upcoming_matches)
+
 
 @bp.route('/admin', methods=['GET', 'POST'])
 @login_required
@@ -619,7 +623,6 @@ def admin():
     all_players = Player.query.all()
 
     return render_template('admin.html', all_users=all_users, all_players=all_players)
-
 
 
 @bp.route('/send_reminder_email/<match_id>/<token>', methods=['GET','POST'])
