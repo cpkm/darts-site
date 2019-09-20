@@ -4,6 +4,7 @@ from flask_wtf import FlaskForm
 from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, RadioField, 
     FieldList, FormField, DateField, SelectField, IntegerField, HiddenField, FileField)
 from wtforms.validators import ValidationError, DataRequired, InputRequired, Length, Email
+from wtforms.widgets import HiddenInput
 from app import db
 from app.models import (Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, 
     ReminderSettings, season_from_date)
@@ -367,7 +368,7 @@ class ReminderForm(FlaskForm):
     category = SelectField('Category', 
         choices=[('match reminder','Match Reminder'),('captain report', "Captain's Report")])
     dia = IntegerField('Days in advance', validators=[InputRequired()])
-    rem_id = HiddenField('')
+    rem_id = IntegerField(widget=HiddenInput())
     delete_reminder = BooleanField('Delete')
 
 class ReminderSetForm(FlaskForm):
