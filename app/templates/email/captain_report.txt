@@ -1,0 +1,33 @@
+ICC4 Captain's Report
+
+Ahoy! Captain {{ captain.player.nickname }},
+
+
+    Here is your player summary for the upcoming event: {{ match.date.strftime('%B %-d') }} against {{ match.opponent.name }} at {{ match.location }}.
+
+{% set ins,out,ifn = match.get_checked_players() %}
+
+IN ({{ ins|length }}): 
+    {% for u in ins %}
+    {{ u.player.nickname }}
+    {% endfor %}
+
+OUT ({{ out|length }}): 
+    {% for u in out %}
+    {{ u.player.nickname }}
+    {% endfor %}
+
+IF NEEDED ({{ ifn|length }}): 
+    {% for u in ifs %}
+    {{ u.player.nickname }}
+    {% endfor %}
+
+No Response (): 
+
+Go to your Captain's page to send a reminder or contact subs:
+{{ url_for('main.captain', _anchor='checkin', _external=True) }}
+
+
+Sincerely,
+
+The ICC4 pub darts team

@@ -675,7 +675,7 @@ def send_reminder_email(match_id, token):
     db.session.add(match)
     db.session.commit()
     flash('Reminder email sent!')
-    return redirect(url_for('main.captain', _anchor="email"))
+    return redirect(url_for('main.captain', _anchor='checkin'))
 
 
 @bp.route('/update_checkin/<player_id>/<match_id>/<status>/<token>', methods=['GET','POST'])
