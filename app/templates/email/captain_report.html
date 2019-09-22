@@ -9,7 +9,7 @@
     Here is your player summary for the upcoming event: {{ match.date.strftime('%B %-d') }} against <b>{{ match.opponent.name }}</b> at {{ match.location }}.
 </p>
 
-{% set ins,out,ifn = match.get_checked_players() %}
+{% set ins,out,ifn,nrp = match.get_checked_players() %}
 
 <p><b>IN ({{ ins|length }}): </b><br>
     {% for u in ins %}
@@ -29,7 +29,10 @@
     {% endfor %}
 </p>
 
-<p><b>No Response (): </b><br>
+<p><b>No Response ({{ nrp|length }}): </b><br>
+    {% for u in nrp %}
+    {{ u.player.nickname }}<br>
+    {% endfor %}
 </p><br>
 
 <p>Go to your <a href="{{ url_for('main.captain', _anchor='checkin', _external=True) }}">Captain's page</a> to send a reminder or contact subs.<br>

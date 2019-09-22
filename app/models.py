@@ -126,7 +126,7 @@ class Player(db.Model):
     def checkin(self, match, status):
         pmc = PlayerMatchCheckin.query.filter_by(player_id=self.id,match_id=match.id).first()
 
-        if status.lower() in ['in','out','ifn'] and pmc:
+        if status.lower() in ['in','out','ifn','none'] and pmc:
             pmc.status = status
             db.session.add(pmc)
             db.session.commit()
@@ -210,7 +210,7 @@ class Game(db.Model):
 class PlayerMatchCheckin(db.Model):
     player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'), primary_key=True)
-    status = db.Column(db.String(4), index=True, default='out')
+    status = db.Column(db.String(4), index=True, default='none')
 
     player = db.relationship('Player', backref=db.backref('checked_matches_association', lazy='dynamic'))
     match = db.relationship('Match', backref=db.backref('checked_players_association', lazy='dynamic'))
@@ -357,8 +357,9 @@ class Match(db.Model):
         ins = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='in').all()
         out = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='out').all()
         ifn = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='ifn').all()
+        nrp = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='none').all()
 
-        return ins, out, ifn
+        return ins, out, ifn, nrp
 
     def __repr__(self):
         return '<Match {}>'.format(self.date.strftime('%Y-%m-%d'))

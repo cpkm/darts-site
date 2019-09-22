@@ -5,7 +5,7 @@ Ahoy! Captain {{ captain.player.nickname }},
 
     Here is your player summary for the upcoming event: {{ match.date.strftime('%B %-d') }} against {{ match.opponent.name }} at {{ match.location }}.
 
-{% set ins,out,ifn = match.get_checked_players() %}
+{% set ins,out,ifn,nrp = match.get_checked_players() %}
 
 IN ({{ ins|length }}): 
     {% for u in ins %}
@@ -22,7 +22,10 @@ IF NEEDED ({{ ifn|length }}):
     {{ u.player.nickname }}
     {% endfor %}
 
-No Response (): 
+No Response ():
+    {% for u in nrp %}
+    {{ u.player.nickname }}
+    {% endfor %} 
 
 Go to your Captain's page to send a reminder or contact subs:
 {{ url_for('main.captain', _anchor='checkin', _external=True) }}
