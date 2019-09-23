@@ -662,7 +662,7 @@ def admin():
 @check_verification
 @check_role(['admin','captain'])
 def send_reminder_email(match_id, token):
-    user = User.verify_user_token(token, task='send_reminder_email')
+    user,_ = User.verify_user_token(token, task='send_reminder_email')
     if not user:
         return redirect(url_for('main.index'))
 
@@ -678,15 +678,28 @@ def send_reminder_email(match_id, token):
     return redirect(url_for('main.captain', _anchor='checkin'))
 
 
-@bp.route('/update_checkin/<player_id>/<match_id>/<status>/<token>', methods=['GET','POST'])
-def update_checkin(player_id, match_id, status, token):
-    user = User.verify_user_token(token, task='checkin')
+@bp.route('/update_checkin/<token>', methods=['GET','POST'])
+def update_checkin(token):
+    user,payload = User.verify_user_token(token, task='checkin')
     if not user:
         flash('Invalid token', 'danger')
         return redirect(url_for('main.index'))
 
+    if not all([param in payload for param in ['match','player','status']]):
+        flash('Invalid token', 'danger')
+        return redirect(url_for('main.index'))
+
+    player_id = payload['player']
+    match_id = payload['match']
+    status = payload['status']
+
     player = Player.query.filter_by(id=player_id).first()
     match = Match.query.filter_by(id=match_id).first()
+
+    if not player or not match:
+        flash('Invalid token parameters', 'danger')
+        return redirect(url_for('main.index'))
+
     player.checkin(match,status)
 
     flash('Thank you for checking in!', 'success')

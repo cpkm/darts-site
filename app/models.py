@@ -36,10 +36,12 @@ class User(UserMixin, db.Model):
         return 'https://www.gravatar.com/avatar/{}?d=robohash&s={}'.format(
             digest, size)
 
-    def get_user_token(self, task, expires_in=600):
+    def get_user_token(self, task, payload=None, expires_in=600):
         params = {task: self.id}
         if expires_in is not None:
             params['exp'] = time() + expires_in
+        if payload is not None:
+            params = {**params, **payload}
 
         return jwt.encode(params,
             current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
@@ -53,11 +55,12 @@ class User(UserMixin, db.Model):
     @staticmethod
     def verify_user_token(token, task):
         try:
-            id = jwt.decode(token, current_app.config['SECRET_KEY'],
-                            algorithms=['HS256'])[task]
+            payload = jwt.decode(token, current_app.config['SECRET_KEY'],
+                            algorithms=['HS256'])
+            id = payload.pop(task)
         except:
-            return
-        return User.query.get(id)
+            return None, None
+        return User.query.get(id), payload
 
     def __repr__(self):
         return '<User {}>'.format(self.email)

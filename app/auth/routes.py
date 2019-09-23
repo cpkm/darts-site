@@ -52,8 +52,6 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        #flash('Congratulations, you are now registered!')
-        #return redirect(url_for('auth.login'))
         send_verification_email(user)
         return redirect(url_for('auth.unverified_email'))
     return render_template('auth/register.html', title='Register', form=form, status=status)
@@ -75,12 +73,11 @@ def reset_password_request():
 
 @bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
-    user = User.verify_user_token(token, task='reset_password')
+    user,_ = User.verify_user_token(token, task='reset_password')
     if not user:
         flash('Invalid token', 'danger')
         return redirect(url_for('main.index'))
 
-    print(user,current_user,(current_user is user), (current_user==user))
     if current_user.is_authenticated and current_user != user:
         flash('You do not have authorization to complete this task.', 'danger')
         return redirect(url_for('main.index'))
@@ -97,7 +94,7 @@ def reset_password(token):
 @bp.route('/verify_email/<token>', methods=['GET', 'POST'])
 def verify_email(token):
 
-    user = User.verify_user_token(token, task='verify_email')
+    user,_ = User.verify_user_token(token, task='verify_email')
     if not user:
         flash('Email verification failed, please login to continue.', 'warning')
         logout_user()
