@@ -256,6 +256,7 @@ class Match(db.Model):
     checked_players = association_proxy('checked_players_association', 'player')
 
     reminder_email_sent = db.Column(db.Date)
+    captain_report_sent = db.Column(db.Date)
 
     scoresheet = db.Column(db.String())
 
