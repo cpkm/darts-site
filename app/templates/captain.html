@@ -90,7 +90,7 @@
           <tbody>
             
             {% for m in upcoming_matches %}
-            {% set ins,out,ifn = m.get_checked_players() %}
+            {% set ins,out,ifn,nrp = m.get_checked_players() %}
             <div id="accordion">
               <tr>
                 <th scope="row">{{ m.date.strftime('%b %d') }}</th> 
@@ -115,13 +115,15 @@
                             <th scope="col">In</th>
                             <th scope="col">Out</th>
                             <th scope="col">If Needed</th>
+                            <th scope="col">No Response</th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr>
                             <td>{% for pmc in ins %}{{ pmc.player.nickname }}<br>{% endfor %}</td>
                             <td>{% for pmc in out %}{{ pmc.player.nickname }}<br>{% endfor %}</td>
-                            <td>{% for pmc in ifn %}{{ pmc.player.nickname }}<br>{% endfor %}</td>                        
+                            <td>{% for pmc in ifn %}{{ pmc.player.nickname }}<br>{% endfor %}</td>
+                            <td>{% for pmc in nrp %}{{ pmc.player.nickname }}<br>{% endfor %}</td>                         
                           </tr>
                         </tbody>
                       </table>
