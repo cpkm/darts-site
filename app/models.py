@@ -84,6 +84,7 @@ class Player(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', back_populates='player')
+    role = db.Column(db.String(32), index=True, default='sub')
 
     checked_matches = association_proxy('checked_matches_association', 'match')
 
@@ -339,7 +340,7 @@ class Match(db.Model):
 
     def create_checkins(self):
         pwc = [PlayerMatchCheckin(match_id=self.id, player_id=p.id)\
-                for p in Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).all()]
+                for p in current_roster('full')]
         try:
             db.session.add_all(pwc)
             db.session.commit()
@@ -705,11 +706,41 @@ def update_all_team_stats(season='all'):
             stats = TeamSeasonStats(season=s)
         stats.update_team_stats()
 
-def current_roster(full=False):
-    if full:
-        return Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).order_by(Player.nickname).all()
+def current_roster(roster='full'):
+    try:
+        roster.lower()
+    except Exception as e:
+        print('Invalid roster type:', e)
+        roster = 'full'
+    finally:
+        roster = roster.lower()
 
-    return Player.query.filter_by(is_active=True).order_by(Player.nickname).all()
+    if roster == 'active':
+        return Player.query.filter(Player.role.in_(['player','assistant','captain'])).order_by(Player.nickname).all()
+    elif roster == 'inactive':
+        return Player.query.filter(Player.role.in_(['sub','retired'])).order_by(Player.nickname).all()
+    elif roster == 'player':
+        return Player.query.filter(Player.role=='player').order_by(Player.nickname).all()
+    elif roster == 'captain':
+        return Player.query.filter(Player.role=='captain').order_by(Player.nickname).all()
+    elif roster == 'assistant':
+        return Player.query.filter(Player.role=='assistant').order_by(Player.nickname).all()
+    elif roster == 'sub':
+        return Player.query.filter(Player.role=='sub').order_by(Player.nickname).all()
+    elif roster == 'retired':
+        return Player.query.filter(Player.role=='retired').order_by(Player.nickname).all()
+    elif roster == 'full':
+        return Player.query.filter(~Player.nickname.in_(['Dummy'])).order_by(Player.nickname).all()
+    elif roster == 'complete':
+        return Player.query.order_by(Player.nickname).all()
+    elif roster == 'dummy':
+        return  [Player.query.filter(Player.role == 'dummy').first()]
+    elif roster == 'ordered':
+        return current_roster('dummy')+current_roster('active')+current_roster('sub')
+    else:
+        return Player.query.filter(~Player.nickname.in_(['Dummy'])).order_by(Player.nickname).all()
+
+    return Player.query.filter(~Player.nickname.in_(['Dummy'])).order_by(Player.nickname).all()
 
 @login.user_loader
 def load_user(id):

@@ -87,7 +87,7 @@ def process_match_reminders():
 
 def process_captain_reports():
     match_reminders = find_captain_reports()
-    captain = User.query.filter_by(role='captain').first()
+    captain = User.query.join(Player).filter(Player.role='captain').all()
 
     if not captain:
         print('Error sending captain report: no captain found')

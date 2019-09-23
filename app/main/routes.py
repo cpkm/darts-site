@@ -25,7 +25,7 @@ def before_request():
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
 def index():
-    all_players = Player.query.filter_by(is_active=True).order_by(Player.nickname).all()
+    all_players = current_roster('active')
     page = request.args.get('page', 1, type=int)
     last_match = Match.query.filter(Match.date<date.today()).order_by(Match.date.desc()).first()
     schedule = Match.query.filter(Match.date>=date.today()).order_by(Match.date).paginate(
@@ -62,7 +62,7 @@ def index():
 def player_edit(nickname):
     player = Player.query.filter_by(nickname=nickname).first()
     form = EditPlayerForm(nickname)
-    all_players = Player.query.order_by(Player.nickname).all()
+    all_players = current_roster('full')
     
     if form.submit_new.data and form.validate():
         newplayer = Player(
@@ -403,7 +403,8 @@ def enter_score(id):
 
     if hl_form.add_btn.data:
         new_row = hl_form.hl_scores.append_entry()
-        new_row.player.choices = [(p.nickname,p.nickname) for p in Player.query.all()]
+        roster_choices = current_roster('ordered')
+        new_row.player.choices = [(p.nickname,p.nickname) for p in roster_choices]
 
         return render_template('enter_score.html', title='Enter Scores', 
         form=form, hl_form=hl_form, match=match)
@@ -493,7 +494,7 @@ def leaderboard(year_str):
         board=None
         pass
 
-    roster = Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).all()
+    roster = current_roster('full')
 
     if year_str.lower() == 'all time':
         stats = [sum(PlayerSeasonStats.query.join(Player).filter(Player.nickname==p.nickname).all()) for p in roster] 
@@ -583,7 +584,7 @@ def profile():
 def captain():
     reminder_form = ReminderSetForm()
     roster_form = RosterForm()
-    players = current_roster(full=True)
+    players = current_roster('full')
 
     if request.method == 'POST' and roster_form.validate() and roster_form.submit.data:
         for player_form in roster_form.roster:
@@ -667,7 +668,7 @@ def send_reminder_email(match_id, token):
         return redirect(url_for('main.index'))
 
     match = Match.query.filter_by(id=match_id).first()
-    users = [p.user for p in current_roster() if p.user is not None]
+    users = [p.user for p in current_roster('active') if p.user is not None]
     status = [u.player.checked_matches_association.filter_by(match_id=match.id).first().status for u in users]
     
     reminder_email(users=users,match=match,status=status)

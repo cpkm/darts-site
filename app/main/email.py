@@ -13,9 +13,8 @@ def send_reminder_email(users, match, status):
 
 def send_captain_report(captain, match):
     print('sending captain report email to {} for {} match.'.format(captain,match))
-
-    send_email("ICC4 Captain's Report: {} vs {}".format(match.date.strftime('%d-%b'), match.opponent.name),
+    send_bulk_email("ICC4 Captain's Report: {} vs {}".format(match.date.strftime('%d-%b'), match.opponent.name),
             sender=current_app.config['ADMINS'][0],
-            recipients=[captain.email],
-            text_body=render_template('email/captain_report.txt', captain=captain, match=match),
-            html_body=render_template('email/captain_report.html', captain=captain, match=match))
+            recipients=[c.email for c in captain],
+            text_body=[render_template('email/captain_report.txt', captain=c, match=match) for c in captain],
+            html_body=[render_template('email/captain_report.html', captain=captain, match=match) for c in captain])

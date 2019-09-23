@@ -47,7 +47,7 @@ class ActivePlayerForm(FlaskForm):
     player = HiddenField('', validators=[DataRequired()])
     is_active = BooleanField('')
     role = SelectField('', 
-        choices=[('player','player'),('assistant','assistant'),('captain','captain')], default='player')
+        choices=[('player','player'),('assistant','assistant'),('captain','captain'),('sub','sub')], default='player')
 
 class RosterForm(FlaskForm):
     roster = FieldList(FormField(ActivePlayerForm))
@@ -195,7 +195,7 @@ class DoublesGameForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        roster = Player.query.order_by(Player.is_active.desc(),Player.nickname).all()
+        roster = current_roster('ordered')
         player_choices = [(p.nickname,p.nickname) for p in roster]
         self.p1.choices=player_choices
         self.p2.choices=player_choices
@@ -208,7 +208,7 @@ class SinglesGameForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        roster = Player.query.order_by(Player.is_active.desc(),Player.nickname).all()
+        roster = current_roster('ordered')
         player_choices = [(p.nickname,p.nickname) for p in roster]
         self.p1.choices=player_choices
 
@@ -297,7 +297,7 @@ class HLPlayerScoreForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        roster = Player.query.order_by(Player.is_active.desc(),Player.nickname).all()
+        roster = current_roster('ordered')
         player_choices = [(p.nickname,p.nickname) for p in roster]
         self.player.choices = player_choices
 
