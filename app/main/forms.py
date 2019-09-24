@@ -6,7 +6,7 @@ from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, Radi
 from wtforms.validators import ValidationError, DataRequired, InputRequired, Length, Email
 from app import db
 from app.models import (Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, 
-    ReminderSettings, season_from_date)
+    ReminderSettings, season_from_date, current_roster)
 from app.validators import Unique
 from datetime import datetime, timedelta
 import string
@@ -45,9 +45,8 @@ class EditPlayerForm(FlaskForm):
 
 class ActivePlayerForm(FlaskForm):
     player = HiddenField('', validators=[DataRequired()])
-    is_active = BooleanField('')
     role = SelectField('', 
-        choices=[('player','player'),('assistant','assistant'),('captain','captain')], default='player')
+        choices=[('player','player'),('assistant','assistant'),('captain','captain'),('sub','sub'),('retired','retired')], default='player')
 
 class RosterForm(FlaskForm):
     roster = FieldList(FormField(ActivePlayerForm))
@@ -60,9 +59,7 @@ class RosterForm(FlaskForm):
         for i,p in enumerate(players):
             self.roster.append_entry()
             self.roster[i].player.data = p.nickname
-            self.roster[i].is_active.data = p.is_active
-            if p.user:
-                self.roster[i].role.data = p.user.role
+            self.roster[i].role.data = p.role
 
 class ClaimPlayerForm(FlaskForm):
     player = SelectField('', choices=[], default='--Select Player--')
@@ -195,7 +192,7 @@ class DoublesGameForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        roster = Player.query.order_by(Player.is_active.desc(),Player.nickname).all()
+        roster = current_roster('ordered')
         player_choices = [(p.nickname,p.nickname) for p in roster]
         self.p1.choices=player_choices
         self.p2.choices=player_choices
@@ -208,7 +205,7 @@ class SinglesGameForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        roster = Player.query.order_by(Player.is_active.desc(),Player.nickname).all()
+        roster = current_roster('ordered')
         player_choices = [(p.nickname,p.nickname) for p in roster]
         self.p1.choices=player_choices
 
@@ -297,7 +294,7 @@ class HLPlayerScoreForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        roster = Player.query.order_by(Player.is_active.desc(),Player.nickname).all()
+        roster = current_roster('ordered')
         player_choices = [(p.nickname,p.nickname) for p in roster]
         self.player.choices = player_choices
 

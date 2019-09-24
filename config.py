@@ -17,6 +17,7 @@ class Config(object):
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+
     ADMINS = [('ICC4 darts','icc4darts@gmail.com')]
     UPLOADS_DEFAULT_DEST = os.environ.get('UPLOAD_FOLDER') or 'app/var/tmp/uploads'
     IMAGE_DEST = os.environ.get('IMAGE_FOLDER') or 'app/var/images'

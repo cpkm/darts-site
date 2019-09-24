@@ -29,7 +29,7 @@
       <div class="container mx-2 my-4">
         <h4>Account details</h4>
         <p>Email: {{ current_user.email }}</p>
-        <p>Role: {{ current_user.role }}</p>
+        <p>Role: {{ current_user.get_role() }}</p>
       </div>    
     </div>
 
@@ -53,7 +53,7 @@
                   <td>{{ u.email }}</td>
                   <td>{{ u.registered_on.strftime('%d/%m/%Y') }}</td>
                   <td><b>{{ u.verified }}</b> ({{ u.verified_on.strftime('%d/%m/%Y') }})</td>
-                  <td>{{ u.role }}</td>
+                  <td>{{ u.get_role() }}</td>
                   <td>{{ u.player.nickname }} ({{ u.player.first_name }} {{ u.player.last_name }})</td>
               </tr>
               {% endfor %}
@@ -81,7 +81,7 @@
                     <td>{{ p.nickname }}</td>
                     <td>{{ p.last_name }}</td>
                     <td>{{ p.first_name }}</td>
-                    <td>{{ p.is_active }}</td>
+                    <td>{{ p.is_active() }}</td>
                     <td>{{ p.user.email }}</td>
                 </tr>
                 {% endfor %}
