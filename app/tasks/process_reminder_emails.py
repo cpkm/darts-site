@@ -73,7 +73,7 @@ def process_match_reminders():
     
     for m in match_reminders:
         try:
-            users = [p.user for p in current_roster() if p.user is not None]
+            users = [p.user for p in current_roster('active') if p.user is not None]
             status = [u.player.checked_matches_association.filter_by(match_id=m.id).first().status for u in users]
             
             print('send_reminder_email', m)
