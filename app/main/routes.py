@@ -170,6 +170,7 @@ def match_edit(id):
     all_matches = Match.query.order_by(Match.date).all()
 
     if form.submit_new.data and form.validate():
+        print(form.date.data, type(form.date.data))
         newmatch = Match(date=form.date.data, 
             opponent=Team.query.filter_by(name=form.opponent.data).first(), 
             home_away=form.home_away.data, match_type=form.match_type.data)
@@ -180,6 +181,7 @@ def match_edit(id):
         match_id = newmatch.id
         db.session.commit()
         match = Match.query.filter_by(id=match_id).first()
+        print(match.date, type(match.date))
         match.create_checkins()
 
         flash('Match {} {} {} added!'.format(newmatch.date, form.opponent.data, form.home_away.data))
