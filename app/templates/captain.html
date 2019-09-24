@@ -29,7 +29,7 @@
       <div class="container mx-2 my-4">
         <h4>Account details</h4>
         <p>Email: {{ current_user.email }}</p>
-        <p>Role: {{ current_user.role }}</p>
+        <p>Role: {{ current_user.get_role() }}</p>
       </div>    
     </div>
 
@@ -48,7 +48,7 @@
                   <th>Player</th>
                   <th>Lastname</th>
                   <th>Firstname</th>
-                  <th>Active</th>
+                  <th scope="col" data-toggle="tooltip" data-placement="top" title="Roles of player, assistant, or captain are active">Active</th>
                   <th>Role</th>
                   <th>Email</th>
                 </tr>
@@ -60,9 +60,9 @@
                     <td>{{ p.player }}{{ players[loop.index-1].nickname }}</td>
                     <td>{{ players[loop.index-1].last_name }}</td>
                     <td>{{ players[loop.index-1].first_name }}</td>
-                    <td>{{ p.is_active }}</td>
-                    <td>{% if players[loop.index-1].user %}{% if players[loop.index-1].user.role=='admin' %}<b>admin</b>{% else %}{{ p.role }}{% endif %}{% else %}<i>no user</i>{% endif %}</td>
-                    <td>{{ players[loop.index-1].user.email }}</td>
+                    <td>{% if players[loop.index-1].is_active() %}yes{% else %}no{% endif %}</td>
+                    <td>{% if players[loop.index-1].user %}{% if players[loop.index-1].user.check_role(['admin']) %}<b>admin</b>{% else %}{{ p.role }}{% endif %}{% else %}{{ p.role }}{% endif %}</td>
+                    <td>{% if not players[loop.index-1].user %}<i>no user</i>{% else %}{{ players[loop.index-1].user.email }}{% endif %}</td>
                 </tr>
                 {% endfor %}
               </table>
@@ -241,5 +241,11 @@ $('#confirmModal').on('show.bs.modal', function(e) {
     
     $('.debug-url').html('Match: <strong>'+ $(this).find('.btn-ok').attr('id') + '</strong>');
 });
+</script>
+
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
 </script>
 {% endblock %}

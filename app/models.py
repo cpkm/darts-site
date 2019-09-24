@@ -47,10 +47,19 @@ class User(UserMixin, db.Model):
             current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
     def check_role(self, roles):
-        if self.role in roles:
+        if self.player:
+            if self.player.role in roles:
+                return True
+        if 'admin' in roles and any([self.email in admin for admin in current_app.config['ADMINS']]):
             return True
-        else:
-            return False
+        return False
+
+    def get_role(self):
+        if self.check_role(['admin']):
+            return 'admin'
+        if self.player:
+            return self.player.role
+        return 'unassigned'
 
     @staticmethod
     def verify_user_token(token, task):
@@ -72,7 +81,6 @@ class Player(db.Model):
     first_name = db.Column(db.String(64), index=True)
     last_name = db.Column(db.String(64), index=True)
     tagline = db.Column(db.String(64))
-    is_active = db.Column(db.Boolean, index=True, default=True)
     games = association_proxy('games_association', 'game')
     last_match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
     last_match = db.relationship('Match', foreign_keys=[last_match_id])
@@ -87,6 +95,11 @@ class Player(db.Model):
     role = db.Column(db.String(32), index=True, default='sub')
 
     checked_matches = association_proxy('checked_matches_association', 'match')
+
+    def is_active(self):
+        if self.role in ['player','assistant','captain']:
+            return True
+        return False
 
     def avatar(self, size):
         if self.user:

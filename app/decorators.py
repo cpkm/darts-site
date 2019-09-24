@@ -18,7 +18,7 @@ def check_role(roles):
     def check_role_decorator(func):
         @wraps(func)
         def decorated_function(*args, **kwargs):
-            if not current_user.role in roles:
+            if not current_user.check_role(roles):
                 flash('You do not have permission to view this page.', 'warning')
                 return redirect(url_for('main.index'))
             return func(*args, **kwargs)

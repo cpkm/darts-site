@@ -590,15 +590,18 @@ def captain():
         for player_form in roster_form.roster:
             if player_form.player.data is not None:
                 p = Player.query.filter_by(nickname=player_form.player.data).first()
-                p.is_active = player_form.is_active.data
                 if p.user:
-                    if p.user.role == 'admin':
+                    if p.user.check_role(['admin']):
+                        #Can not change admin
                         pass
                     elif current_user == p.user:
+                        #Can not change self
                         pass
                     else:
-                        p.user.role=player_form.role.data
-                        db.session.add(p.user)
+                        p.role=player_form.role.data
+                else:
+                    p.role=player_form.role.data
+
                 db.session.add(p)
                 db.session.commit()
         flash('Updated active roster!')
@@ -608,7 +611,6 @@ def captain():
         reminder_form.reminders.append_entry()
 
     if request.method == 'POST' and reminder_form.validate() and reminder_form.submit_reminder.data:
-        print('here')
         for rem in reminder_form.reminders:
             if rem.rem_id.data:
                 r = ReminderSettings.query.filter_by(id=rem.rem_id.data).first()
