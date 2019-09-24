@@ -17,4 +17,4 @@ def send_captain_report(captain, match):
             sender=current_app.config['ADMINS'][0],
             recipients=[c.email for c in captain],
             text_body=[render_template('email/captain_report.txt', captain=c, match=match) for c in captain],
-            html_body=[render_template('email/captain_report.html', captain=captain, match=match) for c in captain])
+            html_body=[render_template('email/captain_report.html', captain=c, match=match) for c in captain])
