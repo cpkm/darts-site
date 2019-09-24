@@ -18,7 +18,6 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    role = db.Column(db.String(32), index=True, default='player')
     registered_on = db.Column(db.Date, index=True, default=date.today())
     verified = db.Column(db.Boolean, index=True, default=False)
     verified_on = db.Column(db.Date, index=True, default=None)
