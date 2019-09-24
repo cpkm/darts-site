@@ -371,10 +371,15 @@ class Match(db.Model):
         return Player.query.join(PlayerGame).join(Game).filter_by(match=self).order_by(Player.nickname).all()
 
     def get_checked_players(self):
-        ins = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='in').all()
-        out = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='out').all()
-        ifn = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='ifn').all()
-        nrp = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='none').all()
+        roster_id = [r.id for r in current_roster('active')+current_roster('sub')]
+        ins = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='in').\
+            join(Player).filter(Player.id.in_(roster_id)).all()
+        out = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='out').\
+            join(Player).filter(Player.id.in_(roster_id)).all()
+        ifn = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='ifn').\
+            join(Player).filter(Player.id.in_(roster_id)).all()
+        nrp = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='none').\
+            join(Player).filter(Player.id.in_(roster_id)).all()
 
         return ins, out, ifn, nrp
 
