@@ -1,14 +1,15 @@
 from flask import request, flash
 from flask_wtf import FlaskForm
+#from flask_wtf.file import FileField
 from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, RadioField, 
-    FieldList, FormField, DateField, SelectField, IntegerField, HiddenField)
+    FieldList, FormField, DateField, SelectField, IntegerField, HiddenField, FileField)
 from wtforms.validators import ValidationError, DataRequired, InputRequired, Length, Email
 from app import db
-from app.models import Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, season_from_date
+from app.models import (Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, 
+    ReminderSettings, season_from_date, current_roster)
 from app.validators import Unique
 from datetime import datetime, timedelta
 import string
-
 
 def hl_score(allowed='0123456789*oO'):
     message = 'Please enter a valid number.'
@@ -44,9 +45,8 @@ class EditPlayerForm(FlaskForm):
 
 class ActivePlayerForm(FlaskForm):
     player = HiddenField('', validators=[DataRequired()])
-    is_active = BooleanField('')
     role = SelectField('', 
-        choices=[('player','player'),('assistant','assistant'),('captain','captain')], default='player')
+        choices=[('player','player'),('assistant','assistant'),('captain','captain'),('sub','sub'),('retired','retired')], default='player')
 
 class RosterForm(FlaskForm):
     roster = FieldList(FormField(ActivePlayerForm))
@@ -59,9 +59,7 @@ class RosterForm(FlaskForm):
         for i,p in enumerate(players):
             self.roster.append_entry()
             self.roster[i].player.data = p.nickname
-            self.roster[i].is_active.data = p.is_active
-            if p.user:
-                self.roster[i].role.data = p.user.role
+            self.roster[i].role.data = p.role
 
 class ClaimPlayerForm(FlaskForm):
     player = SelectField('', choices=[], default='--Select Player--')
@@ -163,6 +161,7 @@ class EditSeasonForm(FlaskForm):
     season_name = StringField('Season Name', validators=[DataRequired()])
     start_date = DateField('Start Date', format='%Y-%m-%d', default=datetime.today().date, validators=[DataRequired()])
     end_date = DateField('End Date', format='%Y-%m-%d', default=(datetime.today()+timedelta(364)).date, validators=[DataRequired()])
+    calendar_link = StringField('Calendar Link')
 
     submit_new = SubmitField('Submit')
     submit_edit = SubmitField('Edit Season')
@@ -174,15 +173,18 @@ class EditSeasonForm(FlaskForm):
             self.original_season_name = season.season_name
             self.original_start_date = season.start_date
             self.original_end_date = season.end_date
+            self.original_calendar_link = season.calendar_link
         else:
             self.original_season_name = None
             self.original_start_date = None
             self.original_end_date = None
+            self.original_calendar_link = None
 
     def load_season(self, season):
         self.season_name.data = season.season_name
         self.start_date.data = season.start_date
         self.end_date.data = season.end_date
+        self.calendar_link.data = season.calendar_link
 
 
 class DoublesGameForm(FlaskForm):
@@ -194,7 +196,7 @@ class DoublesGameForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        roster = Player.query.all()
+        roster = current_roster('ordered')
         player_choices = [(p.nickname,p.nickname) for p in roster]
         self.p1.choices=player_choices
         self.p2.choices=player_choices
@@ -207,7 +209,7 @@ class SinglesGameForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        roster = Player.query.all()
+        roster = current_roster('ordered')
         player_choices = [(p.nickname,p.nickname) for p in roster]
         self.p1.choices=player_choices
 
@@ -219,6 +221,8 @@ class EnterScoresForm(FlaskForm):
     opponent_score = IntegerField('Them', validators=[InputRequired()])
     food = StringField('Food')
     match_summary = TextAreaField('Game summary', validators=[Length(min=0, max=320)])
+    scoresheet = FileField('Scoresheet')
+    remove_scoresheet = BooleanField('Remove?')
 
     d701 = FieldList(FormField(DoublesGameForm), min_entries=4, max_entries=4)
     d501 = FieldList(FormField(DoublesGameForm), min_entries=4, max_entries=4)
@@ -291,10 +295,9 @@ class HLPlayerScoreForm(FlaskForm):
     high_scores = FieldList(StringField('Score'), min_entries=12, max_entries=12)
     low_scores = FieldList(StringField('Score'), min_entries=12, max_entries=12)
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        roster = Player.query.all()
+        roster = current_roster('ordered')
         player_choices = [(p.nickname,p.nickname) for p in roster]
         self.player.choices = player_choices
 
@@ -360,9 +363,29 @@ class HLScoreForm(FlaskForm):
                     self.hl_scores[i].low_scores[j].data = str(s.score)
         return
 
-            
+class ReminderForm(FlaskForm):
+    category = SelectField('Category', 
+        choices=[('match reminder','Match Reminder'),('captain report', "Captain's Report")])
+    dia = IntegerField('Days in advance', validators=[InputRequired()])
+    rem_id = HiddenField('')
+    delete_reminder = BooleanField('Delete')
 
+class ReminderSetForm(FlaskForm):
+    reminders = FieldList(FormField(ReminderForm))
 
+    add_btn = SubmitField('+')
+    rem_btn = SubmitField('Delete')
+    submit_reminder = SubmitField('Submit')
+
+    def load_reminders(self):
+        rems = ReminderSettings.query.order_by(ReminderSettings.category).all()
+
+        for i,r in enumerate(rems):
+            self.reminders.append_entry()
+            self.reminders[i].category.data = r.category
+            self.reminders[i].dia.data = r.days_in_advance
+            self.reminders[i].rem_id.data = r.id
+        return
 
 
 

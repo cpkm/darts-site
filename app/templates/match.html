@@ -76,24 +76,33 @@
           <p>{{ match.match_summary }}</p>
         </div>
 
-        <div class="card-group col-xs-12 col-md-6">
-          <div class="card text-center">
-            <div class="card-header">
-              Doubles
-            </div>
-            <div class="card-body">
-              <a class="h2 card-title">{{ match.match_stats.wins_d7 + match.match_stats.wins_d5 }}</a><a class="card-text">/8</a><br>
-              <p class="h4 card-title">{{ match.match_stats.stars_d7 + match.match_stats.stars_d5 }}<i class="fa fa-star text-warning"></i></p>
-            </div>
+        <div class="col-xs-12 col-md-6">
+            {% if match.match_stats %}
+            <div class="card-group col-xs-12">
+              <div class="card text-center">
+                <div class="card-header">
+                  Doubles
+                </div>
+                <div class="card-body">
+                  <a class="h2 card-title">{{ match.match_stats.wins_d7 + match.match_stats.wins_d5 }}</a><a class="card-text">/8</a><br>
+                  <p class="h4 card-title">{{ match.match_stats.stars_d7 + match.match_stats.stars_d5 }}<i class="fa fa-star text-warning"></i></p>
+                </div>
+              </div>
+              <div class="card text-center">
+                <div class="card-header">
+                  Singles
+                </div>
+                <div class="card-body">
+                  <a class="h2 card-title">{{ match.match_stats.wins_s5 }}</a><a class="card-text">/8</a><br>
+                  <p class="h4 card-title">{{ match.match_stats.stars_s5 }}<i class="fa fa-star text-warning"></i></p>
+                </div>
+              </div>
           </div>
-          <div class="card text-center">
-            <div class="card-header">
-              Singles
-            </div>
-            <div class="card-body">
-              <a class="h2 card-title">{{ match.match_stats.wins_s5 }}</a><a class="card-text">/8</a><br>
-              <p class="h4 card-title">{{ match.match_stats.stars_s5 }}<i class="fa fa-star text-warning"></i></p>
-            </div>
+          {% endif %}
+          <div class="col-xs-12 d-flex justify-content-center">
+            <button type="button" class="m-2 btn btn-primary" data-toggle="modal" data-target="#scoresheetModal">
+              View match sheet
+            </button>
           </div>
         </div>
         {% endif %}
@@ -220,6 +229,26 @@
           </div>
 
       </div>    
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="scoresheetModal" tabindex="-1" role="dialog" aria-labelledby="scoresheetModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="scoresheetModalLabel">{{ match.opponent.name }} {{ match.date.strftime('%d-%b %Y') }}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <img src="{% if match.scoresheet %}{{ match.scoresheet }}{% else %}/static/images/scoresheet_placeholder.png{% endif %}" class="img-fluid" alt="{{ match.scoresheet }}">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+      </div>
     </div>
   </div>
 </div>

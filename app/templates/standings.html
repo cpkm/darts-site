@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+<div class="container">
+  <div class="card">
+    <h2 class="card-header">League Standings</h2>
+
+    <div class="card-body table-responsive pt-0">
+
+      {% if teams %}
+      <table id="tStats" class="table table-hover text-center">
+        <thead>
+          <tr>
+            <th scope="col">Team</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Matches played">MP</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Wins">W</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Losses">L</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Games For">gF</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Games Against">gA</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Plus/Minus">+/-</th>
+            <th scope="col" data-toggle="tooltip" data-placement="top" title="Points">Points</th>
+        </thead>
+        <tbody>
+          {% for t in teams %}
+          <tr>
+            <th scope="row"><a>{{ t.name }}</a></th>
+            <td>{{ t.played }}</td>
+            <td>{{ t.win }}</td>
+            <td>{{ t.loss }}</td>
+            <td>{{ t.g_for }}</td>
+            <td>{{ t.g_against }}</td>
+            <td>{{ t.pm }}</td>
+            <td>{{ t.points }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>Sorry, league data is not available at the moment. Please try again later.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+
+
+<script>
+$(document).ready( function () {
+    $('#tStats').DataTable({
+    "paging": false,
+    "order": [[ "7", "desc" ]]
+  });
+} );
+</script>
+{% endblock %}

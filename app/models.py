@@ -13,11 +13,11 @@ from time import time
 from hashlib import md5
 from app import db, login
 
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    role = db.Column(db.String(32), index=True, default='player')
     registered_on = db.Column(db.Date, index=True, default=date.today())
     verified = db.Column(db.Boolean, index=True, default=False)
     verified_on = db.Column(db.Date, index=True, default=None)
@@ -35,28 +35,40 @@ class User(UserMixin, db.Model):
         return 'https://www.gravatar.com/avatar/{}?d=robohash&s={}'.format(
             digest, size)
 
-    def get_user_token(self, task, expires_in=600):
+    def get_user_token(self, task, payload=None, expires_in=600):
         params = {task: self.id}
         if expires_in is not None:
             params['exp'] = time() + expires_in
+        if payload is not None:
+            params = {**params, **payload}
 
         return jwt.encode(params,
             current_app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
     def check_role(self, roles):
-        if self.role in roles:
+        if self.player:
+            if self.player.role in roles:
+                return True
+        if 'admin' in roles and any([self.email in admin for admin in current_app.config['ADMINS']]):
             return True
-        else:
-            return False
+        return False
+
+    def get_role(self):
+        if self.check_role(['admin']):
+            return 'admin'
+        if self.player:
+            return self.player.role
+        return 'unassigned'
 
     @staticmethod
     def verify_user_token(token, task):
         try:
-            id = jwt.decode(token, current_app.config['SECRET_KEY'],
-                            algorithms=['HS256'])[task]
+            payload = jwt.decode(token, current_app.config['SECRET_KEY'],
+                            algorithms=['HS256'])
+            id = payload.pop(task)
         except:
-            return
-        return User.query.get(id)
+            return None, None
+        return User.query.get(id), payload
 
     def __repr__(self):
         return '<User {}>'.format(self.email)
@@ -68,7 +80,6 @@ class Player(db.Model):
     first_name = db.Column(db.String(64), index=True)
     last_name = db.Column(db.String(64), index=True)
     tagline = db.Column(db.String(64))
-    is_active = db.Column(db.Boolean, index=True, default=True)
     games = association_proxy('games_association', 'game')
     last_match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
     last_match = db.relationship('Match', foreign_keys=[last_match_id])
@@ -80,8 +91,14 @@ class Player(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', back_populates='player')
+    role = db.Column(db.String(32), index=True, default='sub')
 
     checked_matches = association_proxy('checked_matches_association', 'match')
+
+    def is_active(self):
+        if self.role in ['player','assistant','captain']:
+            return True
+        return False
 
     def avatar(self, size):
         if self.user:
@@ -125,7 +142,7 @@ class Player(db.Model):
     def checkin(self, match, status):
         pmc = PlayerMatchCheckin.query.filter_by(player_id=self.id,match_id=match.id).first()
 
-        if status.lower() in ['in','out','ifn'] and pmc:
+        if status.lower() in ['in','out','ifn','none'] and pmc:
             pmc.status = status
             db.session.add(pmc)
             db.session.commit()
@@ -209,7 +226,7 @@ class Game(db.Model):
 class PlayerMatchCheckin(db.Model):
     player_id = db.Column(db.Integer, db.ForeignKey('player.id'), primary_key=True)
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'), primary_key=True)
-    status = db.Column(db.String(4), index=True, default='out')
+    status = db.Column(db.String(4), index=True, default='none')
 
     player = db.relationship('Player', backref=db.backref('checked_matches_association', lazy='dynamic'))
     match = db.relationship('Match', backref=db.backref('checked_players_association', lazy='dynamic'))
@@ -255,6 +272,9 @@ class Match(db.Model):
     checked_players = association_proxy('checked_players_association', 'player')
 
     reminder_email_sent = db.Column(db.Date)
+    captain_report_sent = db.Column(db.Date)
+
+    scoresheet = db.Column(db.String())
 
     def add_game(self, game):
         if not self.is_game(game):
@@ -332,7 +352,7 @@ class Match(db.Model):
 
     def create_checkins(self):
         pwc = [PlayerMatchCheckin(match_id=self.id, player_id=p.id)\
-                for p in Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).all()]
+                for p in current_roster('full')]
         try:
             db.session.add_all(pwc)
             db.session.commit()
@@ -351,11 +371,17 @@ class Match(db.Model):
         return Player.query.join(PlayerGame).join(Game).filter_by(match=self).order_by(Player.nickname).all()
 
     def get_checked_players(self):
-        ins = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='in').all()
-        out = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='out').all()
-        ifn = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='ifn').all()
+        roster_id = [r.id for r in current_roster('active')+current_roster('sub')]
+        ins = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='in').\
+            join(Player).filter(Player.id.in_(roster_id)).all()
+        out = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='out').\
+            join(Player).filter(Player.id.in_(roster_id)).all()
+        ifn = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='ifn').\
+            join(Player).filter(Player.id.in_(roster_id)).all()
+        nrp = PlayerMatchCheckin.query.filter_by(match_id=self.id, status='none').\
+            join(Player).filter(Player.id.in_(roster_id)).all()
 
-        return ins, out, ifn
+        return ins, out, ifn, nrp
 
     def __repr__(self):
         return '<Match {}>'.format(self.date.strftime('%Y-%m-%d'))
@@ -571,6 +597,7 @@ class Season(db.Model):
     start_date = db.Column(db.Date, index=True)
     end_date = db.Column(db.Date, index=True)
     matches = db.relationship('Match', back_populates='season', lazy='dynamic')
+    calendar_link = db.Column(db.String(512))
 
     def __repr__(self):
         return '<Season {}>'.format(self.season_name)
@@ -653,6 +680,16 @@ class MatchStats(db.Model):
                 )
 
 
+class ReminderSettings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(64), index=True, nullable=False)
+    days_in_advance = db.Column(db.Integer, nullable=False)
+    time_of_day = db.Column(db.Time)
+
+    def __repr__(self):
+        return('<{} {} days>'.format(self.category.title(), self.days_in_advance))
+
+
 def current_season(last=0):
     '''use last=1 for previous season, last=2 for 2 seasons ago...'''
     return season_from_date(date.today()-last*timedelta(365))
@@ -687,11 +724,41 @@ def update_all_team_stats(season='all'):
             stats = TeamSeasonStats(season=s)
         stats.update_team_stats()
 
-def current_roster(full=False):
-    if full:
-        return Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).order_by(Player.nickname).all()
+def current_roster(roster='full'):
+    try:
+        roster.lower()
+    except Exception as e:
+        print('Invalid roster type:', e)
+        roster = 'full'
+    finally:
+        roster = roster.lower()
 
-    return Player.query.filter_by(is_active=True).order_by(Player.nickname).all()
+    if roster == 'active':
+        return Player.query.filter(Player.role.in_(['player','assistant','captain'])).order_by(Player.nickname).all()
+    elif roster == 'inactive':
+        return Player.query.filter(Player.role.in_(['sub','retired'])).order_by(Player.nickname).all()
+    elif roster == 'player':
+        return Player.query.filter(Player.role=='player').order_by(Player.nickname).all()
+    elif roster == 'captain':
+        return Player.query.filter(Player.role=='captain').order_by(Player.nickname).all()
+    elif roster == 'assistant':
+        return Player.query.filter(Player.role=='assistant').order_by(Player.nickname).all()
+    elif roster == 'sub':
+        return Player.query.filter(Player.role=='sub').order_by(Player.nickname).all()
+    elif roster == 'retired':
+        return Player.query.filter(Player.role=='retired').order_by(Player.nickname).all()
+    elif roster == 'full':
+        return Player.query.filter(~Player.nickname.in_(['Dummy'])).order_by(Player.nickname).all()
+    elif roster == 'complete':
+        return Player.query.order_by(Player.nickname).all()
+    elif roster == 'dummy':
+        return  [Player.query.filter(Player.nickname == 'Dummy').first()]
+    elif roster == 'ordered':
+        return current_roster('dummy')+current_roster('active')+current_roster('sub')
+    else:
+        return Player.query.filter(~Player.nickname.in_(['Dummy'])).order_by(Player.nickname).all()
+
+    return Player.query.filter(~Player.nickname.in_(['Dummy'])).order_by(Player.nickname).all()
 
 @login.user_loader
 def load_user(id):

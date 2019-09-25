@@ -15,6 +15,7 @@
         {{ wtf.form_field(form.season_name) }}
         {{ wtf.form_field(form.start_date, type="date") }}
         {{ wtf.form_field(form.end_date, type="date") }}
+        {{ wtf.form_field(form.calendar_link) }}
         <hr>
         {% if season %}
         <h4 class="text-center text-muted">{{ season.season_name }}</h4>

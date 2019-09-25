@@ -1,0 +1,46 @@
+<div>
+    <a href="{{ url_for('main.index', _external=True) }}"><img src="{{ url_for('static',filename='icons/dart-logo-small.png', _external=True) }}" alt="ICC4"></a>
+</div>
+
+<div>
+<h1>ICC4 Captain's Report</h1>
+<h3>Ahoy! Captain {{ captain.player.nickname }},</h3>
+<p>
+    Here is your player summary for the upcoming event: {{ match.date.strftime('%B %-d') }} against <b>{{ match.opponent.name }}</b> at {{ match.location }}.
+</p>
+
+{% set ins,out,ifn,nrp = match.get_checked_players() %}
+
+<p><b>IN ({{ ins|length }}): </b><br>
+    {% for u in ins %}
+    {{ u.player.nickname }}<br>
+    {% endfor %}
+</p>
+
+<p><b>OUT ({{ out|length }}): </b><br>
+    {% for u in out %}
+    {{ u.player.nickname }}<br>
+    {% endfor %}
+</p>
+
+<p><b>IF NEEDED ({{ ifn|length }}): </b><br>
+    {% for u in ifs %}
+    {{ u.player.nickname }}<br>
+    {% endfor %}
+</p>
+
+<p><b>No Response ({{ nrp|length }}): </b><br>
+    {% for u in nrp %}
+    {{ u.player.nickname }}<br>
+    {% endfor %}
+</p><br>
+
+<p>Go to your <a href="{{ url_for('main.captain', _anchor='checkin', _external=True) }}">Captain's page</a> to send a reminder or contact subs.<br>
+</p>
+<p>Sincerely,</p>
+<p>The ICC4 pub darts team</p>
+</div>
+
+<div>
+  <small><p>&copy; 2019 ICC4-darts</p></small>
+</div>

@@ -17,5 +17,16 @@ class Config(object):
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    ADMINS = [('ICC4 darts','icc4darts@gmail.com')]
-    UPLOADS_DEFAULT_DEST = os.environ.get('UPLOAD_FOLDER')
+    MAIL_SUPPRESS_SEND = os.environ.get('MAIL_SUPPRESS_SEND') is not None
+
+    ADMINS = [('ICC4 darts','icc4darts@gmail.com'),('ICC4 darts errors','icc4darts+errors@gmail.com')]
+    LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT')
+    
+    UPLOADS_DEFAULT_DEST = os.environ.get('UPLOAD_FOLDER') or 'app/var/tmp/uploads'
+    IMAGE_DEST = os.environ.get('IMAGE_FOLDER') or 'app/var/images'
+
+    S3_BUCKET = os.environ.get('S3_BUCKET_NAME')
+    S3_KEY = os.environ.get('S3_ACCESS_KEY')
+    S3_SECRET = os.environ.get('S3_SECRET_ACCESS_KEY')
+    S3_LOCATION = 'http://{}.s3.amazonaws.com/'.format(S3_BUCKET)
+    AWS_DEFAULT_REGION = os.environ.get('AWS_REGION')

@@ -10,9 +10,9 @@ Currently you have checked-in as: {{ status }}
 
 Click the links below to change your status:
 
-In: {{ url_for('main.update_checkin', player_id=user.player.id, match_id=match.id, status='in', token=token, _external=True) }}
-Out: {{ url_for('main.update_checkin', player_id=user.player.id, match_id=match.id, status='out', token=token, _external=True) }}
-If Needed: {{ url_for('main.update_checkin', player_id=user.player.id, match_id=match.id, status='ifn', token=token, _external=True) }}
+In: {{ url_for('main.update_checkin', token=user.get_user_token(task='checkin', payload={'match':match.id,'player':user.player.id,'status':'in'}, expires_in=None), _external=True) }}
+Out: {{ url_for('main.update_checkin', token=user.get_user_token(task='checkin', payload={'match':match.id,'player':user.player.id,'status':'out'}, expires_in=None), _external=True) }}
+If Needed: {{ url_for('main.update_checkin', token=user.get_user_token(task='checkin', payload={'match':match.id,'player':user.player.id,'status':'ifn'}, expires_in=None), _external=True) }}
 
 Sincerely,
 

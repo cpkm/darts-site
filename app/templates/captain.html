@@ -15,7 +15,10 @@
       <a class="nav-link" id="roster-tab" data-toggle="tab" href="#roster" role="tab" aria-controls="roster" aria-selected="false">Roster</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" id="email-tab" data-toggle="tab" href="#email" role="tab" aria-controls="email" aria-selected="false">Email</a>
+      <a class="nav-link" id="checkin-tab" data-toggle="tab" href="#checkin" role="tab" aria-controls="checkin" aria-selected="false">Checkin</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="reminder-tab" data-toggle="tab" href="#reminder" role="tab" aria-controls="reminder" aria-selected="false">Reminders</a>
     </li>
   </ul>
 
@@ -26,7 +29,7 @@
       <div class="container mx-2 my-4">
         <h4>Account details</h4>
         <p>Email: {{ current_user.email }}</p>
-        <p>Role: {{ current_user.role }}</p>
+        <p>Role: {{ current_user.get_role() }}</p>
       </div>    
     </div>
 
@@ -45,7 +48,7 @@
                   <th>Player</th>
                   <th>Lastname</th>
                   <th>Firstname</th>
-                  <th>Active</th>
+                  <th scope="col" data-toggle="tooltip" data-placement="top" title="Roles of player, assistant, or captain are active">Active</th>
                   <th>Role</th>
                   <th>Email</th>
                 </tr>
@@ -57,9 +60,9 @@
                     <td>{{ p.player }}{{ players[loop.index-1].nickname }}</td>
                     <td>{{ players[loop.index-1].last_name }}</td>
                     <td>{{ players[loop.index-1].first_name }}</td>
-                    <td>{{ p.is_active }}</td>
-                    <td>{% if players[loop.index-1].user %}{% if players[loop.index-1].user.role=='admin' %}<b>admin</b>{% else %}{{ p.role }}{% endif %}{% else %}<i>no user</i>{% endif %}</td>
-                    <td>{{ players[loop.index-1].user.email }}</td>
+                    <td>{% if players[loop.index-1].is_active() %}yes{% else %}no{% endif %}</td>
+                    <td>{% if players[loop.index-1].user %}{% if players[loop.index-1].user.check_role(['admin']) %}<b>admin</b>{% else %}{{ p.role }}{% endif %}{% else %}{{ p.role }}{% endif %}</td>
+                    <td>{% if not players[loop.index-1].user %}<i>no user</i>{% else %}{{ players[loop.index-1].user.email }}{% endif %}</td>
                 </tr>
                 {% endfor %}
               </table>
@@ -70,7 +73,7 @@
       </div>
     </div>
 
-    <div class="tab-pane" id="email" role="tabpanel" aria-labelledby="email-tab">
+    <div class="tab-pane" id="checkin" role="tabpanel" aria-labelledby="checkin-tab">
       <div class="container-fluid table-responsive">
         {% if upcoming_matches %}
         <table class="table">
@@ -87,7 +90,7 @@
           <tbody>
             
             {% for m in upcoming_matches %}
-            {% set ins,out,ifn = m.get_checked_players() %}
+            {% set ins,out,ifn,nrp = m.get_checked_players() %}
             <div id="accordion">
               <tr>
                 <th scope="row">{{ m.date.strftime('%b %d') }}</th> 
@@ -112,13 +115,15 @@
                             <th scope="col">In</th>
                             <th scope="col">Out</th>
                             <th scope="col">If Needed</th>
+                            <th scope="col">No Response</th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr>
                             <td>{% for pmc in ins %}{{ pmc.player.nickname }}<br>{% endfor %}</td>
                             <td>{% for pmc in out %}{{ pmc.player.nickname }}<br>{% endfor %}</td>
-                            <td>{% for pmc in ifn %}{{ pmc.player.nickname }}<br>{% endfor %}</td>                        
+                            <td>{% for pmc in ifn %}{{ pmc.player.nickname }}<br>{% endfor %}</td>
+                            <td>{% for pmc in nrp %}{{ pmc.player.nickname }}<br>{% endfor %}</td>                         
                           </tr>
                         </tbody>
                       </table>
@@ -135,7 +140,51 @@
         {% endif %}
       </div>
     </div>
-  
+
+    <div class="tab-pane" id="reminder" role="tabpanel" aria-labelledby="reminder-tab">
+      <div class="container mx-2 my-4">
+        <h4>Email reminder settings</h4>
+        <form class="form" method="post" role="form">
+          {{ reminder_form.csrf_token }}
+          {{ reminder_form.hidden_tag() }}
+          {{ wtf.form_errors(reminder_form, hiddens="only") }}        
+        <div class="container-fluid table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col" style="width: 55%">Reminder type</th>
+                <th class="text-center" scope="col" style="width: 20%">Days before</th>
+                <th class="text-center" scope="col" style="width: 20%">TOD</th>
+                <th class="text-center" scope="col" style="width: 5%">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in reminder_form.reminders %}
+              <tr>
+                <td>{{ r.rem_id }}{{ r.category(class='form-control') }}</td>
+                <td class="text-center">{{ r.dia(class='form-control text-center') }}  
+                  {% if r.dia.errors %}
+                  {% for error in r.dia.errors %}
+                    <span style="color:red" class="flash"><small>{{ error }}</small><br></span>
+                  {% endfor %}
+                  {% endif %}
+                </td>
+                <td class="text-center">10 a.m.</td>  
+                <td class="text-center">{{ r.delete_reminder }}</td>
+              </tr>
+              {% endfor %}
+              <tr>
+                <td>{{ wtf.form_field(reminder_form.add_btn, button_map={'add_btn': 'primary my-1 add-btn'}) }}</td>
+                <td></td>
+                <td class="text-right">{{ wtf.form_field(reminder_form.submit_reminder, button_map={'submit_reminder': 'info my-1 btn-sm'}) }}</td>
+                <td class="text-center">{{ wtf.form_field(reminder_form.rem_btn, button_map={'rem_btn': 'danger my-1 btn-sm'}) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        </form>
+      </div>    
+    </div>
   </div>
 
 </div>
@@ -192,5 +241,11 @@ $('#confirmModal').on('show.bs.modal', function(e) {
     
     $('.debug-url').html('Match: <strong>'+ $(this).find('.btn-ok').attr('id') + '</strong>');
 });
+</script>
+
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
 </script>
 {% endblock %}

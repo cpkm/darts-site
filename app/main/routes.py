@@ -5,16 +5,17 @@ from wtforms.validators import ValidationError
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from datetime import datetime, date
-from app import db, schedules
+from app import db, schedules, scoresheets
 from app.main import bp
 from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
-    ClaimPlayerForm, EditSeasonForm, ScheduleForm)
+    ClaimPlayerForm, EditSeasonForm, ScheduleForm, ReminderSetForm)
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
-    season_from_date, update_all_team_stats, current_roster, current_season)
+    ReminderSettings, season_from_date, update_all_team_stats, current_roster, current_season)
 from app.decorators import check_verification, check_role
 from app.main.leaderboard_card import LeaderBoardCard
 from app.main.email import send_reminder_email as reminder_email
 from app.scripts.pdf_to_sched import DartSchedulePDF
+from app.helpers import upload_file_s3, delete_file_s3, url_parse_s3, scrape_standings_table
 
 @bp.before_request
 def before_request():
@@ -24,7 +25,7 @@ def before_request():
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
 def index():
-    all_players = Player.query.filter_by(is_active=True).order_by(Player.nickname).all()
+    all_players = current_roster('active')
     page = request.args.get('page', 1, type=int)
     last_match = Match.query.filter(Match.date<date.today()).order_by(Match.date.desc()).first()
     schedule = Match.query.filter(Match.date>=date.today()).order_by(Match.date).paginate(
@@ -61,7 +62,7 @@ def index():
 def player_edit(nickname):
     player = Player.query.filter_by(nickname=nickname).first()
     form = EditPlayerForm(nickname)
-    all_players = Player.query.order_by(Player.nickname).all()
+    all_players = current_roster('full')
     
     if form.submit_new.data and form.validate():
         newplayer = Player(
@@ -169,6 +170,7 @@ def match_edit(id):
     all_matches = Match.query.order_by(Match.date).all()
 
     if form.submit_new.data and form.validate():
+        print(form.date.data, type(form.date.data))
         newmatch = Match(date=form.date.data, 
             opponent=Team.query.filter_by(name=form.opponent.data).first(), 
             home_away=form.home_away.data, match_type=form.match_type.data)
@@ -179,6 +181,7 @@ def match_edit(id):
         match_id = newmatch.id
         db.session.commit()
         match = Match.query.filter_by(id=match_id).first()
+        print(match.date, type(match.date))
         match.create_checkins()
 
         flash('Match {} {} {} added!'.format(newmatch.date, form.opponent.data, form.home_away.data))
@@ -235,7 +238,8 @@ def season_edit(id):
 
     if form.submit_new.data and form.validate():
         new_season = Season(season_name=form.season_name.data,
-            start_date=form.start_date.data, end_date=form.end_date.data)
+            start_date=form.start_date.data, end_date=form.end_date.data,
+            calendar_link=form.calendar_link.data)
         db.session.add(new_season)
         db.session.commit()
 
@@ -254,6 +258,7 @@ def season_edit(id):
         season.season_name = form.season_name.data
         season.start_date = form.start_date.data
         season.end_date = form.end_date.data
+        season.calendar_link = form.calendar_link.data
         db.session.add(season)
         db.session.commit()
 
@@ -308,6 +313,35 @@ def enter_score(id):
         match.opponent_score = form.opponent_score.data
         match.food = form.food.data
         match.match_summary = form.match_summary.data
+
+        if form.scoresheet.data:
+            
+            file = form.scoresheet.data
+
+            if file and scoresheets.file_allowed(file, file.filename):
+
+                if match.scoresheet:
+                    b, k = url_parse_s3(match.scoresheet)
+                    response = delete_file_s3(b, k)
+
+                file.filename = secure_filename(file.filename)
+                output = upload_file_s3(file, current_app.config["S3_BUCKET"], folder='scoresheets')
+
+                if output:
+                    match.scoresheet = output
+                else:
+                    flash('Error uploading file', 'warning')
+
+            else:
+                flash('File not allowed', 'warning')
+        else:
+            if form.remove_scoresheet.data:
+                if match.scoresheet:
+                    b, k = url_parse_s3(match.scoresheet)
+                    response = delete_file_s3(b, k)
+
+                match.scoresheet = None
+
         db.session.add(match)
         db.session.commit()
 
@@ -373,7 +407,8 @@ def enter_score(id):
 
     if hl_form.add_btn.data:
         new_row = hl_form.hl_scores.append_entry()
-        new_row.player.choices = [(p.nickname,p.nickname) for p in Player.query.all()]
+        roster_choices = current_roster('ordered')
+        new_row.player.choices = [(p.nickname,p.nickname) for p in roster_choices]
 
         return render_template('enter_score.html', title='Enter Scores', 
         form=form, hl_form=hl_form, match=match)
@@ -463,7 +498,7 @@ def leaderboard(year_str):
         board=None
         pass
 
-    roster = Player.query.filter(~Player.nickname.in_(['Dummy','Sub'])).all()
+    roster = current_roster('full')
 
     if year_str.lower() == 'all time':
         stats = [sum(PlayerSeasonStats.query.join(Player).filter(Player.nickname==p.nickname).all()) for p in roster] 
@@ -551,34 +586,72 @@ def profile():
 @check_verification
 @check_role(['admin','captain'])
 def captain():
+    reminder_form = ReminderSetForm()
     roster_form = RosterForm()
-    players = current_roster(full=True)
+    players = current_roster('full')
 
-    if request.method == 'POST' and roster_form.validate_on_submit():
+    if request.method == 'POST' and roster_form.validate() and roster_form.submit.data:
         for player_form in roster_form.roster:
             if player_form.player.data is not None:
                 p = Player.query.filter_by(nickname=player_form.player.data).first()
-                p.is_active = player_form.is_active.data
                 if p.user:
-                    if p.user.role == 'admin':
+                    if p.user.check_role(['admin']):
+                        #Can not change admin
                         pass
                     elif current_user == p.user:
+                        #Can not change self
                         pass
                     else:
-                        p.user.role=player_form.role.data
-                        db.session.add(p.user)
+                        p.role=player_form.role.data
+                else:
+                    p.role=player_form.role.data
+
                 db.session.add(p)
                 db.session.commit()
         flash('Updated active roster!')
         return redirect(url_for('main.captain'))
 
+    if request.method == 'POST' and reminder_form.add_btn.data:
+        reminder_form.reminders.append_entry()
+
+    if request.method == 'POST' and reminder_form.validate() and reminder_form.submit_reminder.data:
+        for rem in reminder_form.reminders:
+            if rem.rem_id.data:
+                r = ReminderSettings.query.filter_by(id=rem.rem_id.data).first()
+                if r:
+                    r.category = rem.category.data
+                    r.days_in_advance = rem.dia.data
+                else:
+                    r = ReminderSettings(category=rem.category.data, days_in_advance=rem.dia.data)
+            else:
+                r = ReminderSettings(category=rem.category.data, days_in_advance=rem.dia.data)
+            db.session.add(r)
+            db.session.commit()
+
+        flash('Updated email reminders')
+        return redirect(url_for('main.captain'))
+
+    if request.method == 'POST' and reminder_form.rem_btn.data:
+        for rem in reminder_form.reminders:
+            if rem.delete_reminder.data and rem.rem_id.data:
+                r = ReminderSettings.query.filter_by(id=rem.rem_id.data).first()
+                if r:
+                    db.session.delete(r)
+                    db.session.commit()
+
+        flash('Updated email reminders')
+        return redirect(url_for('main.captain'))
+
     elif request.method == 'GET':
         roster_form.fill_roster(players)
+        reminder_form.load_reminders()
 
     upcoming_matches = Match.query.filter(Match.date>=date.today()).order_by(Match.date).all()
 
-    return render_template('captain.html', roster_form=roster_form, 
+    return render_template('captain.html', 
+        roster_form=roster_form, reminder_form=reminder_form,
         players=players, upcoming_matches=upcoming_matches)
+
 
 @bp.route('/admin', methods=['GET', 'POST'])
 @login_required
@@ -591,18 +664,17 @@ def admin():
     return render_template('admin.html', all_users=all_users, all_players=all_players)
 
 
-
 @bp.route('/send_reminder_email/<match_id>/<token>', methods=['GET','POST'])
 @login_required
 @check_verification
 @check_role(['admin','captain'])
 def send_reminder_email(match_id, token):
-    user = User.verify_user_token(token, task='send_reminder_email')
+    user,_ = User.verify_user_token(token, task='send_reminder_email')
     if not user:
         return redirect(url_for('main.index'))
 
     match = Match.query.filter_by(id=match_id).first()
-    users = [p.user for p in current_roster() if p.user is not None]
+    users = [p.user for p in current_roster('active') if p.user is not None]
     status = [u.player.checked_matches_association.filter_by(match_id=match.id).first().status for u in users]
     
     reminder_email(users=users,match=match,status=status)
@@ -610,18 +682,31 @@ def send_reminder_email(match_id, token):
     db.session.add(match)
     db.session.commit()
     flash('Reminder email sent!')
-    return redirect(url_for('main.captain', _anchor="email"))
+    return redirect(url_for('main.captain', _anchor='checkin'))
 
 
-@bp.route('/update_checkin/<player_id>/<match_id>/<status>/<token>', methods=['GET','POST'])
-def update_checkin(player_id, match_id, status, token):
-    user = User.verify_user_token(token, task='checkin')
+@bp.route('/update_checkin/<token>', methods=['GET','POST'])
+def update_checkin(token):
+    user,payload = User.verify_user_token(token, task='checkin')
     if not user:
         flash('Invalid token', 'danger')
         return redirect(url_for('main.index'))
 
+    if not all([param in payload for param in ['match','player','status']]):
+        flash('Invalid token', 'danger')
+        return redirect(url_for('main.index'))
+
+    player_id = payload['player']
+    match_id = payload['match']
+    status = payload['status']
+
     player = Player.query.filter_by(id=player_id).first()
     match = Match.query.filter_by(id=match_id).first()
+
+    if not player or not match:
+        flash('Invalid token parameters', 'danger')
+        return redirect(url_for('main.index'))
+
     player.checkin(match,status)
 
     flash('Thank you for checking in!', 'success')
@@ -724,6 +809,17 @@ def upload_schedule():
 
     schedule_form.load_schedule(schedule)
     return render_template('import_schedule.html', schedule_form=schedule_form)
+
+@bp.route('/standings')
+def standings():
+    temas=None
+    try:
+        teams = scrape_standings_table()
+    except Exception as e:
+        print(e)
+
+    return render_template('standings.html', teams=teams)
+
 
 
 @bp.route('/search')
