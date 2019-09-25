@@ -70,8 +70,8 @@ def create_app(config_class=Config):
                 secure = ()
             mail_handler = SMTPHandler(
                 mailhost=(app.config['MAIL_SERVER'], app.config['MAIL_PORT']),
-                fromaddr='no-reply@' + app.config['MAIL_SERVER'],
-                toaddrs=[app.config['ADMINS'][1][1]], subject='ICC4 Darts Failure',
+                fromaddr=app.config['ADMINS'][1][1],
+                toaddrs=[app.config['ADMINS'][0][0]], subject='ICC4 Darts Failure',
                 credentials=auth, secure=secure)
             mail_handler.setLevel(logging.ERROR)
             app.logger.addHandler(mail_handler)
