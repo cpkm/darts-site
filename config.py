@@ -19,7 +19,9 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_SUPPRESS_SEND = os.environ.get('MAIL_SUPPRESS_SEND') is not None
 
-    ADMINS = [('ICC4 darts','icc4darts@gmail.com')]
+    ADMINS = [('ICC4 darts','icc4darts@gmail.com'),('ICC4 darts errors','icc4darts+errors@gmail.com')]
+    LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT')
+    
     UPLOADS_DEFAULT_DEST = os.environ.get('UPLOAD_FOLDER') or 'app/var/tmp/uploads'
     IMAGE_DEST = os.environ.get('IMAGE_FOLDER') or 'app/var/images'
 
