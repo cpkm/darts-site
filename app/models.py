@@ -597,6 +597,7 @@ class Season(db.Model):
     start_date = db.Column(db.Date, index=True)
     end_date = db.Column(db.Date, index=True)
     matches = db.relationship('Match', back_populates='season', lazy='dynamic')
+    calendar_link = db.Column(db.String(512))
 
     def __repr__(self):
         return '<Season {}>'.format(self.season_name)
