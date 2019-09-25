@@ -295,7 +295,6 @@ class HLPlayerScoreForm(FlaskForm):
     high_scores = FieldList(StringField('Score'), min_entries=12, max_entries=12)
     low_scores = FieldList(StringField('Score'), min_entries=12, max_entries=12)
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         roster = current_roster('ordered')

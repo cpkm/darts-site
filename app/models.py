@@ -752,7 +752,7 @@ def current_roster(roster='full'):
     elif roster == 'complete':
         return Player.query.order_by(Player.nickname).all()
     elif roster == 'dummy':
-        return  [Player.query.filter(Player.role == 'dummy').first()]
+        return  [Player.query.filter(Player.nickname == 'Dummy').first()]
     elif roster == 'ordered':
         return current_roster('dummy')+current_roster('active')+current_roster('sub')
     else:
