@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<div class="jumbotron">
+    <div class="container">
+      <h1 class="display-4">Not Found</h1>
+      <p class="lead">404 resource not found</p>
+      <hr class="my-4">
+      <p><small>The page you requested does not exist.</small></p>
+      <a class="btn btn-info" role="button" href="{{ url_for('main.index') }}">Home</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<div class="jumbotron">
+    <div class="container">
+      <h1 class="display-4">We missed the mark!</h1>
+      <p class="lead">500 internal server error</p>
+      <hr class="my-4">
+      <p><small>This page does not seems to be working, please try again later. The administrator has been notified.</small></p>
+      <a class="btn btn-info" role="button" href="{{ url_for('main.index') }}">Home</a>
+    </div>
+</div>
+{% endblock %}
