@@ -31,6 +31,7 @@ dependencies:
   - zlib=1.2.11=hf3cbc9b_2
   - pip:
     - alembic==1.0.2
+    - arrow==0.11.0
     - babel==2.6.0
     - beautifulsoup4==4.8.0
     - blinker==1.4
@@ -51,6 +52,7 @@ dependencies:
     - flask-sqlalchemy==2.3.2
     - flask-uploads==0.2.1
     - gunicorn==19.9.0
+    - ics==0.5
     - idna==2.8
     - jinja2==2.10.1
     - jmespath==0.9.4
