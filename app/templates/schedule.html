@@ -40,7 +40,7 @@
         <h4 class="card-title">Season {{ season.season_name }}</h4>
         <h6 class="card-subtitle mb-2 text-muted">From {{ season.start_date.strftime('%d-%b %Y') }} to {{ season.end_date.strftime('%d-%b %Y') }}</h6>
         {% if season.calendar_link %}
-        <p><a role="button" class="btn btn-info btn-sm" href="{{ season.calendar_link }}">Google calendar</a></p>
+        <p><a role="button" class="btn btn-info btn-sm" href="{{ season.calendar_link }}" target="_blank">Google calendar</a></p>
         {% endif %}
         {% endif %}
         <div class="table">

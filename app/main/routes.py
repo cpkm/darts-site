@@ -238,7 +238,8 @@ def season_edit(id):
 
     if form.submit_new.data and form.validate():
         new_season = Season(season_name=form.season_name.data,
-            start_date=form.start_date.data, end_date=form.end_date.data)
+            start_date=form.start_date.data, end_date=form.end_date.data,
+            calendar_link=form.calendar_link.data)
         db.session.add(new_season)
         db.session.commit()
 
@@ -257,6 +258,7 @@ def season_edit(id):
         season.season_name = form.season_name.data
         season.start_date = form.start_date.data
         season.end_date = form.end_date.data
+        season.calendar_link = form.calendar_link.data
         db.session.add(season)
         db.session.commit()
 

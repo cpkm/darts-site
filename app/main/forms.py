@@ -161,6 +161,7 @@ class EditSeasonForm(FlaskForm):
     season_name = StringField('Season Name', validators=[DataRequired()])
     start_date = DateField('Start Date', format='%Y-%m-%d', default=datetime.today().date, validators=[DataRequired()])
     end_date = DateField('End Date', format='%Y-%m-%d', default=(datetime.today()+timedelta(364)).date, validators=[DataRequired()])
+    calendar_link = StringField('Calendar Link')
 
     submit_new = SubmitField('Submit')
     submit_edit = SubmitField('Edit Season')
@@ -172,15 +173,18 @@ class EditSeasonForm(FlaskForm):
             self.original_season_name = season.season_name
             self.original_start_date = season.start_date
             self.original_end_date = season.end_date
+            self.original_calendar_link = season.calendar_link
         else:
             self.original_season_name = None
             self.original_start_date = None
             self.original_end_date = None
+            self.original_calendar_link = None
 
     def load_season(self, season):
         self.season_name.data = season.season_name
         self.start_date.data = season.start_date
         self.end_date.data = season.end_date
+        self.calendar_link.data = season.calendar_link
 
 
 class DoublesGameForm(FlaskForm):
