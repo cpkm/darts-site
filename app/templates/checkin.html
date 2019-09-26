@@ -33,21 +33,21 @@
             </td>
             <td>
               {% if cm.status == 'in'%}
-              <a role="button" class="btn btn-success btn-sm" href="{{ url_for('main.update_checkin', player_id=current_user.player.id, match_id=cm.match_id, status='none', token=current_user.get_user_token(task='checkin')) }}">In</a>
+              <a role="button" class="btn btn-success btn-sm" href="{{ url_for('main.update_checkin', token=current_user.get_user_token(task='checkin', payload={'match':cm.match.id, 'player':current_user.player.id, 'status':'none'})) }}">In</a>
               {% else %}
-              <a role="button" class="btn btn-outline-success btn-sm" href="{{ url_for('main.update_checkin', player_id=current_user.player.id, match_id=cm.match_id, status='in', token=current_user.get_user_token(task='checkin')) }}">In</a>
+              <a role="button" class="btn btn-outline-success btn-sm" href="{{ url_for('main.update_checkin', token=current_user.get_user_token(task='checkin', payload={'match':cm.match.id, 'player':current_user.player.id, 'status':'in'})) }}">In</a>
               {% endif %}
 
               {% if cm.status == 'out'%}
-              <a role="button" class="btn btn-danger btn-sm" href="{{ url_for('main.update_checkin', player_id=current_user.player.id, match_id=cm.match_id, status='none', token=current_user.get_user_token(task='checkin')) }}">Out</a>
+              <a role="button" class="btn btn-danger btn-sm" href="{{ url_for('main.update_checkin', token=current_user.get_user_token(task='checkin', payload={'match':cm.match.id, 'player':current_user.player.id, 'status':'none'})) }}">Out</a>
               {% else %}
-              <a role="button" class="btn btn-outline-danger btn-sm" href="{{ url_for('main.update_checkin', player_id=current_user.player.id, match_id=cm.match_id, status='out', token=current_user.get_user_token(task='checkin')) }}">Out</a>
+              <a role="button" class="btn btn-outline-danger btn-sm" href="{{ url_for('main.update_checkin', token=current_user.get_user_token(task='checkin', payload={'match':cm.match.id, 'player':current_user.player.id, 'status':'out'})) }}">Out</a>
               {% endif %}
 
               {% if cm.status == 'ifn'%}
-              <a role="button" class="btn btn-warning btn-sm" href="{{ url_for('main.update_checkin', player_id=current_user.player.id, match_id=cm.match_id, status='none', token=current_user.get_user_token(task='checkin')) }}">If Needed</a>
+              <a role="button" class="btn btn-warning btn-sm" href="{{ url_for('main.update_checkin', token=current_user.get_user_token(task='checkin', payload={'match':cm.match.id, 'player':current_user.player.id, 'status':'none'})) }}">If Needed</a>
               {% else %}
-              <a role="button" class="btn btn-outline-warning btn-sm" href="{{ url_for('main.update_checkin', player_id=current_user.player.id, match_id=cm.match_id, status='ifn', token=current_user.get_user_token(task='checkin')) }}">If Needed</a>
+              <a role="button" class="btn btn-outline-warning btn-sm" href="{{ url_for('main.update_checkin', token=current_user.get_user_token(task='checkin', payload={'match':cm.match.id, 'player':current_user.player.id, 'status':'ifn'})) }}">If Needed</a>
               {% endif %}
             </td>
           </tr>
