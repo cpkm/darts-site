@@ -96,8 +96,14 @@
 $(document).ready( function () {
     $('#pStats').DataTable({
     "paging": false,
-    "order": [[ "{{ lb }}", "desc" ]]
+    "order": [[ "{{ lb }}", "desc" ]],
+    "rowCallback": function( row, data, index ) {
+                if (data["1"] <= 0) {
+                    $(row).hide();
+                }
+  }
   });
+    
 } );
 </script>
 {% endblock %}
