@@ -105,6 +105,13 @@ def process_captain_reports():
 
 
 app = create_app()
+
+if app.config['ENV']=='production':
+    if not app.config['DEBUG']:
+        app.config['SERVER_NAME'] = 'icc4darts.com'
+    else:
+        app.config['SERVER_NAME'] = 'staging.icc4darts.com'
+
 with app.app_context(), app.test_request_context():
     process_match_reminders()
     process_captain_reports()
