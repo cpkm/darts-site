@@ -146,10 +146,10 @@ class Player(db.Model):
             pmc.status = status
             db.session.add(pmc)
             db.session.commit()
-            print('checked in {}: status {}'.format(match,status))
+            print('Checked in {}: status {}'.format(match,status))
             return True
         else:
-            print('status not found')
+            print('Status or checkin not found:', match, status)
         return False
 
     def game_stars(self, game=None, game_id=None):
