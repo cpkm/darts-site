@@ -90,6 +90,29 @@
   </div>
 </div>
 
+<div class="col-12 mt-2 mx-auto">
+  <div class="card h-100">
+    <h2 class="card-header">Partner Statisitics</h2>
+    <div class="card-body table-responsive">
+      <table id="partnerStats" class="table table-hover text-center">
+        <thead>
+          <tr>
+            <th scope="col">Player</th>
+            <th scope="col">#</th>
+        </thead>
+        <tbody>
+          {% for p,n in partners.items() %}
+          <tr>
+            <th scope="row"><a href="{{ url_for('main.player', nickname=p) }}">{{ p }}</a></th>
+            <td>{{ n }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 {% block scripts %}
 {{ super() }}
@@ -112,6 +135,14 @@ $(document).ready( function () {
         );
       }
     }
+  });
+} );
+</script>
+<script>
+$(document).ready( function () {
+  $('#partnerStats').DataTable({
+    "order": [[ 1, "desc" ]],
+    "paging": false
   });
 } );
 </script>

@@ -452,6 +452,8 @@ def enter_score(id):
 def player(nickname):
     player = Player.query.filter_by(nickname=nickname).first_or_404()
     seasons = PlayerSeasonStats.query.filter_by(player_id=player.id).join(Season).order_by(Season.start_date).all()
+    partners = player.get_partner_data()
+
     page = request.args.get('page', 1, type=int)
     matches = Match.query.join(Game).join(PlayerGame).filter_by(player_id=player.id).order_by(Match.date.desc()).distinct().paginate(
         page, current_app.config['MATCH_PER_PAGE'], False)
@@ -459,8 +461,9 @@ def player(nickname):
         if matches.has_next else None
     prev_url = url_for('main.player', nickname=player.nickname, page=matches.prev_num) \
         if matches.has_prev else None
+
     return render_template('player.html', next_url=next_url, prev_url=prev_url,
-            player=player, matches=matches.items, seasons=seasons)
+            player=player, matches=matches.items, seasons=seasons, partners=partners)
 
 
 @bp.route('/schedule',  methods=['GET', 'POST'], defaults={'id': None})
