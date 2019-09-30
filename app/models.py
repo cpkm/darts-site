@@ -205,6 +205,21 @@ class Player(db.Model):
             db.session.commit()
         return
 
+    def get_partner_data(self):
+        partners = []
+        partners_all = []
+
+        for game in self.games:
+            gp = game.players_association.join(Player).filter(Player.nickname != self.nickname).first()
+            if gp:
+                name = gp.player.nickname
+                if name not in partners_all:
+                    partners.append(name)
+                partners_all.append(name)
+        freq = [partners_all.count(gp) for gp in partners]
+
+        return {x:y for x,y in zip(partners,freq)}
+
     def __repr__(self):
         return '<Player {}>'.format(self.nickname) if self.nickname else '<Player_id {}>'.format(self.id)
 
