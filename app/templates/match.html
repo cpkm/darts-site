@@ -179,7 +179,7 @@
                 <thead>
                   <tr>
                     <th scope="col"></th>
-                    <th scope="col"></th>
+                    <th scope="col">#</th>
                     <th scope="col"></th>
                   </tr>
                 </thead>
@@ -189,7 +189,7 @@
                   <th scope="row">{{ p.nickname }}</th>
                   {% with ss = match.high_scores.filter_by(player=p).all() %}
                   <td>{{ ss|count }}</td>
-                  <td>{% for s in ss %}{{ s.score }}, {% endfor %}</td>
+                  <td>{% if ss %}{% for s in ss[:-1] %}{{ s.score }}, {% endfor %}{{ ss[-1].score }}{% endif %}</td>
                   {% endwith %}
                 </tr>
                   {% endfor %}
@@ -208,7 +208,7 @@
                 <thead>
                   <tr>
                     <th scope="col"></th>
-                    <th scope="col"></th>
+                    <th scope="col">#</th>
                     <th scope="col"></th>
                   </tr>
                 </thead>
@@ -218,7 +218,7 @@
                 <th scope="row">{{ p.nickname }}</th>
                 {% with ss = match.low_scores.filter_by(player=p).all() %}
                 <td>{{ ss|count }}</td>
-                <td>{% for s in ss %}{{ s.score }}, {% endfor %}</td>
+                <td>{% if ss %}{% for s in ss[:-1] %}{{ s.score }}, {% endfor %}{{ ss[-1].score }}{% endif %}</td>
                 {% endwith %}
               </tr>
                 {% endfor %}
