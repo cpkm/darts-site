@@ -8,7 +8,19 @@ Food: {{ match.food }}
 
 {{ match.match_summary }}
 
-Top performers:
+Top players:
+
+{% if performers['stars'] %}Stars: {{ performers['stars'][0][1] }} - {% for p in performers['stars'][:-1] %}{{ p[0].nickname }}, {% endfor %}{{ performers['stars'][-1][0].nickname }} {% endif %}
+{% if performers['hs'] %}High Scores: {{ performers['hs'][0][1] }} - {% for p in performers['hs'][:-1] %}{{ p[0].nickname }}, {% endfor %}{{ performers['hs'][-1][0].nickname }} {% endif %}
+{% if performers['ls'] %}Low Scores: {{ performers['ls'][0][1] }} - {% for p in performers['ls'][:-1] %}{{ p[0].nickname }}, {% endfor %}{{ performers['ls'][-1][0].nickname }} {% endif %}
+
+{% if match.match_stats %}
+Team performance:
+
+Doubles 701: {{ match.match_stats.wins_d7 }}/4
+Doubles 501: {{ match.match_stats.wins_d5 }}/4 with {{ match.match_stats.stars_d5 }} stars
+Singles 501: {{ match.match_stats.wins_s5 }}/8 with {{ match.match_stats.stars_s5 }} stars
+{% endif %}
 
 Complete match details can be found here:
 {{ url_for('main.match', id=match.id, _external=True) }}

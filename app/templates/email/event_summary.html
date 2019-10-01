@@ -12,7 +12,21 @@
 <p><b>Food: </b>{{ match.food }}</p>
 <p>{{ match.match_summary }}</p>
 
-<p><b>Top performers:</b></p>
+<p><b>Top players:</b></p>
+<ul>
+    {% if performers['stars'] %}<li>Stars: {{ performers['stars'][0][1] }} - {% for p in performers['stars'][:-1] %}{{ p[0].nickname }}, {% endfor %}{{ performers['stars'][-1][0].nickname }}</li>{% endif %}
+    {% if performers['hs'] %}<li>High Scores: {{ performers['hs'][0][1] }} - {% for p in performers['hs'][:-1] %}{{ p[0].nickname }}, {% endfor %}{{ performers['hs'][-1][0].nickname }}</li>{% endif %}
+    {% if performers['ls'] %}<li>Low Scores: {{ performers['ls'][0][1] }} - {% for p in performers['ls'][:-1] %}{{ p[0].nickname }}, {% endfor %}{{ performers['ls'][-1][0].nickname }}</li>{% endif %}
+</ul>
+
+{% if match.match_stats %}
+<p><b>Team performance:</b></p>
+    <ul>
+        <li>Doubles 701: {{ match.match_stats.wins_d7 }}/4</li>
+        <li>Doubles 501: {{ match.match_stats.wins_d5 }}/4 with {{ match.match_stats.stars_d5 }} stars</li>
+        <li>Singles 501: {{ match.match_stats.wins_s5 }}/8 with {{ match.match_stats.stars_s5 }} stars</li>
+    </ul>
+{% endif %}
 
 <p><a href="{{ url_for('main.match', id=match.id, _external=True) }}">Click here</a> to view the complete match details.</p>
 
