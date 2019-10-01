@@ -4,13 +4,13 @@
 
 <div>
 <h1>ICC4 Event summary</h1>
-<h3>
+<h2>
     {{ match.date.strftime('%B %-d') }} against <b>{{ match.opponent.name }}</b> at {{ match.location }}.
-</h3>
-<h5>{{ match.team_score }} - {{ match.opponent_score }} {% if match.win %}WIN{% else %}LOSS{% endif %} {% if match.overtime %}in overtime{% endif %}</h5>
+</h2>
+<h3>{{ match.team_score }} - {{ match.opponent_score }} {% if match.win %}WIN{% else %}LOSS{% endif %} {% if match.overtime %}in overtime{% endif %}</h3>
 
 <p><b>Food: </b>{{ match.food }}</p>
-<p>{{ match.summary }}</p>
+<p>{{ match.match_summary }}</p>
 
 <p><b>Top performers:</b></p>
 

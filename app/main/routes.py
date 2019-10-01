@@ -14,6 +14,7 @@ from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeaso
 from app.decorators import check_verification, check_role
 from app.main.leaderboard_card import LeaderBoardCard
 from app.main.email import send_reminder_email as reminder_email
+from app.main.email import send_summary_email as summary_email
 from app.scripts.pdf_to_sched import DartSchedulePDF
 from app.helpers import upload_file_s3, delete_file_s3, url_parse_s3, scrape_standings_table
 

@@ -6,7 +6,7 @@ ICC4 Event summary
 
 Food: {{ match.food }}
 
-{{ match.summary }}
+{{ match.match_summary }}
 
 Top performers:
 

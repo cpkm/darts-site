@@ -93,6 +93,9 @@
             </div>
           </div>
           {{ wtf.form_field(form.submit_details, button_map={'submit_details': 'primary my-1 btn-block'}) }}
+          {% if match.win is not none %}
+          <a role="button" class="btn btn-danger btn-sm btn-block" data-id="{{match.id}}" href="#" data-href="{{ url_for('main.send_summary_email',token=current_user.get_user_token(task='send_summary_email',payload={'match':match.id})) }}" data-toggle="modal" data-target="#confirmModal">Send Summary Email {% if match.summary_email_sent %}<small>(Sent {{ match.summary_email_sent.strftime('%Y-%m-%d') }})</small>{% endif %}</a>
+          {% endif %}
           <br>
           <div class="col-xs-12 my-1">
           <h4>701 doubles</h4>
@@ -159,10 +162,41 @@
   </div>
 
 </div>
+
+<!-- Modal -->
+<div class="modal" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="confirmModalLabel">Confirm send summary email</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="debug-url"><p>
+        <p>This will send a summary email to all active roster players.</p>
+        <p class="text-center">Are you sure you want to send this email?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-info mr-auto" data-dismiss="modal">Cancel</button>
+        <a class="btn btn-danger btn-ok">Confirm</a>
+      </div>
+    </div>
+  </div>
+</div> 
+
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
+<script>
+$('#confirmModal').on('show.bs.modal', function(e) {
+    $(this).find('.btn-ok').attr('href', $(e.relatedTarget).data('href'));
+
+    $(this).find('.btn-ok').attr('id', $(e.relatedTarget).data('id'));
+});
+</script>
 <script>
   $('#customFile').on('change',function(){
     //get the file name
