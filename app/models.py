@@ -220,6 +220,17 @@ class Player(db.Model):
 
         return {x:y for x,y in zip(partners,freq)}
 
+    def get_partner_data_alt(self):
+        data = {p.nickname: {k:v for k,v in zip(['701','501'],
+            [len(Game.query.filter(Game.players.contains(p), Game.players.contains(self), Game.game_type=='doubles 701').all()),
+            len(Game.query.filter(Game.players.contains(p), Game.players.contains(self), Game.game_type=='doubles 501').all())])}\
+            for p in current_roster('complete')}
+        data.pop(self.nickname)
+        return data
+
+
+
+
     def __repr__(self):
         return '<Player {}>'.format(self.nickname) if self.nickname else '<Player_id {}>'.format(self.id)
 
