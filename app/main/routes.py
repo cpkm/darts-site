@@ -693,7 +693,7 @@ def update_checkin(token):
         return redirect(url_for('main.index'))
 
     if not all([param in payload for param in ['match','player','status']]):
-        flash('Invalid token', 'danger')
+        flash('Invalid token payload', 'danger')
         return redirect(url_for('main.index'))
 
     player_id = payload['player']
@@ -810,6 +810,7 @@ def upload_schedule():
     schedule_form.load_schedule(schedule)
     return render_template('import_schedule.html', schedule_form=schedule_form)
 
+
 @bp.route('/standings')
 def standings():
     temas=None
@@ -820,6 +821,32 @@ def standings():
 
     return render_template('standings.html', teams=teams)
 
+
+@bp.route('/send_summary_email/<token>', methods=['GET','POST'])
+@login_required
+@check_verification
+@check_role(['admin','captain'])
+def send_summary_email(token):
+    user, payload = User.verify_user_token(token, task='send_summary_email')
+    if not user:
+        flash('Invalid token', 'danger')
+        return redirect(url_for('main.index'))
+
+    if not 'match' in payload:
+        flash('Invalid token payload', 'danger')
+        return redirect(url_for('main.index'))
+
+    match_id = payload['match']
+    match = Match.query.filter_by(id=match_id).first()
+
+    users = [p.user for p in current_roster('active') if p.user is not None]
+    
+    summary_email(users=users,match=match)
+    match.summary_email_sent = date.today()
+    db.session.add(match)
+    db.session.commit()
+    flash('Summary email sent!')
+    return redirect(url_for('main.enter_score', id=match.id))
 
 
 @bp.route('/search')

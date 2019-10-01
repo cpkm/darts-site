@@ -18,3 +18,11 @@ def send_captain_report(captain, match):
             recipients=[c.email for c in captain],
             text_body=[render_template('email/captain_report.txt', captain=c, match=match) for c in captain],
             html_body=[render_template('email/captain_report.html', captain=c, match=match) for c in captain])
+
+def send_summary_email(users, match):
+    print('sending summary email to {} for {} match.'.format(users,match))
+    send_email('ICC4 Event summary: {} vs {}'.format(match.date.strftime('%d-%b'), match.opponent.name),
+            sender=current_app.config['ADMINS'][0],
+            recipients=[u.email for u in users],
+            text_body=render_template('email/event_summary.txt', match=match),
+            html_body=render_template('email/event_summary.html', match=match))
