@@ -1,0 +1,25 @@
+<div>
+    <a href="{{ url_for('main.index', _external=True) }}"><img src="{{ url_for('static',filename='icons/dart-logo-small.png', _external=True) }}" alt="ICC4"></a>
+</div>
+
+<div>
+<h1>ICC4 Event summary</h1>
+<h3>
+    {{ match.date.strftime('%B %-d') }} against <b>{{ match.opponent.name }}</b> at {{ match.location }}.
+</h3>
+<h5>{{ match.team_score }} - {{ match.opponent_score }} {% if match.win %}WIN{% else %}LOSS{% endif %} {% if match.overtime %}in overtime{% endif %}</h5>
+
+<p><b>Food: </b>{{ match.food }}</p>
+<p>{{ match.summary }}</p>
+
+<p><b>Top performers:</b></p>
+
+<p><a href="{{ url_for('main.match', id=match.id, _external=True) }}">Click here</a> to view the complete match details.</p>
+
+<p>Sincerely,</p>
+<p>The ICC4 pub darts team</p>
+</div>
+
+<div>
+  <small><p>&copy; 2019 ICC4-darts</p></small>
+</div>

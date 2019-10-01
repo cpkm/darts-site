@@ -1,0 +1,18 @@
+ICC4 Event summary
+
+{{ match.date.strftime('%B %-d') }} against {{ match.opponent.name }} at {{ match.location }}.
+
+{{ match.team_score }} - {{ match.opponent_score }} {% if match.win %}WIN{% else %}LOSS{% endif %} {% if match.overtime %}in overtime{% endif %}
+
+Food: {{ match.food }}
+
+{{ match.summary }}
+
+Top performers:
+
+Complete match details can be found here:
+{{ url_for('main.match', id=match.id, _external=True) }}
+
+Sincerely,
+
+The ICC4 pub darts team
