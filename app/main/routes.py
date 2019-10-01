@@ -10,12 +10,14 @@ from app.main import bp
 from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
     ClaimPlayerForm, EditSeasonForm, ScheduleForm, ReminderSetForm)
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
-    ReminderSettings, season_from_date, update_all_team_stats, current_roster, current_season)
+    ReminderSettings, HighScore, LowScore, season_from_date, update_all_team_stats, current_roster, current_season)
 from app.decorators import check_verification, check_role
 from app.main.leaderboard_card import LeaderBoardCard
 from app.main.email import send_reminder_email as reminder_email
+from app.main.email import send_summary_email as summary_email
 from app.scripts.pdf_to_sched import DartSchedulePDF
 from app.helpers import upload_file_s3, delete_file_s3, url_parse_s3, scrape_standings_table
+from sqlalchemy import func
 
 @bp.before_request
 def before_request():
@@ -693,7 +695,7 @@ def update_checkin(token):
         return redirect(url_for('main.index'))
 
     if not all([param in payload for param in ['match','player','status']]):
-        flash('Invalid token', 'danger')
+        flash('Invalid token payload', 'danger')
         return redirect(url_for('main.index'))
 
     player_id = payload['player']
@@ -810,6 +812,7 @@ def upload_schedule():
     schedule_form.load_schedule(schedule)
     return render_template('import_schedule.html', schedule_form=schedule_form)
 
+
 @bp.route('/standings')
 def standings():
     temas=None
@@ -820,6 +823,49 @@ def standings():
 
     return render_template('standings.html', teams=teams)
 
+
+@bp.route('/send_summary_email/<token>', methods=['GET','POST'])
+@login_required
+@check_verification
+@check_role(['admin','captain'])
+def send_summary_email(token):
+    user, payload = User.verify_user_token(token, task='send_summary_email')
+    if not user:
+        flash('Invalid token', 'danger')
+        return redirect(url_for('main.index'))
+
+    if not 'match' in payload:
+        flash('Invalid token payload', 'danger')
+        return redirect(url_for('main.index'))
+
+    match_id = payload['match']
+    match = Match.query.filter_by(id=match_id).first()
+
+    hs = match.high_scores.with_entities(HighScore.player_id, func.count(HighScore.player_id))\
+        .group_by(HighScore.player_id)\
+        .order_by(func.count(HighScore.player_id).desc()).all()
+    t_hs = [(Player.query.filter_by(id=t[0]).first(),t[1]) for t in hs if t[1] == hs[0][1]]
+
+    ls = match.low_scores.with_entities(LowScore.player_id, func.count(LowScore.player_id))\
+        .group_by(LowScore.player_id)\
+        .order_by(func.count(LowScore.player_id).desc()).all()
+    t_ls = [(Player.query.filter_by(id=t[0]).first(),t[1]) for t in hs if t[1] == hs[0][1]]
+
+    ts = sorted([(p,sum([pg.stars for pg in PlayerGame.query.filter_by(player=p)\
+        .join(Game).join(Match).filter(Match.id==match.id).all()])) for p in match.get_roster()], key = lambda x:x[1], reverse = True)
+
+    t_ts = [t for t in ts if t[1]==ts[0][1]]
+
+    performers = {'stars': t_ts, 'hs': t_hs, 'ls': t_ls}
+
+    users = [p.user for p in current_roster('active') if p.user is not None]
+    
+    summary_email(users=users,match=match, performers=performers)
+    match.summary_email_sent = date.today()
+    db.session.add(match)
+    db.session.commit()
+    flash('Summary email sent!')
+    return redirect(url_for('main.enter_score', id=match.id))
 
 
 @bp.route('/search')

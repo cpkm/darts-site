@@ -273,6 +273,7 @@ class Match(db.Model):
 
     reminder_email_sent = db.Column(db.Date)
     captain_report_sent = db.Column(db.Date)
+    summary_email_sent = db.Column(db.Date)
 
     scoresheet = db.Column(db.String())
 
