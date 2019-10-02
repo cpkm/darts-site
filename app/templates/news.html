@@ -9,7 +9,7 @@
 {% block app_content %}
 
 {% if not current_user.is_anonymous %}
-{% if current_user.check_role(['captain']) %}
+{% if current_user.check_role(['captain','admin']) %}
 <div class="container">
   <div class="col-12 mt-4"><h3>Edit News</h3>
     <form class="form" method="post" role="form">
@@ -38,9 +38,7 @@
 
 <div class="container">
   <div class="col-12">
-
       <p class="h1 display-4">News</hp>
-
         {% for n in news %}
           {% include '_news.html' %}
           <hr>
@@ -59,7 +57,6 @@
           </li>
         </ul>
       </nav>
-
   </div>
 </div>
 
