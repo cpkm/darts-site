@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block head %}
+{{ super() }}
+<style CSS>
+@media (min-width:256px) {
+    .card-columns {
+      column-count: 2;
+    }
+}
+@media (min-width:576px) {
+    .card-columns {
+      column-count: 3;
+    }
+}
+  @media (min-width:768px) {
+    .card-columns {
+      column-count: 4;
+    }
+}
+
+</style>
+{% endblock %}
+
+{% block app_content %}
+
+<div class="container">
+  <p class="h1 display-4 my-4 text-dark">Current Roster</p>
+
+  {% if players['captain'] %}
+  <div class="col-12">
+    <h2>Captains</h2>
+    <div class="card-columns">
+    {% for player in players['captain'] %}
+    {% include '_player.html' %}
+    {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if players['assistant'] %}
+  <div class="col-12">
+    <h2>Assistant Captains</h2>
+    <div class="card-columns">
+    {% for player in players['assistant'] %}
+    {% include '_player.html' %}
+    {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if players['player'] %}
+  <div class="col-12">
+    <h2>Players</h2>
+    <div class="card-columns">
+    {% for player in players['player'] %}
+    {% include '_player.html' %}
+    {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if players['sub'] %}
+  <div class="col-12">
+    <h2>Subs</h2>
+    <div class="card-columns">
+    {% for player in players['sub'] %}
+    {% include '_player.html' %}
+    {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if players['retired'] %}
+  <div class="col-12">
+    <h2>Retired</h2>
+    <div class="card-columns">
+    {% for player in players['retired'] %}
+    {% include '_player.html' %}
+    {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}
+

@@ -8,7 +8,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method, Comparator
 from sqlalchemy.sql import select
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from time import time
 from hashlib import md5
 from app import db, login
@@ -205,6 +205,14 @@ class Player(db.Model):
             db.session.commit()
         return
 
+    def get_partner_data(self):
+        data = {p.nickname: {k:v for k,v in zip(['701','501'],
+            [Game.query.filter(Game.players.contains(p), Game.players.contains(self), Game.game_type=='doubles 701').join(Match).order_by(Match.date).all(),
+            Game.query.filter(Game.players.contains(p), Game.players.contains(self), Game.game_type=='doubles 501').join(Match).order_by(Match.date).all()])}\
+            for p in current_roster('complete')}
+        data.pop(self.nickname)
+        return data
+
     def __repr__(self):
         return '<Player {}>'.format(self.nickname) if self.nickname else '<Player_id {}>'.format(self.id)
 
@@ -273,6 +281,7 @@ class Match(db.Model):
 
     reminder_email_sent = db.Column(db.Date)
     captain_report_sent = db.Column(db.Date)
+    summary_email_sent = db.Column(db.Date)
 
     scoresheet = db.Column(db.String())
 
@@ -501,7 +510,6 @@ class PlayerSeasonStats(db.Model):
             return '{}'.format(type(self))
         
 
-
 class TeamSeasonStats(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     season_id = db.Column(db.Integer, db.ForeignKey('season.id'))
@@ -688,6 +696,15 @@ class ReminderSettings(db.Model):
 
     def __repr__(self):
         return('<{} {} days>'.format(self.category.title(), self.days_in_advance))
+
+
+class News(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String(1024))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.now())
+
+    def __repr__(self):
+        return('<News {}>'.format(self.timestamp))
 
 
 def current_season(last=0):

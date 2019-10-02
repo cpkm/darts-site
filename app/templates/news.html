@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block head %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+{% endblock %}
+
+{% block app_content %}
+
+{% if not current_user.is_anonymous %}
+{% if current_user.check_role(['captain','admin']) %}
+<div class="container">
+  <div class="col-12 mt-4"><h3>Edit News</h3>
+    <form class="form" method="post" role="form">
+      {{ form.csrf_token }}
+      {{ form.hidden_tag() }}
+      {{ wtf.form_errors(form, hiddens="only") }}
+
+      <div>
+        <b>{{ form.content.label }}</b>:
+        {{ form.content(rows=5, style='width:100%') }}
+      </div>
+
+      {% if post %}
+      {{ wtf.form_field(form.submit_edit, button_map={'submit_edit': 'info my-1 btn-sm'}) }}
+      {{ wtf.form_field(form.submit_delete, button_map={'submit_delete': 'danger my-1 btn-sm'}) }}
+      {% else %}
+      {{ wtf.form_field(form.submit_new, button_map={'submit_new': 'primary my-1 btn-sm'}) }}
+      {% endif %}
+      <a align="right" href="{{ url_for('main.news') }}">+ new post</a>
+    </form>
+  </div>
+</div>
+<hr>
+{% endif %}
+{% endif %}
+
+<div class="container">
+  <div class="col-12">
+      <p class="h1 display-4">News</hp>
+        {% for n in news %}
+          {% include '_news.html' %}
+          <hr>
+        {% endfor %}
+        <nav aria-label="...">
+        <ul class="pager">
+          <li class="previous{% if not prev_url %} disabled{% endif %}">
+            <a href="{{ prev_url or '#' }}">
+              <span aria-hidden="true">&larr;</span>Nearer
+            </a>
+          </li>
+          <li class="next{% if not next_url %} disabled{% endif %}">
+            <a href="{{ next_url or '#' }}">
+              Further<span aria-hidden="true">&rarr;</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+  </div>
+</div>
+
+{% endblock %}
+

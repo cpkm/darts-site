@@ -7,6 +7,7 @@ boto3==1.9.228
 botocore==1.12.228
 bs4==0.0.1
 certifi==2018.10.15
+cffi==1.12.3
 chardet==3.0.4
 Click==7.0
 distro==1.4.0
@@ -19,7 +20,9 @@ Flask-Bootstrap==3.3.7.1
 Flask-Login==0.4.1
 Flask-Mail==0.9.1
 Flask-Migrate==2.3.0
+Flask-Misaka==1.0.0
 Flask-Moment==0.6.0
+Flask-PageDown==0.2.2
 Flask-SQLAlchemy==2.3.2
 Flask-Uploads==0.2.1
 Flask-WTF==0.14.2
@@ -32,10 +35,12 @@ jmespath==0.9.4
 lxml==4.4.1
 Mako==1.0.7
 MarkupSafe==1.0
+misaka==2.1.1
 newrelic==5.0.2.126
 numpy==1.17.2
 pandas==0.25.1
 psycopg2==2.8.2
+pycparser==2.19
 PyJWT==1.6.4
 python-dateutil==2.7.5
 python-dotenv==0.9.1

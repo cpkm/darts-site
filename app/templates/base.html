@@ -12,6 +12,12 @@
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <style>
+  .row:before, .row:after {
+    display: block;
+  }
+  </style>
 {% endblock %}
 
 {% block title %}
@@ -33,13 +39,18 @@
         <a class="nav-link" href="{{ url_for('main.index') }}">Home<span class="sr-only">(current)</span></a>
       </li>
 
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.news') }}">News</a>
+      </li>
+
       <li class="nav-item dropdown">
-          <a class="btn nav-link dropdown-toggle" href="{{ url_for('main.schedule') }}" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <a class="nav-link dropdown-toggle" href="{{ url_for('main.schedule') }}" id="dropdownSchedule" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Schedule
           </a>
           
-          <div id="scheduleDrop" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+          <div id="scheduleDrop" class="dropdown-menu" aria-labelledby="dropdownSchedule">
             <a class="dropdown-item" href="{{ url_for('main.schedule') }}">Current</a>
+            <div class="dropdown-divider"></div>
             {% if g.all_seasons %}
             {% for s in g.all_seasons %}
             <a class="dropdown-item" href="{{ url_for('main.schedule', id=s.id) }}">{{ s.season_name }}</a>
@@ -48,14 +59,27 @@
           </div>
       </li>
 
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.leaderboard') }}">Leaderboards</a>
+      <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="{{ url_for('main.roster') }}" id="dropdownTeam" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Team
+          </a>
+          
+          <div id="teamDrop" class="dropdown-menu" aria-labelledby="dropdownTeam">
+            <a class="dropdown-item" href="{{ url_for('main.roster') }}">Roster</a>
+            <a class="dropdown-item" href="{{ url_for('main.leaderboard') }}">Leaderboards</a>
+          </div>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.opponent') }}">Opponents</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.standings') }}">Standings</a>
+
+      <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="{{ url_for('main.opponent') }}" id="dropdownLeague" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            League
+          </a>
+          
+          <div id="teamDrop" class="dropdown-menu" aria-labelledby="dropdownLeague">
+            <a class="dropdown-item" href="{{ url_for('main.opponent') }}">Opponents</a>
+            <a class="dropdown-item" href="{{ url_for('main.standings') }}">Standings</a>
+            <a class="dropdown-item" href="http://www.sentex.net/~pmartin/">GPD League</a>
+          </div>
       </li>
     </ul>
 
@@ -82,9 +106,10 @@
       {% if current_user.check_role(['admin', 'captain', 'assistant']) %}
       <div class="dropdown-divider"></div>
       <li class="nav-item dropdown">
-          <a class="btn nav-link dropdown-toggle" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Editing Tools</a>
-          <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+          <a class="nav-link dropdown-toggle" id="dropdownEditor" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Editing Tools</a>
+          <div class="dropdown-menu" aria-labelledby="dropdownEditor">
             <a class="dropdown-item" href="{{ url_for('main.enter_score') }}">Enter scores</a>
+            <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="{{ url_for('main.match_edit') }}">Match editor</a>
             <a class="dropdown-item" href="{{ url_for('main.player_edit') }}">Player editor</a>
             <a class="dropdown-item" href="{{ url_for('main.team_edit') }}">Team editor</a>

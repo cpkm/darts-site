@@ -1,5 +1,5 @@
 <div class="card d-inline-block">
-  <a href="{{ url_for('main.player', nickname=player.nickname) }}"><img class="card-img-top" src="{{ player.avatar(256) }}" alt="{{ player.nickname }}"></a>
+  <a class="stretched-link" href="{{ url_for('main.player', nickname=player.nickname) }}"><img class="card-img-top" src="{{ player.avatar(256) }}" alt="{{ player.nickname }}"></a>
   <div class="card-body">
     <h5 class="card-title">{{ player.nickname }}</h5>
     <small><p>
