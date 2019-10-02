@@ -9,6 +9,8 @@ from flask_moment import Moment
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_uploads import UploadSet, configure_uploads, IMAGES
+from flask_misaka import Misaka
+from flask_pagedown import PageDown
 from flask_wtf.csrf import CSRFProtect
 from config import Config
 from sqlalchemy import MetaData
@@ -29,6 +31,8 @@ mail = Mail()
 moment = Moment()
 login = LoginManager()
 csrf = CSRFProtect()
+md = Misaka()
+pagedown = PageDown()
 login.login_view = 'auth.login'
 login.login_message = 'Please log in to access this page.'
 
@@ -47,6 +51,8 @@ def create_app(config_class=Config):
     moment.init_app(app)
     login.init_app(app)
     csrf.init_app(app)
+    md.init_app(app)
+    pagedown.init_app(app)
 
     configure_uploads(app, (schedules, scoresheets))
 

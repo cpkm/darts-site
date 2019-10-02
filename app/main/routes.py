@@ -8,9 +8,9 @@ from datetime import datetime, date
 from app import db, schedules, scoresheets
 from app.main import bp
 from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
-    ClaimPlayerForm, EditSeasonForm, ScheduleForm, ReminderSetForm)
+    ClaimPlayerForm, EditSeasonForm, ScheduleForm, ReminderSetForm, NewsForm)
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
-    ReminderSettings, HighScore, LowScore, season_from_date, update_all_team_stats, current_roster, current_season)
+    ReminderSettings, HighScore, LowScore, News, season_from_date, update_all_team_stats, current_roster, current_season)
 from app.decorators import check_verification, check_role
 from app.main.leaderboard_card import LeaderBoardCard
 from app.main.email import send_reminder_email as reminder_email
@@ -37,6 +37,8 @@ def index():
     prev_url = url_for('main.index', page=schedule.prev_num) \
         if schedule.has_prev else None
 
+    news = News.query.order_by(News.timestamp.desc()).limit(4).all()
+
     leader_board_list = [ 
         LeaderBoardCard('Stars',PlayerSeasonStats.query.join(Player).\
             filter(PlayerSeasonStats.season==current_season()).\
@@ -53,7 +55,8 @@ def index():
 
     return render_template('index.html', title=None,
         schedule=schedule.items, next_url=next_url, prev_url=prev_url, 
-        all_players=all_players, last_match=last_match,leader_board_list=leader_board_list)
+        all_players=all_players, last_match=last_match, leader_board_list=leader_board_list,
+        news=news)
 
 
 @bp.route('/player_edit',  methods=['GET', 'POST'], defaults={'nickname': None})
@@ -869,6 +872,49 @@ def send_summary_email(token):
     db.session.commit()
     flash('Summary email sent!')
     return redirect(url_for('main.enter_score', id=match.id))
+
+
+@bp.route('/news',  methods=['GET', 'POST'], defaults={'id': None})
+@bp.route('/news/<id>',  methods=['GET', 'POST'])
+def news(id):
+    post = News.query.filter_by(id=id).first()
+    form = NewsForm()
+
+    if form.submit_new.data and form.validate():
+        post = News(content=form.content.data, timestamp=datetime.now())
+        db.session.add(post)
+        db.session.commit()
+        flash('News item posted!', 'success')
+        return redirect(url_for('main.news'))
+        
+    if form.submit_edit.data and form.validate() and post is not None:
+        post.content = form.content.data
+        post.timestamp = datetime.now()
+        db.session.add(post)
+        db.session.commit()
+
+        flash('News item edited')
+        return redirect(url_for('main.news'))
+
+    if  form.submit_delete.data and post is not None:
+        db.session.delete(post)
+        db.session.commit()
+        flash('News item deleted', 'danger')
+        return redirect(url_for('main.news'))
+
+    elif request.method == 'GET' and post is not None:
+        form.content.data = post.content
+
+    page = request.args.get('page', 1, type=int)
+    news = News.query.order_by(News.timestamp).paginate(
+        page, current_app.config['NEWS_PER_PAGE'], False)
+    next_url = url_for('main.news', page=news.next_num) \
+        if news.has_next else None
+    prev_url = url_for('main.news', page=news.prev_num) \
+        if news.has_prev else None
+
+    return render_template('news.html', form=form, news=news.items, 
+        next_url=next_url, prev_url=prev_url, post=post)
 
 
 @bp.route('/search')
