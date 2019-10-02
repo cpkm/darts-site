@@ -1,4 +1,4 @@
-<div class="card mx-auto d-block w-75">
+<div class="mx-auto p2 d-block w-100">
   <div class="card-body">
   <h6 class="card-title">
     <a class="text-muted" href="{{ url_for('main.news', id=n.id) }}">{{ n.timestamp.strftime("%B %d, %Y") }}</a>
@@ -6,7 +6,7 @@
     {{ n.content|markdown }}
   <p class="card-text text-muted">
     <small>
-      Posted at {{ n.timestamp.strftime("%H:%M:%S") }}
+      Posted at {{ n.timestamp.strftime("%-H:%M %p") }}
     </small>
   </p>
   </div>

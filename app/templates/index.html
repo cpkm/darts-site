@@ -58,14 +58,26 @@
         
         <div class="carousel-inner overflow-auto">
           <div style="height: 200px;" class="carousel-item active">
-            {% with n = news[0] %}
-            {% include '_news.html' %}
-            {% endwith %}
+            <div class="row">
+            <div class="col-1"></div>
+            <div class="col-10 justify-content-center">
+              {% with n = news[0] %}
+              {% include '_news.html' %}
+              {% endwith %}
+            </div>
+            <div class="col-1"></div>
           </div>
+        </div>
           {% for n in news[1:] %}
           <div style="height: 200px;" class="carousel-item">
+            <div class="row">
+            <div class="col-1"></div>
+            <div class="col-10 justify-content-center">
             {% include '_news.html' %}
+            </div>
+            <div class="col-1"></div>
           </div>
+        </div>
           {% endfor %}
         </div>
         <a class="carousel-control-prev" href="#carouselNews" role="button" data-slide="prev">
