@@ -206,30 +206,12 @@ class Player(db.Model):
         return
 
     def get_partner_data(self):
-        partners = []
-        partners_all = []
-
-        for game in self.games:
-            gp = game.players_association.join(Player).filter(Player.nickname != self.nickname).first()
-            if gp:
-                name = gp.player.nickname
-                if name not in partners_all:
-                    partners.append(name)
-                partners_all.append(name)
-        freq = [partners_all.count(gp) for gp in partners]
-
-        return {x:y for x,y in zip(partners,freq)}
-
-    def get_partner_data_alt(self):
         data = {p.nickname: {k:v for k,v in zip(['701','501'],
-            [len(Game.query.filter(Game.players.contains(p), Game.players.contains(self), Game.game_type=='doubles 701').all()),
-            len(Game.query.filter(Game.players.contains(p), Game.players.contains(self), Game.game_type=='doubles 501').all())])}\
+            [Game.query.filter(Game.players.contains(p), Game.players.contains(self), Game.game_type=='doubles 701').join(Match).order_by(Match.date).all(),
+            Game.query.filter(Game.players.contains(p), Game.players.contains(self), Game.game_type=='doubles 501').join(Match).order_by(Match.date).all()])}\
             for p in current_roster('complete')}
         data.pop(self.nickname)
         return data
-
-
-
 
     def __repr__(self):
         return '<Player {}>'.format(self.nickname) if self.nickname else '<Player_id {}>'.format(self.id)
