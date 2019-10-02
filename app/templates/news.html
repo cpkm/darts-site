@@ -37,16 +37,14 @@
 {% endif %}
 
 <div class="container">
-  <div class="col-md-12">
-    <div class="card h-100">
-      <div class="card-header">News</div>
-      <div class="card-body">
-        <div class="">
+  <div class="col-12">
+
+      <p class="h1 display-4">News</hp>
+
         {% for n in news %}
           {% include '_news.html' %}
           <br>
         {% endfor %}
-        </div>
         <nav aria-label="...">
         <ul class="pager">
           <li class="previous{% if not prev_url %} disabled{% endif %}">
@@ -61,8 +59,7 @@
           </li>
         </ul>
       </nav>
-      </div>
-    </div>
+
   </div>
 </div>
 
