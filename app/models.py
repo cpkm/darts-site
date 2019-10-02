@@ -205,6 +205,14 @@ class Player(db.Model):
             db.session.commit()
         return
 
+    def get_partner_data(self):
+        data = {p.nickname: {k:v for k,v in zip(['701','501'],
+            [Game.query.filter(Game.players.contains(p), Game.players.contains(self), Game.game_type=='doubles 701').join(Match).order_by(Match.date).all(),
+            Game.query.filter(Game.players.contains(p), Game.players.contains(self), Game.game_type=='doubles 501').join(Match).order_by(Match.date).all()])}\
+            for p in current_roster('complete')}
+        data.pop(self.nickname)
+        return data
+
     def __repr__(self):
         return '<Player {}>'.format(self.nickname) if self.nickname else '<Player_id {}>'.format(self.id)
 
