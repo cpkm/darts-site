@@ -917,6 +917,16 @@ def news(id):
         next_url=next_url, prev_url=prev_url, post=post)
 
 
+@bp.route('/roster',  methods=['GET', 'POST'])
+def roster():
+    players = {'captain': current_roster('captain'),
+        'assistant':current_roster('assistant'),
+        'player': current_roster('player'),
+        'sub': current_roster('sub'),
+        'retired':current_roster('retired')}
+    
+    return render_template('roster.html', players=players)
+
 @bp.route('/search')
 @login_required
 def search():

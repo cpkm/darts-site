@@ -58,14 +58,27 @@
           </div>
       </li>
 
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.leaderboard') }}">Leaderboards</a>
+      <li class="nav-item dropdown">
+          <a class="btn nav-link dropdown-toggle" href="{{ url_for('main.roster') }}" role="button" id="dropdownTeam" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Team
+          </a>
+          
+          <div id="teamDrop" class="dropdown-menu" aria-labelledby="dropdownTeam">
+            <a class="dropdown-item" href="{{ url_for('main.roster') }}">Roster</a>
+            <a class="dropdown-item" href="{{ url_for('main.leaderboard') }}">Leaderboards</a>
+          </div>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.opponent') }}">Opponents</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.standings') }}">Standings</a>
+
+      <li class="nav-item dropdown">
+          <a class="btn nav-link dropdown-toggle" href="{{ url_for('main.opponent') }}" role="button" id="dropdownLeague" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            League
+          </a>
+          
+          <div id="teamDrop" class="dropdown-menu" aria-labelledby="dropdownLeague">
+            <a class="dropdown-item" href="{{ url_for('main.opponent') }}">Opponents</a>
+            <a class="dropdown-item" href="{{ url_for('main.standings') }}">Standings</a>
+            <a class="dropdown-item" href="http://www.sentex.net/~pmartin/">GPD League</a>
+          </div>
       </li>
     </ul>
 
