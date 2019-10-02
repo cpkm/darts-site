@@ -906,7 +906,7 @@ def news(id):
         form.content.data = post.content
 
     page = request.args.get('page', 1, type=int)
-    news = News.query.order_by(News.timestamp).paginate(
+    news = News.query.order_by(News.timestamp.desc()).paginate(
         page, current_app.config['NEWS_PER_PAGE'], False)
     next_url = url_for('main.news', page=news.next_num) \
         if news.has_next else None
