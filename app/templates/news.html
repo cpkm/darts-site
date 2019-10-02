@@ -8,8 +8,32 @@
 
 {% block app_content %}
 
+{% if not current_user.is_anonymous %}
 {% if current_user.check_role(['captain']) %}
+<div class="container">
+  <div class="col-12 mt-4"><h3>Edit News</h3>
+    <form class="form" method="post" role="form">
+      {{ form.csrf_token }}
+      {{ form.hidden_tag() }}
+      {{ wtf.form_errors(form, hiddens="only") }}
 
+      <div>
+        <b>{{ form.content.label }}</b>:
+        {{ form.content(rows=5, style='width:100%') }}
+      </div>
+
+      {% if post %}
+      {{ wtf.form_field(form.submit_edit, button_map={'submit_edit': 'info my-1 btn-sm'}) }}
+      {{ wtf.form_field(form.submit_delete, button_map={'submit_delete': 'danger my-1 btn-sm'}) }}
+      {% else %}
+      {{ wtf.form_field(form.submit_new, button_map={'submit_new': 'primary my-1 btn-sm'}) }}
+      {% endif %}
+      <a align="right" href="{{ url_for('main.news') }}">+ new post</a>
+    </form>
+  </div>
+</div>
+<hr>
+{% endif %}
 {% endif %}
 
 <div class="container">
@@ -17,9 +41,10 @@
     <div class="card h-100">
       <div class="card-header">News</div>
       <div class="card-body">
-        <div class="table">
+        <div class="">
         {% for n in news %}
-          <p>{{ n.timestamp }}</p><br>
+          {% include '_news.html' %}
+          <br>
         {% endfor %}
         </div>
         <nav aria-label="...">

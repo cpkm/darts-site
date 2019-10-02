@@ -1,8 +1,8 @@
 from flask import request, flash
 from flask_wtf import FlaskForm
-#from flask_wtf.file import FileField
 from wtforms import (StringField, SubmitField, TextAreaField, BooleanField, RadioField, 
     FieldList, FormField, DateField, SelectField, IntegerField, HiddenField, FileField)
+from flask_pagedown.fields import PageDownField
 from wtforms.validators import ValidationError, DataRequired, InputRequired, Length, Email
 from app import db
 from app.models import (Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, 
@@ -386,6 +386,12 @@ class ReminderSetForm(FlaskForm):
             self.reminders[i].dia.data = r.days_in_advance
             self.reminders[i].rem_id.data = r.id
         return
+
+class NewsForm(FlaskForm):
+    content = PageDownField('Enter your post using markdown')
+    submit_new = SubmitField('Submit')
+    submit_edit = SubmitField('Edit Post')
+    submit_delete = SubmitField('Delete Post')
 
 
 

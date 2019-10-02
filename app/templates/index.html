@@ -32,6 +32,12 @@
     }
 }
 </style>
+<style type="text/css">
+.carousel-control-next,
+.carousel-control-prev {
+    filter: invert(100%);
+}
+</style>
 {% endblock %}
 
 {% block app_content %}
@@ -46,21 +52,45 @@
 
   <div class="col-lg-8">
     <div class="col">
-      <h2 class="my-4">News</h2>
-      <p>A new season starts soon - stay tuned for details! In the meantime, 
-        <a href="{{ url_for('auth.login') }}"> register</a> if you haven't already!</p>
+      {% if news %}
+      <h2 class="my-4"><a class="text-dark" href="{{ url_for('main.news') }}">News</a></h2>
+      <div id="carouselNews" class="carousel slide" data-ride="carousel">
+        
+        <div class="carousel-inner overflow-auto">
+          <div style="height: 200px;" class="carousel-item active">
+            {% with n = news[0] %}
+            {% include '_news.html' %}
+            {% endwith %}
+          </div>
+          {% for n in news[1:] %}
+          <div style="height: 200px;" class="carousel-item">
+            {% include '_news.html' %}
+          </div>
+          {% endfor %}
+        </div>
+        <a class="carousel-control-prev" href="#carouselNews" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carouselNews" role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
+      </div>
+      {% endif %}
+
     </div>
 
     <div class="col">
-      <h2 class="my-4">Schedule</h2>
-      <h4>Last match</h4>
+      <h2 class="my-4"><a class="text-dark" href="{{ url_for('main.schedule') }}">Schedule</a></h2>
+      <h4 class="text-dark">Last match</h4>
       {% if last_match %}
       {% with match = last_match %}
         {% include '_match.html' %}
       {% endwith %}
       {% endif %}
       <br>
-      <h4>Upcoming matches</h4>
+      <h4 class="text-dark">Upcoming matches</h4>
       {% for match in schedule %}
         {% include '_match.html' %}
       {% endfor %}
@@ -81,7 +111,7 @@
     </div>
 
     <div class="col">
-    <h2 class="my-4"> Season Leaderboards</h2>
+    <h2 class="my-4"><a class="text-dark" href="{{ url_for('main.leaderboard') }}">Season Leaderboards</a></h2>
       <div class="row">
           {% for card in leader_board_list %}
               {{  draw_leaderboard(card)  }}
@@ -92,7 +122,7 @@
   </div>
 
   <div class="col-lg-4">
-  <h2 class="my-4">Current Roster</h2>
+  <h2 class="my-4 text-dark">Current Roster</h2>
     <div class="card-columns">
     {% for player in all_players %}
     <!-- <li><a href="{{ url_for('main.player', nickname=player.nickname) }}">{{ player.nickname }}</a></li> -->
