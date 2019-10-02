@@ -8,7 +8,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method, Comparator
 from sqlalchemy.sql import select
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from time import time
 from hashlib import md5
 from app import db, login
@@ -510,7 +510,6 @@ class PlayerSeasonStats(db.Model):
             return '{}'.format(type(self))
         
 
-
 class TeamSeasonStats(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     season_id = db.Column(db.Integer, db.ForeignKey('season.id'))
@@ -697,6 +696,15 @@ class ReminderSettings(db.Model):
 
     def __repr__(self):
         return('<{} {} days>'.format(self.category.title(), self.days_in_advance))
+
+
+class News(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String(1024))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.now())
+
+    def __repr__(self):
+        return('<News {}>'.format(self.timestamp))
 
 
 def current_season(last=0):
