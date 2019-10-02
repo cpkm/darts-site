@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block head %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+{% endblock %}
+
+{% block app_content %}
+
+{% if current_user.check_role(['captain']) %}
+
+{% endif %}
+
+<div class="container">
+  <div class="col-md-12">
+    <div class="card h-100">
+      <div class="card-header">News</div>
+      <div class="card-body">
+        <div class="table">
+        {% for n in news %}
+          <p>{{ n.timestamp }}</p><br>
+        {% endfor %}
+        </div>
+        <nav aria-label="...">
+        <ul class="pager">
+          <li class="previous{% if not prev_url %} disabled{% endif %}">
+            <a href="{{ prev_url or '#' }}">
+              <span aria-hidden="true">&larr;</span>Nearer
+            </a>
+          </li>
+          <li class="next{% if not next_url %} disabled{% endif %}">
+            <a href="{{ next_url or '#' }}">
+              Further<span aria-hidden="true">&rarr;</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
