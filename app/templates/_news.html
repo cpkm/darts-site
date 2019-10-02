@@ -1,7 +1,7 @@
 <div class="mx-auto p2 d-block w-100">
   <div class="card-body">
   <h6 class="card-title">
-    <a class="stretched-link text-muted" href="{{ url_for('main.news', id=n.id) }}">{{ n.timestamp.strftime("%B %d, %Y") }}</a>
+    <a class="text-muted" href="{{ url_for('main.news', id=n.id) }}">{{ n.timestamp.strftime("%B %d, %Y") }}</a>
   </h6>
     {{ n.content|markdown }}
   <p class="card-text text-muted">
