@@ -242,7 +242,7 @@ class EnterScoresForm(FlaskForm):
         self.food.data = match.food
         self.win.data = match.win
         self.overtime.data = match.overtime
-        
+
         if match.games.all() is None:
             return
 
@@ -347,25 +347,33 @@ class HLScoreForm(FlaskForm):
             return
 
         all_p = match.get_roster()
-        diff = len(all_p) - len(self.hl_scores)
+        rows = [max(len(match.high_scores.filter_by(player=p).all())//(1+len(self.hl_scores[0].high_scores)),
+                len(match.low_scores.filter_by(player=p).all())//(1+len(self.hl_scores[0].low_scores)))+1 for p in all_p]
+
+        diff = sum(rows) - len(self.hl_scores)
 
         if diff > 0:
             for _ in range(diff):
                 self.hl_scores.append_entry()
 
-        for i,p in enumerate(all_p):
-            self.hl_scores[i].player.data = p.nickname
-            for j,s in enumerate(match.high_scores.filter_by(player=p).all()):
-                if j < self.hl_scores[i].high_scores.max_entries:
-                    if s.out:
-                        score = str(s.score) + '*'
-                    else:
-                        score = str(s.score)
-                    self.hl_scores[i].high_scores[j].data = score
+        for i,(p,r) in enumerate(zip(all_p, rows)):
+            k = sum(rows[:i])
+            for m in range(r):
+                rr = k + m        
+                self.hl_scores[rr].player.data = p.nickname
+                for j,s in enumerate(match.high_scores.filter_by(player=p).all()):
+                    if j//len(self.hl_scores[rr].high_scores) == m:
+                        cc = j%len(self.hl_scores[rr].high_scores)            
+                        if s.out:
+                            score = str(s.score) + '*'
+                        else:
+                            score = str(s.score)
+                        self.hl_scores[rr].high_scores[cc].data = score
 
-            for j,s in enumerate(match.low_scores.filter_by(player=p).all()):
-                if j < self.hl_scores[i].low_scores.max_entries - 1:
-                    self.hl_scores[i].low_scores[j].data = str(s.score)
+                for j,s in enumerate(match.low_scores.filter_by(player=p).all()):
+                    if j//len(self.hl_scores[rr].low_scores) == m:
+                        cc = j%len(self.hl_scores[rr].low_scores)            
+                        self.hl_scores[rr].low_scores[cc].data = str(s.score)
         return
 
 class ReminderForm(FlaskForm):
