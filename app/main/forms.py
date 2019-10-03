@@ -238,6 +238,11 @@ class EnterScoresForm(FlaskForm):
             f.p2_stars.choices =[('0','0'),('1','1')]
 
     def load_games(self, match):
+        self.match_summary.data = match.match_summary
+        self.food.data = match.food
+        self.win.data = match.win
+        self.overtime.data = match.overtime
+        
         if match.games.all() is None:
             return
 
