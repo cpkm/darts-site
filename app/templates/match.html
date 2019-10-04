@@ -27,7 +27,7 @@
               <ul class="list-unstyled">
                 {% for m in season.matches|sort(attribute='date') %}
                 <li>
-                  <a href="{{ url_for('main.match', id=m.id) }}">{{ m.date.strftime('%b-%d') }} {{ m.opponent.name }}</a>
+                  <a href="{{ url_for('main.match', id=m.id) }}">{{ moment(m.date, local=True).format('MMM Do') }} - {{ m.opponent.name }}</a>
                 </li>
                 {% endfor %}
               </ul>
@@ -41,7 +41,7 @@
 
   <div class="col-md-9">
     <div class="card">
-      <h2 class="card-header">{{ match.opponent.name }} <small class="text-muted">{{ match.date.strftime('%d-%b %Y') }}</small></h2>
+      <h2 class="card-header">{{ match.opponent.name }} <small class="text-muted">- {{ moment(match.date, local=True).format('MMM Do YYYY') }}</small></h2>
       
       <div class="card-body col-xs-12">
 
@@ -238,7 +238,7 @@
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="scoresheetModalLabel">{{ match.opponent.name }} {{ match.date.strftime('%d-%b %Y') }}</h5>
+        <h5 class="modal-title" id="scoresheetModalLabel">{{ match.opponent.name }} {{ moment(match.date, local=True).format('MMM Do YYYY') }}</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

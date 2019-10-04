@@ -701,7 +701,7 @@ class ReminderSettings(db.Model):
 class News(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(1024))
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.now())
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow())
 
     def __repr__(self):
         return('<News {}>'.format(self.timestamp))
