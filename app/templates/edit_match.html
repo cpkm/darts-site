@@ -31,7 +31,7 @@
           </div>
           <hr>
           {% if match %}
-          <h4 class="text-center text-muted">{{ match.date.strftime('%Y-%m-%d') }} {{ match.opponent.name }} {{ match.home_away }}</h4>
+          <h4 class="text-center text-muted">{{ moment(match.date, local=True).format('LL') }} {{ match.opponent.name }} {{ match.home_away }}</h4>
           {{ wtf.form_field(form.submit_edit, button_map={'submit_edit': 'info my-1 btn-block'}) }}
           {{ wtf.form_field(form.submit_delete, hidden="true", button_map={'submit_delete': 'danger my-1 btn-block'}) }}
           <button type="button" id="modal-click" class="btn btn-danger btn-block my-1" data-toggle="modal" data-target="#confirmModal">Delete Match</button>
@@ -91,7 +91,7 @@
               <ul class="list-unstyled">
                 {% for m in season.matches|sort(attribute='date') %}
                 <li>
-                  <a href="{{ url_for('main.match_edit', id=m.id) }}">{{ m.date.strftime('%b-%d') }} {{ m.opponent.name }}</a>
+                  <a href="{{ url_for('main.match_edit', id=m.id) }}">{{ moment(m.date, local=True).format('MMM Do') }} - {{ m.opponent.name }}</a>
                 </li>
                 {% endfor %}
               </ul>

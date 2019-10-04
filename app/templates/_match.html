@@ -7,7 +7,7 @@
         <a href="{{ url_for('main.opponent', id=match.opponent_id) }}">
             {{ match.opponent.name }}
         </a>
-        - {{ match.date.strftime('%d-%b %Y') }}
+        - {{ moment(match.date, local=True).format('ll') }}
         <br>
         {% if match.home_away == 'away' %}
         &emsp;at {{ match.opponent.home_location }}

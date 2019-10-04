@@ -9,8 +9,8 @@
       <td>
         <h1>{{ player.nickname }}</h1>
         <h3>{{ player.first_name }} {{ player.last_name }}</h3>
-        {% if player.last_match %}<p>Last match: <a href="{{ url_for('main.match',id=player.last_match_id) }}">{{ player.last_match.date.strftime('%Y-%m-%d') }} vs. {{ player.last_match.opponent.name }}</a></p>{% endif %}
-        {% if player.first_match %}<p>Active since: <a href="{{ url_for('main.match',id=player.first_match_id) }}">{{ player.first_match.date.strftime('%Y-%m-%d') }}</a></p>{% endif %}
+        {% if player.last_match %}<p>Last match: <a href="{{ url_for('main.match',id=player.last_match_id) }}">{{ moment(player.last_match.date, local=True).format('LL') }} vs. {{ player.last_match.opponent.name }}</a></p>{% endif %}
+        {% if player.first_match %}<p>Active since: <a href="{{ url_for('main.match',id=player.first_match_id) }}">{{ moment(player.first_match.date, local=True).format('LL') }}</a></p>{% endif %}
       </td>
     </tr>
   </table>

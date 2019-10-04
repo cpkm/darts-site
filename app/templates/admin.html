@@ -51,8 +51,8 @@
               <tr>
                   <td scope="row">{{ u.id }}</td>
                   <td>{{ u.email }}</td>
-                  <td>{{ u.registered_on.strftime('%d/%m/%Y') }}</td>
-                  <td><b>{{ u.verified }}</b> ({{ u.verified_on.strftime('%d/%m/%Y') }})</td>
+                  <td>{{ moment(u.registered_on, local=True).format('MMM Do YYYY') }}</td>
+                  <td><b>{{ u.verified }}</b> ({{ moment(u.verified_on, local=True).format('MMM Do YYYY') }})</td>
                   <td>{{ u.get_role() }}</td>
                   <td>{{ u.player.nickname }} ({{ u.player.first_name }} {{ u.player.last_name }})</td>
               </tr>
