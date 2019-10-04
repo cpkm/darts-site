@@ -60,3 +60,10 @@ html
     padding: 0 !important;
     margin: 0 !important;
 }
+
+.vote-btn {
+    display: block;
+    width: 125px;
+    height: 40px;
+    margin: 0;
+}

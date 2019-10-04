@@ -927,6 +927,16 @@ def roster():
     
     return render_template('roster.html', players=players)
 
+
+@login_required
+@check_verification
+@bp.route('/vote',  methods=['GET', 'POST'])
+def vote():
+    roster = {'active': current_roster('active'),
+        'inactive':current_roster('inactive')}
+    
+    return render_template('vote.html', roster=roster)
+
 @bp.route('/search')
 @login_required
 def search():

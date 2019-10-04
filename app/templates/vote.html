@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block head %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+{% endblock %}
+
+{% block app_content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col mt-4"><h3>Match voting</h3>
+      <p>Select up to three players for MVP:</p>
+
+      <form name="vote_form" id="vote_form" action="{{ url_for('main.vote') }}" method="post" enctype=multipart/form-data>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        <div class="form-row d-flex justify-content-center">
+        {% if roster['active'] %}
+        {% for player in roster['active'] %}
+          <label class="btn btn-info vote-btn m-1">
+            <input type="checkbox">
+            <span>{{ player.nickname }}</span>
+          </label>
+        {% endfor %}
+        {% endif %}
+        </div>
+
+        <hr>
+
+        <div class="form-row d-flex justify-content-center">
+        {% if roster['inactive'] %}
+        {% for player in roster['inactive'] %}
+          <label class="btn btn-info vote-btn m-1">
+            <input type="checkbox">
+            <span>{{ player.nickname }}</span>
+          </label>
+        {% endfor %}
+        {% endif %}
+        </div>
+
+        <div class="form-row d-flex justify-content-center">
+            <input type="submit" value="Vote" class="btn btn-primary my-2">
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
