@@ -44,7 +44,7 @@
 
   <div class="col-md-9">
   {% if match %}
-    <div class="card">
+    <div class="card m-2">
       <h2 class="card-header">Details and game scores</h2>
       <div class="card-body">
       <h3 class="text-center text-muted">{{ match.opponent.name }} {{ match.home_away }} game on {{ match.date.strftime('%Y-%m-%d') }}</h3>
@@ -122,7 +122,7 @@
       </div>
     </div>
 
-    <div id="hl_scores" class="card">
+    <div id="hl_scores" class="card m-2">
       <h2 class="card-header">High and low scores</h2>
       <small class="p-2">Use a <i>*</i> or <i>o</i> to indicate a high score as a big out, e.g. <i>96*</i> or <i>104o</i>.</small>
       <div class="card-body">
@@ -144,8 +144,8 @@
         {% include '_hl_score.html' %}
         {% endfor %}
 
-        {{ wtf.form_field(hl_form.add_btn, button_map={'add_btn': 'primary my-1 btn-sm'}) }}
-        {{ wtf.form_field(hl_form.rem_btn, button_map={'rem_btn': 'secondary my-1 btn-sm'}) }}
+        {{ wtf.form_field(hl_form.add_btn, button_map={'add_btn': 'primary add-btn'}) }}
+        {{ wtf.form_field(hl_form.rem_btn, button_map={'rem_btn': 'secondary add-btn'}) }}
 
         {{ wtf.form_field(hl_form.submit_hl_scores, button_map={'submit_hl_scores': 'primary my-1 btn-block'}) }}
         </form>

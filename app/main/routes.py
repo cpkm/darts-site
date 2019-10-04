@@ -414,17 +414,17 @@ def enter_score(id):
         new_row = hl_form.hl_scores.append_entry()
         roster_choices = current_roster('ordered')
         new_row.player.choices = [(p.nickname,p.nickname) for p in roster_choices]
-
+        form.load_games(match)
         return render_template('enter_score.html', title='Enter Scores', 
         form=form, hl_form=hl_form, match=match)
 
     if hl_form.rem_btn.data:
         hl_form.hl_scores.pop_entry()
+        form.load_games(match)
         return render_template('enter_score.html', title='Enter Scores', 
         form=form, hl_form=hl_form, match=match)
 
     if hl_form.submit_hl_scores.data and match is not None:
-
         print(hl_form.validate())
         for fieldName, errorMessages in hl_form.errors.items():
             for err in errorMessages:
