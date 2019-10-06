@@ -928,14 +928,65 @@ def roster():
     return render_template('roster.html', players=players)
 
 
+@bp.route('/vote',  methods=['GET', 'POST'])
 @login_required
 @check_verification
-@bp.route('/vote',  methods=['GET', 'POST'])
 def vote():
     roster = {'active': current_roster('active'),
         'inactive':current_roster('inactive')}
     
     return render_template('vote.html', roster=roster)
+
+
+@bp.route('/register_vote/<token>',  methods=['GET', 'POST'])
+@login_required
+@check_verification
+def register_vote(token):
+
+    user, payload = User.verify_user_token(token, task='vote')
+    if not user:
+        flash('Invalid token', 'danger')
+        return redirect(url_for('main.index'))
+
+    if not 'match' in payload:
+        flash('Invalid token payload', 'danger')
+        return redirect(url_for('main.index'))
+
+    match_id = payload['match']
+    match = Match.query.filter_by(id=match_id).first()
+    poll = Poll.query.filter_by(match_id=match_id).first()
+
+    if not poll:
+        flash('Sorry, poll not found.', 'danger')
+        return redirect(url_for('main.index'))
+
+    voter = voters.query.filter_by(user_id=current_user.id, poll_id=poll.id).first()
+    if voter:
+        flash('You have already voted for this match.', 'warning')
+        return redirect(url_for('main.index'))
+    else:
+        voter = voters(user_id=current_user.id, poll_id=poll.id)
+        db.session.add(voter)
+        db.session.commit()
+
+    players = [Player.query.filter_by(id=c).first() for c in request.form.getlist('choices')]
+    for p in players:
+        if not p:
+            pass
+
+        option = poll.options.filter_by(player_id=p.id).first()
+        if option:
+            option.votes += 1
+        else:
+            option = Option(poll_id=poll.id, player_id=p.id, votes=1)
+            
+        db.session.add(option)
+        db.session.commit()
+
+
+    flash('Thanks for voting!', 'success')
+    return redirect(url_for('main.index'))
+
 
 @bp.route('/search')
 @login_required
