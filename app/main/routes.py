@@ -10,7 +10,8 @@ from app.main import bp
 from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
     ClaimPlayerForm, EditSeasonForm, ScheduleForm, ReminderSetForm, NewsForm)
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
-    ReminderSettings, HighScore, LowScore, News, season_from_date, update_all_team_stats, current_roster, current_season)
+    ReminderSettings, HighScore, LowScore, News, Poll, Option, 
+    voters, season_from_date, update_all_team_stats, current_roster, current_season)
 from app.decorators import check_verification, check_role
 from app.main.leaderboard_card import LeaderBoardCard
 from app.main.email import send_reminder_email as reminder_email
@@ -932,10 +933,11 @@ def roster():
 @login_required
 @check_verification
 def vote():
+    match = Match.query.first()
     roster = {'active': current_roster('active'),
         'inactive':current_roster('inactive')}
     
-    return render_template('vote.html', roster=roster)
+    return render_template('vote.html', roster=roster, match=match)
 
 
 @bp.route('/register_vote/<token>',  methods=['GET', 'POST'])
@@ -954,20 +956,21 @@ def register_vote(token):
 
     match_id = payload['match']
     match = Match.query.filter_by(id=match_id).first()
-    poll = Poll.query.filter_by(match_id=match_id).first()
 
-    if not poll:
-        flash('Sorry, poll not found.', 'danger')
-        return redirect(url_for('main.index'))
+    if not match.poll:
+        poll = Poll(match_id=match.id,question='Select up to three (3) players for MVP:')
+        #flash('Sorry, poll not found.', 'danger')
+        #return redirect(url_for('main.index'))
+        db.session.add(poll)
+        db.session.commit()
 
-    voter = voters.query.filter_by(user_id=current_user.id, poll_id=poll.id).first()
-    if voter:
+    poll = match.poll
+
+    if current_user in poll.users:
         flash('You have already voted for this match.', 'warning')
         return redirect(url_for('main.index'))
     else:
-        voter = voters(user_id=current_user.id, poll_id=poll.id)
-        db.session.add(voter)
-        db.session.commit()
+        poll.users.append(current_user)
 
     players = [Player.query.filter_by(id=c).first() for c in request.form.getlist('choices')]
     for p in players:

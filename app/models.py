@@ -15,6 +15,12 @@ from hashlib import md5
 from app import db, login
 
 
+voters = db.Table('voters',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('poll_id', db.Integer, db.ForeignKey('poll.id'))
+    )
+
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), index=True, unique=True)
@@ -24,6 +30,7 @@ class User(UserMixin, db.Model):
     verified_on = db.Column(db.Date, index=True, default=None)
 
     player = db.relationship('Player', uselist=False, back_populates='user')
+    polls = db.relationship('Poll', secondary=voters, back_populates='users')
 
     def set_password(self,password):
         self.password_hash = generate_password_hash(password)
@@ -277,7 +284,7 @@ class Match(db.Model):
     match_stats = db.relationship('MatchStats', uselist=False, back_populates='match')
     high_scores = db.relationship('HighScore', back_populates='match', lazy='dynamic')
     low_scores = db.relationship('LowScore', back_populates='match', lazy='dynamic')
-    polls = db.relationship('Poll', back_populates='match', lazy='dynamic')
+    poll = db.relationship('Poll', uselist=False, back_populates='match')
 
     checked_players = association_proxy('checked_players_association', 'player')
 
@@ -712,10 +719,11 @@ class News(db.Model):
 class Poll(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
-    match = db.relationship('Match', back_populates='polls')
+    match = db.relationship('Match', back_populates='poll')
     question = db.Column(db.String(256))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow())
     options = db.relationship('Option', back_populates='poll', lazy='dynamic')
+    users = db.relationship('User', secondary=voters, back_populates='polls')
 
 
 class Option(db.Model):
@@ -725,12 +733,6 @@ class Option(db.Model):
     poll_id = db.Column(db.Integer, db.ForeignKey('poll.id'))
     poll = db.relationship('Poll', back_populates='options')
     votes = db.Column(db.Integer, default=0)
-
-
-voters = db.Table('voters',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('poll_id', db.Integer, db.ForeignKey('poll.id'))
-    )
 
 
 def current_season(last=0):

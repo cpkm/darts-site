@@ -66,4 +66,7 @@ html
     width: 125px;
     height: 40px;
     margin: 0;
+    background-color: #1595a9;
+    border: 1px solid;
+    border-color: #17a2b8;
 }
