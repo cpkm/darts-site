@@ -28,7 +28,7 @@
               <ul class="list-unstyled">
                 {% for m in season.matches|sort(attribute='date') %}
                 <li>
-                  <a href="{{ url_for('main.enter_score', id=m.id) }}">{{ {{ moment(m.date, local=True).format('MMM Do') }} - {{ m.opponent.name }}</a>
+                  <a href="{{ url_for('main.enter_score', id=m.id) }}">{{ moment(m.date, local=True).format('MMM Do') }} - {{ m.opponent.name }}</a>
                 </li>
                 {% endfor %}
               </ul>
