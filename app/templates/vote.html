@@ -16,14 +16,14 @@
       <p class="h3">{{ moment(match.date, local=True).format('LL') }} against {{ match.opponent.name }}</p>
       <p>{{ match.poll.question }}</p>
 
-      <form name="vote_form" name="vote_form" action="{{ url_for('main.register_vote', token=current_user.get_user_token(task='vote',payload={'match':match.id})) }}" method="post" enctype=multipart/form-data>
+      <form id="vote_form" name="vote_form" action="{{ url_for('main.register_vote', token=current_user.get_user_token(task='vote',payload={'match':match.id})) }}" method="post" enctype=multipart/form-data>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
         <div class="form-group d-flex justify-content-center">
         {% if roster['active'] %}
         {% for player in roster['active'] %}
         <div class="form-group m-0">
-          <label class="btn btn-info vote-btn" for="active_choices-{{loop.index}}">
+          <label class="btn vote-btn" for="active_choices-{{loop.index}}">
             <input type="checkbox" id="active_choices-{{loop.index}}" name="choices" value="{{ player.id }}">
             <span>{{ player.nickname }}</span>
           </label>
@@ -38,7 +38,7 @@
         {% if roster['inactive'] %}
         {% for player in roster['inactive'] %}
         <div class="form-group m-0">
-          <label class="btn btn-info vote-btn" for="inactive_choices-{{loop.index}}">
+          <label class="btn vote-btn" for="inactive_choices-{{loop.index}}">
             <input type="checkbox" id="inactive_choices-{{loop.index}}" name="choices" value="{{ player.id }}">
             <span>{{ player.nickname }}</span>
           </label>
@@ -59,5 +59,24 @@
   </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+$('#vote_form input[type="checkbox"]').on('change', function() {
+  if ($(this).prop('checked') == true){
+    if($('#vote_form input[type="checkbox"]:checked').length > 3) {
+      $(this).prop('checked', false);
+      $(this.parentElement).removeClass('vote-btn-checked');
+    } else {
+      $(this).prop('checked', true);
+      $(this.parentElement).addClass('vote-btn-checked');
+    }
+  } else {
+    $(this.parentElement).removeClass('vote-btn-checked');
+  }
+});
+</script>
 {% endblock %}
 

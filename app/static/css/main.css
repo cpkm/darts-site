@@ -69,4 +69,9 @@ html
     background-color: #1595a9;
     border: 1px solid;
     border-color: #17a2b8;
+    color: #ffffff;
+}
+
+.vote-btn-checked {
+    background-color: #17a2b8;
 }
