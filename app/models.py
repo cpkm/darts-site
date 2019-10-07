@@ -739,9 +739,20 @@ class Poll(db.Model):
     options = db.relationship('Option', back_populates='poll', lazy='dynamic')
     users = db.relationship('User', secondary=voters, back_populates='polls')
 
-    def top(self):
-        top = self.options.order_by(Option.votes.desc()).all()
-        return
+    def ranking(self, top=3):
+        ordered = self.options.order_by(Option.votes.desc()).all()
+        votes = [o.votes for o in ordered]
+        rank = [sorted(votes,reverse=True).index(v) for v in votes]
+
+        if (top-1) < rank[-1]:
+            i = next(x[0] for x in enumerate(rank) if x[1] >= top)
+            options = ordered[:i]
+            ranks = rank[:i]
+        else:
+            options = ordered
+            ranks = rank
+
+        return [(r+1,o) for r,o in zip(ranks,options)]
 
 
 class Option(db.Model):
@@ -752,6 +763,8 @@ class Option(db.Model):
     poll = db.relationship('Poll', back_populates='options')
     votes = db.Column(db.Integer, default=0)
 
+    def __repr__(self):
+        return('<{} {}>'.format(self.player, self.votes))
 
 def current_season(last=0):
     '''use last=1 for previous season, last=2 for 2 seasons ago...'''
