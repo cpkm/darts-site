@@ -26,7 +26,7 @@
         {{ wtf.form_errors(game, hiddens="only") }}
         <tr>
           <td>{{ game.import_check }}</td>
-          <td>{% if game.date %}{{ game.date.data.strftime('%B %d, %Y') }}{% endif %}</td>
+          <td>{% if game.date %}{{ moment(game.date.data, local=True).format('ll') }}{% endif %}</td>
           <td>{{ game.opponent.data }}</td>
           <td>{{ game.home_away.data }}</td>
         </tr>

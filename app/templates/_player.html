@@ -11,7 +11,7 @@
   </div>
   <div class="card-footer">
     <small class="text-muted">
-      {% if player.last_match %}Last played on {{ player.last_match.date.strftime('%B %d, %Y') }}
+      {% if player.last_match %}Last played on {{ moment(player.last_match.date, local=True).format('LL') }}
       {% else %}New player!
       {% endif %}
     </small>

@@ -25,7 +25,7 @@
           {% for cm in checked_matches %}
           {% set ins,out,ifn,nrp = cm.match.get_checked_players() %}
           <tr>
-            <th scope="row">{{ cm.match.date.strftime('%b %d') }}</th> 
+            <th scope="row">{{ moment(cm.match.date, local=True).format('ll') }}</th> 
             <td>{{ cm.match.opponent.name }}</td>
             <td>{{ cm.match.home_away }}</td>
             <td>{{ ins|length }} ({{ ifn|length }}) 

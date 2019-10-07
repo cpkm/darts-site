@@ -60,3 +60,23 @@ html
     padding: 0 !important;
     margin: 0 !important;
 }
+
+.vote-btn {
+    display: block;
+    width: 125px;
+    height: 40px;
+    margin: 0;
+    background-color: #17a2b8;
+    border: 1px solid;
+    border-radius: 0;
+    border-color: #118091;
+    color: #ffffff;
+}
+
+.vote-btn:hover {
+    color: #ffffff;
+}
+
+.vote-btn-checked {
+    background-color: #118091;
+}
