@@ -4,13 +4,14 @@ from flask_login import current_user, login_required
 from wtforms.validators import ValidationError
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from app import db, schedules, scoresheets
 from app.main import bp
 from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
     ClaimPlayerForm, EditSeasonForm, ScheduleForm, ReminderSetForm, NewsForm)
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
-    ReminderSettings, HighScore, LowScore, News, season_from_date, update_all_team_stats, current_roster, current_season)
+    ReminderSettings, HighScore, LowScore, News, Poll, Option, 
+    voters, season_from_date, update_all_team_stats, current_roster, current_season)
 from app.decorators import check_verification, check_role
 from app.main.leaderboard_card import LeaderBoardCard
 from app.main.email import send_reminder_email as reminder_email
@@ -186,8 +187,8 @@ def match_edit(id):
         match_id = newmatch.id
         db.session.commit()
         match = Match.query.filter_by(id=match_id).first()
-        print(match.date, type(match.date))
         match.create_checkins()
+        match.create_poll()
 
         flash('Match {} {} {} added!'.format(newmatch.date, form.opponent.data, form.home_away.data))
         return redirect(url_for('main.match_edit'))
@@ -213,6 +214,7 @@ def match_edit(id):
         match_roster = match.get_roster()
         match.delete_all_games()
         match.destroy_checkins()
+        match.destroy_poll()
 
         db.session.delete(match)
         db.session.commit()
@@ -521,6 +523,7 @@ def leaderboard(year_str):
             join(Player).filter(Player.nickname.in_([p.nickname for p in roster])).all()
     return render_template('leaderboard.html', roster=roster, stats=stats, year_str=year_str, board=board)
 
+
 @bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -821,7 +824,7 @@ def upload_schedule():
 
 @bp.route('/standings')
 def standings():
-    temas=None
+    teams = None
     try:
         teams = scrape_standings_table()
     except Exception as e:
@@ -926,6 +929,75 @@ def roster():
         'retired':current_roster('retired')}
     
     return render_template('roster.html', players=players)
+
+
+@bp.route('/vote',  methods=['GET', 'POST'])
+@login_required
+@check_verification
+def vote():
+    closed = date.today() - timedelta(1)
+    match = Match.query.filter(Match.date <= date.today(), Match.date >= closed).first()
+
+    if match:
+        if not match.poll:
+            match.create_poll()
+
+    roster = {'active': current_roster('active'),
+        'inactive':current_roster('inactive')}
+    
+    return render_template('vote.html', roster=roster, match=match)
+
+
+@bp.route('/register_vote/<token>',  methods=['GET', 'POST'])
+@login_required
+@check_verification
+def register_vote(token):
+
+    user, payload = User.verify_user_token(token, task='vote')
+    if not user:
+        flash('Invalid token', 'danger')
+        return redirect(url_for('main.index'))
+
+    if user != current_user:
+        flash('Login and try again', 'danger')
+        return redirect(url_for('main.index'))
+
+    if not 'match' in payload:
+        flash('Invalid token payload', 'danger')
+        return redirect(url_for('main.index'))
+
+    match_id = payload['match']
+    match = Match.query.filter_by(id=match_id).first()
+
+    poll = match.poll
+    if not poll:
+        flash('Voting has not oppened for this match.', 'warning')
+        return redirect(url_for('main.index'))
+
+    if current_user in poll.users:
+        flash('You have already voted for this match.', 'warning')
+        return redirect(url_for('main.index'))
+    else:
+        poll.users.append(current_user)
+
+    players = [Player.query.filter_by(id=c).first() for c in request.form.getlist('choices')]
+    for p in players:
+        if not p:
+            pass
+
+        option = poll.options.filter_by(player_id=p.id).first()
+        if option:
+            option.votes += 1
+        else:
+            option = Option(poll_id=poll.id, player_id=p.id, votes=1)
+            
+        db.session.add(option)
+        db.session.commit()
+
+
+    flash('Thanks for voting!', 'success')
+    return redirect(url_for('main.index'))
+
 
 @bp.route('/search')
 @login_required

@@ -2,6 +2,7 @@ import jwt
 import random
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import ARRAY
 from flask_login import UserMixin
 from sqlalchemy import MetaData, alias, func, join
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -14,6 +15,12 @@ from hashlib import md5
 from app import db, login
 
 
+voters = db.Table('voters',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('poll_id', db.Integer, db.ForeignKey('poll.id'))
+    )
+
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), index=True, unique=True)
@@ -23,6 +30,7 @@ class User(UserMixin, db.Model):
     verified_on = db.Column(db.Date, index=True, default=None)
 
     player = db.relationship('Player', uselist=False, back_populates='user')
+    polls = db.relationship('Poll', secondary=voters, back_populates='users')
 
     def set_password(self,password):
         self.password_hash = generate_password_hash(password)
@@ -276,6 +284,7 @@ class Match(db.Model):
     match_stats = db.relationship('MatchStats', uselist=False, back_populates='match')
     high_scores = db.relationship('HighScore', back_populates='match', lazy='dynamic')
     low_scores = db.relationship('LowScore', back_populates='match', lazy='dynamic')
+    poll = db.relationship('Poll', uselist=False, back_populates='match')
 
     checked_players = association_proxy('checked_players_association', 'player')
 
@@ -391,6 +400,20 @@ class Match(db.Model):
             join(Player).filter(Player.id.in_(roster_id)).all()
 
         return ins, out, ifn, nrp
+
+    def create_poll(self):
+        poll = Poll(match_id=self.id, question='Select up to three (3) players for MVP:')
+        db.session.add(poll)
+        db.session.flush()
+        poll_id = poll.id
+        db.session.commit()
+        return Poll.query.filter_by(id=poll_id).first()
+
+    def destroy_poll(self):
+        if self.poll:
+            db.session.delete(self.poll)
+            db.session.commit()
+        return
 
     def __repr__(self):
         return '<Match {}>'.format(self.date.strftime('%Y-%m-%d'))
@@ -706,6 +729,42 @@ class News(db.Model):
     def __repr__(self):
         return('<News {}>'.format(self.timestamp))
 
+
+class Poll(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    match_id = db.Column(db.Integer, db.ForeignKey('match.id'))
+    match = db.relationship('Match', back_populates='poll')
+    question = db.Column(db.String(256))
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow())
+    options = db.relationship('Option', back_populates='poll', lazy='dynamic')
+    users = db.relationship('User', secondary=voters, back_populates='polls')
+
+    def ranking(self, top=3):
+        ordered = self.options.order_by(Option.votes.desc()).all()
+        votes = [o.votes for o in ordered]
+        rank = [sorted(votes,reverse=True).index(v) for v in votes]
+
+        if (top-1) < rank[-1]:
+            i = next(x[0] for x in enumerate(rank) if x[1] >= top)
+            options = ordered[:i]
+            ranks = rank[:i]
+        else:
+            options = ordered
+            ranks = rank
+
+        return [(r+1,o) for r,o in zip(ranks,options)]
+
+
+class Option(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    player_id = db.Column(db.Integer, db.ForeignKey('player.id'))
+    player =  db.relationship('Player')
+    poll_id = db.Column(db.Integer, db.ForeignKey('poll.id'))
+    poll = db.relationship('Poll', back_populates='options')
+    votes = db.Column(db.Integer, default=0)
+
+    def __repr__(self):
+        return('<{} {}>'.format(self.player, self.votes))
 
 def current_season(last=0):
     '''use last=1 for previous season, last=2 for 2 seasons ago...'''
