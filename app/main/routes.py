@@ -4,7 +4,7 @@ from flask_login import current_user, login_required
 from wtforms.validators import ValidationError
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from app import db, schedules, scoresheets
 from app.main import bp
 from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
@@ -187,8 +187,8 @@ def match_edit(id):
         match_id = newmatch.id
         db.session.commit()
         match = Match.query.filter_by(id=match_id).first()
-        print(match.date, type(match.date))
         match.create_checkins()
+        match.create_poll()
 
         flash('Match {} {} {} added!'.format(newmatch.date, form.opponent.data, form.home_away.data))
         return redirect(url_for('main.match_edit'))
@@ -214,6 +214,7 @@ def match_edit(id):
         match_roster = match.get_roster()
         match.delete_all_games()
         match.destroy_checkins()
+        match.destroy_poll()
 
         db.session.delete(match)
         db.session.commit()
@@ -521,6 +522,7 @@ def leaderboard(year_str):
         stats = PlayerSeasonStats.query.join(Season).filter_by(season_name=year_str).\
             join(Player).filter(Player.nickname.in_([p.nickname for p in roster])).all()
     return render_template('leaderboard.html', roster=roster, stats=stats, year_str=year_str, board=board)
+
 
 @bp.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -933,7 +935,13 @@ def roster():
 @login_required
 @check_verification
 def vote():
-    match = Match.query.first()
+    closed = date.today() - timedelta(7)
+    match = Match.query.filter(Match.date <= date.today(), Match.date >= closed).first()
+
+    if match:
+        if not match.poll:
+            match.create_poll()
+
     roster = {'active': current_roster('active'),
         'inactive':current_roster('inactive')}
     
@@ -950,6 +958,10 @@ def register_vote(token):
         flash('Invalid token', 'danger')
         return redirect(url_for('main.index'))
 
+    if user != current_user:
+        flash('Login and try again', 'danger')
+        return redirect(url_for('main.index'))
+
     if not 'match' in payload:
         flash('Invalid token payload', 'danger')
         return redirect(url_for('main.index'))
@@ -957,14 +969,10 @@ def register_vote(token):
     match_id = payload['match']
     match = Match.query.filter_by(id=match_id).first()
 
-    if not match.poll:
-        poll = Poll(match_id=match.id,question='Select up to three (3) players for MVP:')
-        #flash('Sorry, poll not found.', 'danger')
-        #return redirect(url_for('main.index'))
-        db.session.add(poll)
-        db.session.commit()
-
     poll = match.poll
+    if not poll:
+        flash('Voting has not oppened for this match.', 'warning')
+        return redirect(url_for('main.index'))
 
     if current_user in poll.users:
         flash('You have already voted for this match.', 'warning')

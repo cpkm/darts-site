@@ -401,6 +401,20 @@ class Match(db.Model):
 
         return ins, out, ifn, nrp
 
+    def create_poll(self):
+        poll = Poll(match_id=self.id, question='Select up to three (3) players for MVP:')
+        db.session.add(poll)
+        db.session.flush()
+        poll_id = poll.id
+        db.session.commit()
+        return Poll.query.filter_by(id=poll_id).first()
+
+    def destroy_poll(self):
+        if self.poll:
+            db.session.delete(self.poll)
+            db.session.commit()
+        return
+
     def __repr__(self):
         return '<Match {}>'.format(self.date.strftime('%Y-%m-%d'))
 
@@ -724,6 +738,10 @@ class Poll(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow())
     options = db.relationship('Option', back_populates='poll', lazy='dynamic')
     users = db.relationship('User', secondary=voters, back_populates='polls')
+
+    def top(self):
+        top = self.options.order_by(Option.votes).all()
+        return
 
 
 class Option(db.Model):

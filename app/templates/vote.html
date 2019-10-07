@@ -13,7 +13,8 @@
   <div class="row">
     {% if match %}
     <div class="col mt-4">
-      <p>Select up to three players for MVP:</p>
+      <p class="h3">{{ moment(match.date, local=True).format('LL') }} against {{ match.opponent.name }}</p>
+      <p>{{ match.poll.question }}</p>
 
       <form name="vote_form" name="vote_form" action="{{ url_for('main.register_vote', token=current_user.get_user_token(task='vote',payload={'match':match.id})) }}" method="post" enctype=multipart/form-data>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
