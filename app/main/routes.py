@@ -824,7 +824,7 @@ def upload_schedule():
 
 @bp.route('/standings')
 def standings():
-    temas=None
+    teams = None
     try:
         teams = scrape_standings_table()
     except Exception as e:
@@ -935,7 +935,7 @@ def roster():
 @login_required
 @check_verification
 def vote():
-    closed = date.today() - timedelta(7)
+    closed = date.today() - timedelta(1)
     match = Match.query.filter(Match.date <= date.today(), Match.date >= closed).first()
 
     if match:

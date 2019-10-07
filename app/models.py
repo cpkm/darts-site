@@ -740,7 +740,7 @@ class Poll(db.Model):
     users = db.relationship('User', secondary=voters, back_populates='polls')
 
     def top(self):
-        top = self.options.order_by(Option.votes).all()
+        top = self.options.order_by(Option.votes.desc()).all()
         return
 
 
