@@ -858,7 +858,7 @@ def send_summary_email(token):
     ls = match.low_scores.with_entities(LowScore.player_id, func.count(LowScore.player_id))\
         .group_by(LowScore.player_id)\
         .order_by(func.count(LowScore.player_id).desc()).all()
-    t_ls = [(Player.query.filter_by(id=t[0]).first(),t[1]) for t in hs if t[1] == hs[0][1]]
+    t_ls = [(Player.query.filter_by(id=t[0]).first(),t[1]) for t in ls if t[1] == ls[0][1]]
 
     ts = sorted([(p,sum([pg.stars for pg in PlayerGame.query.filter_by(player=p)\
         .join(Game).join(Match).filter(Match.id==match.id).all()])) for p in match.get_roster()], key = lambda x:x[1], reverse = True)
