@@ -739,7 +739,7 @@ class Poll(db.Model):
     options = db.relationship('Option', back_populates='poll', lazy='dynamic')
     users = db.relationship('User', secondary=voters, back_populates='polls')
 
-    def ranking(self, top=3):
+    def ranking(self, top=3, group=False):
         ordered = self.options.order_by(Option.votes.desc()).all()
         votes = [o.votes for o in ordered]
         rank = [sorted(votes,reverse=True).index(v) for v in votes]
@@ -752,7 +752,12 @@ class Poll(db.Model):
             options = ordered
             ranks = rank
 
-        return [(r+1,o) for r,o in zip(ranks,options)]
+        ranking = [(r+1,o) for r,o in zip(ranks,options)]
+
+        if group:
+            return [(r,[o[1] for o in ranking if o[0]==r]) for r in set([o[0] for o in ranking])]
+        else:
+            return ranking
 
 
 class Option(db.Model):
