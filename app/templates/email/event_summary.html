@@ -12,6 +12,15 @@
 <p><b>Food: </b>{{ match.food }}</p>
 <p>{{ match.match_summary }}</p>
 
+{% if match.poll %}
+<p><b>MVP Voting:</b></p>
+    <ul style="list-style: none;">
+        {% for rank in match.poll.ranking(group=True) %}
+        <li>{{rank[0]}}: {% for o in rank[1] %}{{ o.player.nickname }}{% if loop.index < loop.length %}, {% endif %}{% endfor %}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
 <p><b>Top players:</b></p>
 <ul>
     {% if performers['stars'] %}<li>Stars: {{ performers['stars'][0][1] }} - {% for p in performers['stars'][:-1] %}{{ p[0].nickname }}, {% endfor %}{{ performers['stars'][-1][0].nickname }}</li>{% endif %}

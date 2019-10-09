@@ -868,6 +868,9 @@ def send_summary_email(token):
     performers = {'stars': t_ts, 'hs': t_hs, 'ls': t_ls}
 
     users = [p.user for p in current_roster('active') if p.user is not None]
+
+    if current_app.config['RENDER_EMAIL']:
+        return render_template('email/event_summary.html', match=match, performers=performers)
     
     summary_email(users=users,match=match, performers=performers)
     match.summary_email_sent = date.today()
