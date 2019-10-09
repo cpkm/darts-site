@@ -8,6 +8,13 @@ Food: {{ match.food }}
 
 {{ match.match_summary }}
 
+{% if match.poll %}
+MVP Voting:
+{% for rank in match.poll.ranking(group=True) %}
+    {{rank[0]}}: {% for o in rank[1] %}{{ o.player.nickname }}{% if loop.index < loop.length %}, {% endif %}{% endfor %}
+    {% endfor %}
+{% endif %}
+
 Top players:
 
 {% if performers['stars'] %}Stars: {{ performers['stars'][0][1] }} - {% for p in performers['stars'][:-1] %}{{ p[0].nickname }}, {% endfor %}{{ performers['stars'][-1][0].nickname }} {% endif %}

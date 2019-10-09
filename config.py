@@ -19,6 +19,7 @@ class Config(object):
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_SUPPRESS_SEND = os.environ.get('MAIL_SUPPRESS_SEND') is not None
+    RENDER_EMAIL = os.environ.get('RENDER_EMAIL') is not None
 
     ADMINS = [('ICC4 darts','icc4darts@gmail.com'),('ICC4 darts errors','icc4darts+errors@gmail.com')]
     LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT')

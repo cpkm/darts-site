@@ -74,37 +74,57 @@
           {% else %}Loss{% endif %}</p>
           <p>We ate {{ match.food }}</p>
           <p>{{ match.match_summary }}</p>
-        </div>
 
-        <div class="col-xs-12 col-md-6">
-            {% if match.match_stats %}
-            <div class="card-group col-xs-12">
-              <div class="card text-center">
-                <div class="card-header">
-                  Doubles
-                </div>
-                <div class="card-body">
-                  <a class="h2 card-title">{{ match.match_stats.wins_d7 + match.match_stats.wins_d5 }}</a><a class="card-text">/8</a><br>
-                  <p class="h4 card-title">{{ match.match_stats.stars_d7 + match.match_stats.stars_d5 }}<i class="fa fa-star text-warning"></i></p>
-                </div>
-              </div>
-              <div class="card text-center">
-                <div class="card-header">
-                  Singles
-                </div>
-                <div class="card-body">
-                  <a class="h2 card-title">{{ match.match_stats.wins_s5 }}</a><a class="card-text">/8</a><br>
-                  <p class="h4 card-title">{{ match.match_stats.stars_s5 }}<i class="fa fa-star text-warning"></i></p>
-                </div>
-              </div>
-          </div>
-          {% endif %}
           <div class="col-xs-12 d-flex justify-content-center">
             <button type="button" class="m-2 btn btn-primary" data-toggle="modal" data-target="#scoresheetModal">
               View match sheet
             </button>
           </div>
+
         </div>
+
+        <div class="col-xs-12 col-md-6">
+
+          {% if match.match_stats %}
+          <div class="card-group col-xs-12">
+            <div class="card text-center">
+              <div class="card-header">
+                Doubles
+              </div>
+              <div class="card-body">
+                <a class="h2 card-title">{{ match.match_stats.wins_d7 + match.match_stats.wins_d5 }}</a><a class="card-text">/8</a><br>
+                <p class="h4 card-title">{{ match.match_stats.stars_d7 + match.match_stats.stars_d5 }}<i class="fa fa-star text-warning"></i></p>
+              </div>
+            </div>
+            <div class="card text-center">
+              <div class="card-header">
+                Singles
+              </div>
+              <div class="card-body">
+                <a class="h2 card-title">{{ match.match_stats.wins_s5 }}</a><a class="card-text">/8</a><br>
+                <p class="h4 card-title">{{ match.match_stats.stars_s5 }}<i class="fa fa-star text-warning"></i></p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if match.poll %}
+          <div class="col-xs-12 my-2">
+            <div class="card text-center">
+              <h5 class="card-header">
+                Match MVP
+              </h5>
+              <div class="card-body">
+                {% for rank in match.poll.ranking(group=True) %}
+                <p>{{rank[0]}}: {% for o in rank[1] %}{{ o.player.nickname }}{% if loop.index < loop.length %}, {% endif %}{% endfor %}</p>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+
         {% endif %}
       </div>
 
