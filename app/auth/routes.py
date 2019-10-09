@@ -1,4 +1,5 @@
 from flask import render_template, flash, redirect, url_for, request, current_app, g
+from sqlalchemy import func
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from datetime import date
@@ -19,7 +20,7 @@ def login():
         return redirect(url_for('main.index'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter(func.lower(User.email)==func.lower(form.email.data)).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid email or password', 'danger')
             return redirect(url_for('auth.login'))
@@ -48,7 +49,7 @@ def register():
     status = current_app.config['REGISTRATION_OPEN']
     
     if form.validate_on_submit():
-        user = User(email=form.email.data)
+        user = User(email=form.email.data.lower())
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -63,7 +64,7 @@ def reset_password_request():
         return redirect(url_for('main.index'))
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter(func.lower(User.email)==func.lower(form.email.data)).first()
         if user:
             send_password_reset_email(user)
         flash('Check your email for instructions to reset your password')
