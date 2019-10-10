@@ -948,7 +948,7 @@ def vote():
             match.create_poll()
 
     roster = {'active': current_roster('active'),
-        'inactive':current_roster('inactive')}
+        'inactive':current_roster('sub')}
     
     return render_template('vote.html', roster=roster, match=match)
 
