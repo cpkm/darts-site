@@ -743,8 +743,12 @@ class Poll(db.Model):
         ordered = self.options.order_by(Option.votes.desc()).all()
         votes = [o.votes for o in ordered]
         rank = [sorted(votes,reverse=True).index(v) for v in votes]
+        
+        if top is None or top == 0:
+            options = ordered
+            ranks = rank
 
-        if (top-1) < rank[-1]:
+        elif (top-1) < rank[-1]:
             i = next(x[0] for x in enumerate(rank) if x[1] >= top)
             options = ordered[:i]
             ranks = rank[:i]

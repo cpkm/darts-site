@@ -938,7 +938,9 @@ def roster():
 @login_required
 @check_verification
 def vote():
-    closed = date.today() - timedelta(1)
+    period = current_app.config['VOTE_PERIOD']
+    closed = date.today() - timedelta(period)
+
     match = Match.query.filter(Match.date <= date.today(), Match.date >= closed).first()
 
     if match:
