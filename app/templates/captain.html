@@ -2,10 +2,8 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-
 <div class="card h-100">
   <h2 class="card-header">Captain's Portal</h2>
-
   <!-- Nav tabs -->
   <ul class="nav nav-tabs mt-2 mx-1" id="myTab" role="tablist">
     <li class="nav-item">
@@ -120,10 +118,10 @@
                         </thead>
                         <tbody>
                           <tr>
-                            <td>{% for pmc in ins %}{{ pmc.player.nickname }}<br>{% endfor %}</td>
-                            <td>{% for pmc in out %}{{ pmc.player.nickname }}<br>{% endfor %}</td>
-                            <td>{% for pmc in ifn %}{{ pmc.player.nickname }}<br>{% endfor %}</td>
-                            <td>{% for pmc in nrp %}{{ pmc.player.nickname }}<br>{% endfor %}</td>                         
+                            <td>{% for pmc in ins %}{% include '_checkin_popup.html' %}<br>{% endfor %}</td>
+                            <td>{% for pmc in out %}{% include '_checkin_popup.html' %}<br>{% endfor %}</td>
+                            <td>{% for pmc in ifn %}{% include '_checkin_popup.html' %}<br>{% endfor %}</td>
+                            <td>{% for pmc in nrp %}{% include '_checkin_popup.html' %}<br>{% endfor %}</td>                         
                           </tr>
                         </tbody>
                       </table>
@@ -248,4 +246,18 @@ $('#confirmModal').on('show.bs.modal', function(e) {
   $('[data-toggle="tooltip"]').tooltip()
 })
 </script>
+
+<script>
+  $(function () {
+  $('[data-toggle="popover"]').popover({
+    container: 'body',
+    animation: false,
+    html: true})
+
+  $('[data-toggle="popover"]').on('click', function (e) {
+    $('[data-toggle="popover"]').not(this).popover('hide');
+});
+})
+</script>
+
 {% endblock %}

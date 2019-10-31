@@ -80,3 +80,7 @@ html
 .vote-btn-checked {
     background-color: #118091;
 }
+
+.popover > .arrow {
+    border-width: 0px;
+}
