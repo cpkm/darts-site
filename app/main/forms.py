@@ -6,7 +6,7 @@ from flask_pagedown.fields import PageDownField
 from wtforms.validators import ValidationError, DataRequired, InputRequired, Length, Email
 from app import db
 from app.models import (Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, 
-    ReminderSettings, season_from_date, current_roster)
+    ReminderSettings, UserSettings, season_from_date, current_roster)
 from app.validators import Unique
 from datetime import datetime, timedelta
 import string
@@ -405,6 +405,27 @@ class NewsForm(FlaskForm):
     submit_new = SubmitField('Submit')
     submit_edit = SubmitField('Edit Post')
     submit_delete = SubmitField('Delete Post')
+
+class UserSettingsForm(FlaskForm):
+    email_reminders = BooleanField('Match reminders')
+    email_summary = BooleanField('Post-match summaries')
+
+    submit_settings = SubmitField('Update')
+
+    def load_settings(self, user):
+        if not user.settings:
+            settings = UserSettings()
+            settings.user = user
+            db.session.add(settings)
+            db.session.commit()
+        else:
+            settings = user.settings
+
+        self.email_reminders.data = settings.email_reminders
+        self.email_summary.data = settings.email_summary
+
+        return
+
 
 
 

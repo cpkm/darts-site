@@ -8,7 +8,7 @@ from datetime import datetime, date, timedelta
 from app import db, schedules, scoresheets
 from app.main import bp
 from app.main.forms import (EditPlayerForm, EditTeamForm, EditMatchForm, EnterScoresForm, HLScoreForm, RosterForm,
-    ClaimPlayerForm, EditSeasonForm, ScheduleForm, ReminderSetForm, NewsForm)
+    ClaimPlayerForm, EditSeasonForm, ScheduleForm, ReminderSetForm, NewsForm, UserSettingsForm)
 from app.models import (User, Player, Game, Match, Team, PlayerGame, PlayerSeasonStats, Season,
     ReminderSettings, HighScore, LowScore, News, Poll, Option, 
     voters, season_from_date, update_all_team_stats, current_roster, current_season)
@@ -539,6 +539,7 @@ def profile():
 
     player_form = EditPlayerForm(nickname)
     claim_form = ClaimPlayerForm()
+    settings_form = UserSettingsForm()
 
     if request.method=='POST' and claim_form.submit_claim.data and claim_form.validate():
         claimed_player = Player.query.filter_by(nickname=claim_form.player.data).first()
@@ -582,14 +583,25 @@ def profile():
             player.nickname, player.first_name, player.last_name))
         return redirect(url_for('main.profile'))
 
+    if request.method=='POST' and settings_form.submit_settings.data and settings_form.validate():
+        settings = current_user.settings
+        settings.email_reminders = settings_form.email_reminders.data
+        settings.email_summary = settings_form.email_summary.data
+        db.session.add(settings)
+        db.session.commit()
+        flash('Settings updated!')
+        return redirect(url_for('main.profile'))
+
     elif request.method == 'GET' and player is not None:
         player_form.first_name.data = player.first_name
         player_form.last_name.data = player.last_name
         player_form.nickname.data = player.nickname
         player_form.tagline.data = player.tagline
 
+        settings_form.load_settings(current_user)
+
     return render_template('profile.html', player_form=player_form, claim_form=claim_form, 
-        checked_matches=checked_matches)
+        settings_form=settings_form, checked_matches=checked_matches)
 
 
 @bp.route('/captain', methods=['GET', 'POST'])
