@@ -31,6 +31,7 @@ class User(UserMixin, db.Model):
 
     player = db.relationship('Player', uselist=False, back_populates='user')
     polls = db.relationship('Poll', secondary=voters, back_populates='users')
+    settings = db.relationship('UserSettings', uselist=False, back_populates='user')
 
     def set_password(self,password):
         self.password_hash = generate_password_hash(password)
@@ -774,6 +775,19 @@ class Option(db.Model):
 
     def __repr__(self):
         return('<{} {}>'.format(self.player, self.votes))
+
+
+class UserSettings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user =  db.relationship('User')
+
+    email_reminders = db.Column(db.Boolean, index=True, default=True)
+    email_summary = db.Column(db.Boolean, index=True, default=True)
+
+    def __repr__(self):
+        return('<{} Settings>'.format(self.user))
+
 
 def current_season(last=0):
     '''use last=1 for previous season, last=2 for 2 seasons ago...'''
