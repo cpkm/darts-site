@@ -3,6 +3,10 @@ from app.email import send_bulk_email, send_email
 
 def send_reminder_email(users, match, status):
     print('sending reminder email to {} for {} match.'.format(users,match))
+
+    allowed = [u.settings.email_reminders if u.settings is not None else True for u in users] 
+    users,status = [[i for (i,t) in zip(j,allowed) if t] for j in [users,status]]
+
     send_bulk_email('ICC4 Event reminder: {} vs {}'.format(match.date.strftime('%d-%b'), match.opponent.name),
             sender=current_app.config['ADMINS'][0],
             recipients=[u.email for u in users],
@@ -21,6 +25,10 @@ def send_captain_report(captain, match):
 
 def send_summary_email(users, match, performers):
     print('sending summary email to {} for {} match.'.format(users,match))
+
+    allowed = [u.settings.email_summary if u.settings is not None else True for u in users] 
+    users = [i for (i,t) in zip(users,allowed) if t]
+
     send_email('ICC4 Event summary: {} vs {}'.format(match.date.strftime('%d-%b'), match.opponent.name),
             sender=current_app.config['ADMINS'][0],
             recipients=[u.email for u in users],
