@@ -43,6 +43,13 @@ class EditPlayerForm(FlaskForm):
             if new_player_test is not None and self.original_nickname is not nickname.data:
                 raise ValidationError('Player nickname must be unique.')
 
+    def load_player(self, player):
+        self.first_name.data = player.first_name
+        self.last_name.data = player.last_name
+        self.nickname.data = player.nickname
+        self.tagline.data = player.tagline
+        return
+
 class ActivePlayerForm(FlaskForm):
     player = HiddenField('', validators=[DataRequired()])
     role = SelectField('', 

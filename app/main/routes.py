@@ -592,13 +592,10 @@ def profile():
         flash('Settings updated!')
         return redirect(url_for('main.profile'))
 
-    elif request.method == 'GET' and player is not None:
-        player_form.first_name.data = player.first_name
-        player_form.last_name.data = player.last_name
-        player_form.nickname.data = player.nickname
-        player_form.tagline.data = player.tagline
-
+    elif request.method == 'GET':
         settings_form.load_settings(current_user)
+        if player is not None:
+            player_form.load_player(player)
 
     return render_template('profile.html', player_form=player_form, claim_form=claim_form, 
         settings_form=settings_form, checked_matches=checked_matches)
