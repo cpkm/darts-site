@@ -586,6 +586,7 @@ def profile():
     if request.method=='POST' and settings_form.submit_settings.data and settings_form.validate():
         settings = current_user.settings
         settings.email_reminders = settings_form.email_reminders.data
+        settings.email_reminders_if_nr = settings_form.email_reminders_if_nr.data
         settings.email_summary = settings_form.email_summary.data
         db.session.add(settings)
         db.session.commit()
