@@ -783,6 +783,7 @@ class UserSettings(db.Model):
     user =  db.relationship('User')
 
     email_reminders = db.Column(db.Boolean, index=True, default=True)
+    email_reminders_if_nr= db.Column(db.Boolean, index=True, default=False)
     email_summary = db.Column(db.Boolean, index=True, default=True)
 
     def __repr__(self):
