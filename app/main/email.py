@@ -2,7 +2,6 @@ from flask import render_template, current_app
 from app.email import send_bulk_email, send_email
 
 def send_reminder_email(users, match, status):
-
     allowed = [True]*len(users)
     ins,out,ifn,nrp = match.get_checked_players()
     u_nrp = [i.player.user for i in nrp]
@@ -14,9 +13,7 @@ def send_reminder_email(users, match, status):
                     allowed[i] = False
             else:
                 allowed[i] = False
-
-    print(allowed)
-
+                
     users,status = [[i for (i,t) in zip(j,allowed) if t] for j in [users,status]]
     print('sending reminder email to {} for {} match.'.format(users,match))
     send_bulk_email('ICC4 Event reminder: {} vs {}'.format(match.date.strftime('%d-%b'), match.opponent.name),
