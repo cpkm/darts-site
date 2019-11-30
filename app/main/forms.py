@@ -6,7 +6,7 @@ from flask_pagedown.fields import PageDownField
 from wtforms.validators import ValidationError, DataRequired, InputRequired, Length, Email
 from app import db
 from app.models import (Player, Game, Match, Team, PlayerGame, Season, HighScore, LowScore, 
-    ReminderSettings, season_from_date, current_roster)
+    ReminderSettings, UserSettings, season_from_date, current_roster)
 from app.validators import Unique
 from datetime import datetime, timedelta
 import string
@@ -42,6 +42,13 @@ class EditPlayerForm(FlaskForm):
             new_player_test = Player.query.filter_by(nickname=nickname.data).first()
             if new_player_test is not None and self.original_nickname is not nickname.data:
                 raise ValidationError('Player nickname must be unique.')
+
+    def load_player(self, player):
+        self.first_name.data = player.first_name
+        self.last_name.data = player.last_name
+        self.nickname.data = player.nickname
+        self.tagline.data = player.tagline
+        return
 
 class ActivePlayerForm(FlaskForm):
     player = HiddenField('', validators=[DataRequired()])
@@ -405,6 +412,29 @@ class NewsForm(FlaskForm):
     submit_new = SubmitField('Submit')
     submit_edit = SubmitField('Edit Post')
     submit_delete = SubmitField('Delete Post')
+
+class UserSettingsForm(FlaskForm):
+    email_reminders = BooleanField('Match reminders')
+    email_reminders_if_nr = BooleanField('Only if I have NOT responded')
+    email_summary = BooleanField('Post-match summaries')
+
+    submit_settings = SubmitField('Update')
+
+    def load_settings(self, user):
+        if not user.settings:
+            settings = UserSettings()
+            settings.user = user
+            db.session.add(settings)
+            db.session.commit()
+        else:
+            settings = user.settings
+
+        self.email_reminders.data = settings.email_reminders
+        self.email_reminders_if_nr.data = settings.email_reminders_if_nr
+        self.email_summary.data = settings.email_summary
+
+        return
+
 
 
 
