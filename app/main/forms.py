@@ -415,7 +415,7 @@ class NewsForm(FlaskForm):
 
 class UserSettingsForm(FlaskForm):
     email_reminders = BooleanField('Match reminders')
-    email_reminders_if_nr = BooleanField('Only if I have not checked in')
+    email_reminders_if_nr = BooleanField('Only if I have NOT responded')
     email_summary = BooleanField('Post-match summaries')
 
     submit_settings = SubmitField('Update')
