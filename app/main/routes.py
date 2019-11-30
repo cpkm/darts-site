@@ -731,10 +731,8 @@ def update_checkin(token):
     player.checkin(match,status)
 
     flash('Thank you for checking in!', 'success')
-    if current_user.is_anonymous():
+    if current_user.is_anonymous:
         return redirect(url_for('main.index'))
-    if current_user.check_role(['captain','admin']):
-        return redirect(url_for('main.captain', _anchor='checkin'))
     elif current_user == user:
         return redirect(url_for('main.checkin'))
     else:
