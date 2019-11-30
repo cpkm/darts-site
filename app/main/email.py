@@ -2,11 +2,9 @@ from flask import render_template, current_app
 from app.email import send_bulk_email, send_email
 
 def send_reminder_email(users, match, status):
-    print('sending reminder email to {} for {} match.'.format(users,match))
-
     allowed = [u.settings.email_reminders if u.settings is not None else True for u in users] 
     users,status = [[i for (i,t) in zip(j,allowed) if t] for j in [users,status]]
-
+    print('sending reminder email to {} for {} match.'.format(users,match))
     send_bulk_email('ICC4 Event reminder: {} vs {}'.format(match.date.strftime('%d-%b'), match.opponent.name),
             sender=current_app.config['ADMINS'][0],
             recipients=[u.email for u in users],
@@ -24,13 +22,12 @@ def send_captain_report(captain, match):
             html_body=[render_template('email/captain_report.html', captain=c, match=match) for c in captain])
 
 def send_summary_email(users, match, performers):
-    print('sending summary email to {} for {} match.'.format(users,match))
-
     allowed = [u.settings.email_summary if u.settings is not None else True for u in users] 
     users = [i for (i,t) in zip(users,allowed) if t]
-
+    print('sending summary email to {} for {} match.'.format(users,match))
     send_email('ICC4 Event summary: {} vs {}'.format(match.date.strftime('%d-%b'), match.opponent.name),
             sender=current_app.config['ADMINS'][0],
-            recipients=[u.email for u in users],
+            recipients=[],
             text_body=render_template('email/event_summary.txt', match=match, performers=performers),
-            html_body=render_template('email/event_summary.html', match=match, performers=performers))
+            html_body=render_template('email/event_summary.html', match=match, performers=performers),
+            bcc=[u.email for u in users])
