@@ -94,8 +94,32 @@
     
     <div class="tab-pane" id="settings" role="tabpanel" aria-labelledby="settings-tab">
       <div class="container mx-2 my-4">
-        <p>To change your account email, please <a href="mailto:icc4darts+admin@gmail.com">contact</a> the site administrator.</p>
-        <p>To change your password, <a href="{{ url_for('auth.reset_password', token=current_user.get_user_token(task='reset_password')) }}">Click Here</a>.</p>
+        <form class="form" method="post" role="form">
+          {{ settings_form.csrf_token }}
+          {{ settings_form.hidden_tag() }}
+          {{ wtf.form_errors(settings_form, hiddens="only") }}
+
+          <h3>Login settings</h3>
+          <div class="container mx-2">
+            <p>To change your account email, please <a href="mailto:icc4darts+admin@gmail.com">contact</a> the site administrator.</p>
+            <p>To change your password, <a href="{{ url_for('auth.reset_password', token=current_user.get_user_token(task='reset_password')) }}">Click Here</a>.</p>
+          </div>
+          <h3>Email settings</h3>
+          <div class="container mx-2">
+            <p>Please select which communications you would like to recieve.</p>
+
+            {{ wtf.form_field(settings_form.email_reminders) }}
+
+            <div class="checkbox", style="text-indent: 40px">
+              <small style="text-indent: -15px">
+              {{ settings_form.email_reminders_if_nr(class="form-check-input", id="email_reminders_if_nr") }} {{ settings_form.email_reminders_if_nr.label(class="form-check-label", for="email_reminders_if_nr") }}
+              </small>
+            </div>
+
+            {{ wtf.form_field(settings_form.email_summary) }}
+          </div>
+          {{ wtf.form_field(settings_form.submit_settings, button_map={'submit_settings': 'info my-1'}) }}
+        </form>
       </div>
     </div>      
   </div>
@@ -119,4 +143,13 @@ $(function(){
   });
 });
 </script>
+
+<script>
+$(function() {
+  $('#email_reminders').on('change', function(){
+        $('#email_reminders_if_nr').prop('disabled', !this.checked);
+          }).trigger('change');
+});
+</script>
+
 {% endblock %}
