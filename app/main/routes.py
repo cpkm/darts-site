@@ -745,7 +745,7 @@ def checkin():
     if current_user.player:
         player = Player.query.filter_by(nickname=current_user.player.nickname).first()
         checked_matches = player.checked_matches_association.\
-            join(Match).filter(Match.date>=date.today()).order_by(Match.date).all()
+            join(Match).filter(Match.date>=(date.today()-timedelta(days=1))).order_by(Match.date).all()
     else:
         player = None
         checked_matches = None
