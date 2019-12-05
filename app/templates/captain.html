@@ -101,7 +101,7 @@
                   <a role="button" class="btn btn-danger btn-sm" data-id="{{ m.__repr__()[1:-1] }}" href="#" data-href="{{ url_for('main.send_reminder_email', token=current_user.get_user_token(task='send_reminder_email'), match_id=m.id) }}" data-toggle="modal" data-target="#confirmModal">Send Reminder Email</a>
                   <a role="button" class="btn btn-warning btn-sm" id="ifn_{{ m.__repr__()[1:-1] }}" href="mailto:{{ ifn|join(', ', attribute='player.user.email') }}?bcc={{ current_user.email }}&subject=You are needed for darts this week">Email IfN's</a>
                 </td>
-                <td>{% if m.reminder_email_sent %}{{ moment(m.reminder_email_sent, local=True).fromNow()}}{% endif %}</td>
+                <td>{% if m.reminder_email_sent %}{{ moment(m.reminder_email_sent, local=True).format('dddd, MMM D') }}{% endif %}</td>
               </tr>
               <tr>
                 <td colspan="6">
