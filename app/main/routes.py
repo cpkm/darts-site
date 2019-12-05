@@ -530,12 +530,9 @@ def profile():
     if current_user.player:
         nickname = current_user.player.nickname
         player = Player.query.filter_by(nickname=nickname).first()
-        checked_matches = player.checked_matches_association.\
-            join(Match).filter(Match.date>=date.today()).order_by(Match.date).all()
     else:
         player = None
         nickname = None
-        checked_matches = None
 
     player_form = EditPlayerForm(nickname)
     claim_form = ClaimPlayerForm()
@@ -599,7 +596,7 @@ def profile():
             player_form.load_player(player)
 
     return render_template('profile.html', player_form=player_form, claim_form=claim_form, 
-        settings_form=settings_form, checked_matches=checked_matches)
+        settings_form=settings_form)
 
 
 @bp.route('/captain', methods=['GET', 'POST'])
