@@ -10,14 +10,21 @@
 
     8p.m. on {{ match.date.strftime('%B %-d') }} against <b>{{ match.opponent.name }}</b> at {{ match.location }}.
 </p>
-<p>Currently you have checked-in as: <b>
-{% if not status %}OUT
-{% elif status.lower()=='in' %}IN
+{% if not status %}
+<p><b>You have not checked-in.</b></p>
+{% elif status.lower()=='none' %}
+<p><b>You have not checked-in.</b></p>
+{% else %}
+<p>Currently you have checked-in as: 
+<b>
+{% if status.lower()=='in' %}IN
+{% elif status.lower()=='out' %}OUT
 {% elif status.lower()=='ifn' %}IF NEEDED
-{% else %}OUT
+{% else %}NO RESPONSE
 {% endif %}
 </b></p>
-<p>Click the links below to change your status:<br>
+{% endif %}
+<p>Click the links below to update your status:<br>
 <button type="button"><a role="button" href="{{ url_for('main.update_checkin', token=user.get_user_token(task='checkin', payload={'match':match.id,'player':user.player.id,'status':'in'}, expires_in=None), _external=True) }}">In</a></button>
 <button type="button"><a role="button" href="{{ url_for('main.update_checkin', token=user.get_user_token(task='checkin', payload={'match':match.id,'player':user.player.id,'status':'out'}, expires_in=None), _external=True) }}">Out</a></button>
 <button type="button"><a role="button" href="{{ url_for('main.update_checkin', token=user.get_user_token(task='checkin', payload={'match':match.id,'player':user.player.id,'status':'ifn'}, expires_in=None), _external=True) }}">If Needed</a></button>
