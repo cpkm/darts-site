@@ -41,9 +41,27 @@
 
   <div class="col-md-9">
     <div class="card">
-      <h2 class="card-header">{{ match.opponent.name }} <small class="text-muted">- {{ moment(match.date, local=True).format('MMM Do YYYY') }}</small></h2>
+      <h2 class="card-header">{{ match.opponent.name }} <small class="text-muted">- {{ moment(match.date, local=True).format('MMM Do YYYY') }}</small>
+      </h2>
       
       <div class="card-body col-xs-12">
+
+        <h6>
+        <nav aria-label="...">
+          <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+              <a href="{{ prev_url or '#' }}">
+                <span aria-hidden="true">&larr;</span> Prev match
+              </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+              <a href="{{ next_url or '#' }}">
+                Next match <span aria-hidden="true">&rarr;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        </h6>
 
         {% if match.win==None %}
         <div class="col-xs-12 col-md-6">
@@ -220,7 +238,7 @@
         </div>
 
 
-        <div class="col-xs-12 col-md-6">
+        <div class="col-xs-12 col-md-6 mb-4">
           <div class="container">
             <h5 class="card-subtitle">Low Scores</h5>
             <div class="table-responsive">
@@ -233,20 +251,37 @@
                   </tr>
                 </thead>
                 <tbody>
-              {% for p in roster %}
-              <tr>
-                <th scope="row">{{ p.nickname }}</th>
-                {% with ss = match.low_scores.filter_by(player=p).all() %}
-                <td>{{ ss|count }}</td>
-                <td>{% if ss %}{% for s in ss[:-1] %}{{ s.score }}, {% endfor %}{{ ss[-1].score }}{% endif %}</td>
-                {% endwith %}
-              </tr>
+                {% for p in roster %}
+                <tr>
+                  <th scope="row">{{ p.nickname }}</th>
+                  {% with ss = match.low_scores.filter_by(player=p).all() %}
+                  <td>{{ ss|count }}</td>
+                  <td>{% if ss %}{% for s in ss[:-1] %}{{ s.score }}, {% endfor %}{{ ss[-1].score }}{% endif %}</td>
+                  {% endwith %}
+                </tr>
                 {% endfor %}
-              </tbody>
-            </table>
-              </div>
+                </tbody>
+              </table>
             </div>
           </div>
+        </div>
+
+        <h6>
+        <nav aria-label="...">
+          <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+              <a href="{{ prev_url or '#' }}">
+                <span aria-hidden="true">&larr;</span> Prev match
+              </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+              <a href="{{ next_url or '#' }}">
+                Next match <span aria-hidden="true">&rarr;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        </h6>
 
       </div>    
     </div>
