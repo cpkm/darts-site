@@ -5,12 +5,12 @@
 <h1>Enter game scores</h1>
 <br> 
 <div class="row">
-
+  
+  <!--Side bar-->
   <div class="col-md-3">
-    <p>
-      <a class="btn btn-primary" data-toggle="collapse" href="#allSeasonCollapse" role="button" aria-expanded="false" aria-controls="allSeasonCollapse">Show Seasons</a>
-    </p>
-    <div class="collapse multi-collapse" id="allSeasonCollapse">
+      <a class="btn btn-primary btn-block mb-2" data-toggle="collapse" href="#allSeasonCollapse" role="button" aria-expanded="false" aria-controls="allSeasonCollapse">Show Seasons</a>
+
+    <div class="collapse multi-collapse mb-2" id="allSeasonCollapse">
       <div id="accordion">
 
         {% for season in g.all_seasons %}
@@ -42,10 +42,12 @@
     </div>
   </div>
 
+  <!--Match details-->
   <div class="col-md-9">
   {% if match %}
-    <div class="card m-2">
-      <h2 class="card-header">Details and game scores</h2>
+    <div class="card mb-2">
+      <h2 class="card-header">Details and game scores
+        <a href="{{ url_for('main.match', id=match.id) }}"><small class="text-muted"> (View Match Page)</small></a></h2>
       <div class="card-body">
       <h3 class="text-center text-muted">{{ match.opponent.name }} {{ match.home_away }} game on {{ match.date.strftime('%Y-%m-%d') }}</h3>
         <form class="form" method="post" role="form" enctype=multipart/form-data>
@@ -122,7 +124,7 @@
       </div>
     </div>
 
-    <div id="hl_scores" class="card m-2">
+    <div id="hl_scores" class="card">
       <h2 class="card-header">High and low scores</h2>
       <small class="p-2">Use a <i>*</i> or <i>o</i> to indicate a high score as a big out, e.g. <i>96*</i> or <i>104o</i>.</small>
       <div class="card-body">
