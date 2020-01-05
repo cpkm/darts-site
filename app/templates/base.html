@@ -35,7 +35,7 @@
 {% endblock %}
 
 {% block navbar %}
-<div class="container-fluid">
+<div class="container-fluid px-sm-3 px-0">
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   <a href="{{ url_for('main.index') }}"><img src="/static/icons/dart-logo-small.png" alt="ICC4" class="bg-light"></a>
   <!--<a class="navbar-brand mt-2 mr-auto" href="{{ url_for('main.index') }}">ICC4</a>-->
@@ -148,7 +148,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid px-sm-3 px-0">
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       {% for category, message in messages %}
