@@ -496,7 +496,16 @@ def opponent(id):
 def match(id):
     match = Match.query.filter_by(id=id).first_or_404()
     roster = match.get_roster()
-    return render_template('match.html', match=match, roster=roster)
+
+    next_match = Match.query.filter(Match.date>match.date).order_by(Match.date).first()
+    prev_match = Match.query.filter(Match.date<match.date).order_by(Match.date.desc()).first()
+
+    next_url = url_for('main.match', id=next_match.id) \
+        if next_match else None
+    prev_url = url_for('main.match', id=prev_match.id) \
+        if prev_match else None
+
+    return render_template('match.html', match=match, roster=roster, next_url=next_url, prev_url=prev_url)
 
 @bp.route('/leaderboard',  methods=['GET', 'POST'], defaults={'year_str':'all time'})
 @bp.route('/leaderboard/',  methods=['GET', 'POST'], defaults={'year_str':'all time'})

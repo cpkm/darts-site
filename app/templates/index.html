@@ -41,10 +41,17 @@
 {% endblock %}
 
 {% block app_content %}
-<div class="jumbotron jumbotron-fluid">
+<div class="jumbotron jumbotron-fluid d-none d-md-block">
   <div class="container">
     <h1 class="display-4">Welcome to ICC4 darts</h1>
     <p class="lead">Home of the best team in the <a class="text-muted" target="_blank" href="http://www.sentex.net/~pmartin/">Guelph Pub Darts League!</a></p>
+  </div>
+</div>
+
+<div class="jumbotron jumbotron-fluid d-md-none d-block">
+  <div class="container">
+    <h1 class="display-4">ICC4 darts</h1>
+    <p class="lead">Part of the <a class="text-muted" target="_blank" href="http://www.sentex.net/~pmartin/">Guelph Pub Darts League!</a></p>
   </div>
 </div>
 
@@ -134,12 +141,14 @@
   </div>
 
   <div class="col-lg-4">
-  <h2 class="my-4"><a class="text-dark" href="{{ url_for('main.roster') }}">Current Roster</a></h2>
-    <div class="card-columns">
-    {% for player in all_players %}
-    <!-- <li><a href="{{ url_for('main.player', nickname=player.nickname) }}">{{ player.nickname }}</a></li> -->
-    {% include '_player.html' %}
-    {% endfor %}
+    <div class="col">
+    <h2 class="my-4"><a class="text-dark" href="{{ url_for('main.roster') }}">Current Roster</a></h2>
+      <div class="card-columns">
+      {% for player in all_players %}
+      <!-- <li><a href="{{ url_for('main.player', nickname=player.nickname) }}">{{ player.nickname }}</a></li> -->
+      {% include '_player.html' %}
+      {% endfor %}
+      </div>
     </div>
   </div>
 </div>

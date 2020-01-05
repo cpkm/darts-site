@@ -5,11 +5,12 @@
 
 <div class="row">
 
+  <!--Side bar-->
   <div class="col-md-3">
-    <p>
-      <a class="btn btn-primary btn-block" data-toggle="collapse" href="#allSeasonCollapse" role="button" aria-expanded="false" aria-controls="allSeasonCollapse">Show Seasons</a>
-    </p>
-    <div class="collapse multi-collapse" id="allSeasonCollapse">
+
+      <a class="btn btn-primary btn-block mb-2" data-toggle="collapse" href="#allSeasonCollapse" role="button" aria-expanded="false" aria-controls="allSeasonCollapse">Show Seasons</a>
+
+    <div class="collapse multi-collapse mb-2" id="allSeasonCollapse">
       <div id="accordion">
 
         {% for season in g.all_seasons %}
@@ -39,10 +40,38 @@
     </div>
   </div>
 
+  <!--Match display-->
   <div class="col-md-9">
     <div class="card">
-      <h2 class="card-header">{{ match.opponent.name }} <small class="text-muted">- {{ moment(match.date, local=True).format('MMM Do YYYY') }}</small></h2>
+
+      <div class="card-header">
+        <h2>{{ match.opponent.name }} <small class="text-muted">- {{ moment(match.date, local=True).format('MMM Do YYYY') }}
+        {% if not current_user.is_anonymous %}
+        {% if current_user.check_role(['captain','admin']) %}
+        <a href="{{ url_for('main.enter_score', id=match.id) }}"><small> (Edit Details)</small></a>
+        {% endif %}
+        {% endif %}
+        </small>
+        </h2>
+      </div>
       
+        <h6 class="col-xs-12 my-0">
+        <nav aria-label="...">
+          <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+              <a href="{{ prev_url or '#' }}">
+                <span aria-hidden="true">&larr;</span> Prev match
+              </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+              <a href="{{ next_url or '#' }}">
+                Next match <span aria-hidden="true">&rarr;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        </h6>
+
       <div class="card-body col-xs-12">
 
         {% if match.win==None %}
@@ -233,22 +262,38 @@
                   </tr>
                 </thead>
                 <tbody>
-              {% for p in roster %}
-              <tr>
-                <th scope="row">{{ p.nickname }}</th>
-                {% with ss = match.low_scores.filter_by(player=p).all() %}
-                <td>{{ ss|count }}</td>
-                <td>{% if ss %}{% for s in ss[:-1] %}{{ s.score }}, {% endfor %}{{ ss[-1].score }}{% endif %}</td>
-                {% endwith %}
-              </tr>
+                {% for p in roster %}
+                <tr>
+                  <th scope="row">{{ p.nickname }}</th>
+                  {% with ss = match.low_scores.filter_by(player=p).all() %}
+                  <td>{{ ss|count }}</td>
+                  <td>{% if ss %}{% for s in ss[:-1] %}{{ s.score }}, {% endfor %}{{ ss[-1].score }}{% endif %}</td>
+                  {% endwith %}
+                </tr>
                 {% endfor %}
-              </tbody>
-            </table>
-              </div>
+                </tbody>
+              </table>
             </div>
           </div>
+        </div>
 
-      </div>    
+      </div>  
+      <h6 class="col-xs-12">
+        <nav aria-label="...">
+          <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+              <a href="{{ prev_url or '#' }}">
+                <span aria-hidden="true">&larr;</span> Prev match
+              </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+              <a href="{{ next_url or '#' }}">
+                Next match <span aria-hidden="true">&rarr;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        </h6>  
     </div>
   </div>
 </div>
