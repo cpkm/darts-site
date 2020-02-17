@@ -24,7 +24,6 @@ html
 .team-info {
     display:inline-block;
     padding: 8px;
-    z-index: 2;
     position:relative;
 }
 
