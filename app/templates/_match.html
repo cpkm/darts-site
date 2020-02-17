@@ -1,12 +1,17 @@
 <div class="match-card">
-    <a class="divLink" href="{{ url_for('main.match', id=match.id) }}"> </a>
+    {% if (match.win != None) or (current_user.is_anonymous) %}
+    <a class="stretched-link" href="{{ url_for('main.match', id=match.id) }}"> </a>
+    {% else %}
+    <a class="stretched-link" href="{{ url_for('main.checkin') }}"> </a>
+    {% endif %}
     <div class="team-avatar">
         <img src="{{ match.opponent.avatar(70) }}">
     </div>
     <div class="team-info">
-        <a href="{{ url_for('main.opponent', id=match.opponent_id) }}">
+        <b>
             {{ match.opponent.name }}
-        </a>
+        </b>
+
         - {{ moment(match.date, local=True).format('ll') }}
         <br>
         {% if match.home_away == 'away' %}
